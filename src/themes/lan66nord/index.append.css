@@ -1,0 +1,80 @@
+:root {
+	--black-rgb: 8, 9, 12;
+	--white-rgb: 248, 248, 246;
+	--red-rgb: 240, 49, 37;
+	--green-rgb: 56, 148, 107;
+
+	--viewport-margin-top: 1.15rem;
+	--viewport-margin-right: 2rem;
+	--viewport-margin-bottom: 1.5rem;
+	--viewport-margin-left: 2rem;
+	--top-bar-width: 62%;
+	--lan66-radar-top: var(--viewport-margin-top);
+	--lan66-radar-left: var(--viewport-margin-left);
+	--lan66-top-bar-top: var(--viewport-margin-top);
+	--lan66-focused-player-bottom: var(--viewport-margin-bottom);
+	--lan66-players-alive-top: var(--viewport-margin-top);
+	--lan66-players-alive-right: var(--viewport-margin-right);
+	--lan66-sidebar-left: var(--viewport-margin-left);
+	--lan66-sidebar-right: var(--viewport-margin-right);
+	--lan66-sidebar-bottom: var(--viewport-margin-bottom);
+	--lan66-sidebar-scale-x: 0.5;
+	--lan66-sidebar-scale-y: 1;
+	--lan66-event-badge-top: calc(var(--radar-width) + 0.9rem);
+	--lan66-event-badge-left: 1rem;
+	--lan66-event-badge-width: clamp(14rem, calc(var(--radar-width) - 2rem), 22rem);
+	--lan66-event-badge-logo-height: 2.1rem;
+	--lan66-event-badge-title-size: 0.98rem;
+	--lan66-event-badge-meta-size: 0.72rem;
+
+	--lan66-panel-fill: rgba(10, 12, 18, 0.88);
+	--lan66-panel-border: rgba(255, 255, 255, 0.18);
+	--lan66-accent: rgba(var(--red-rgb), 0.92);
+	--lan66-accent-soft: rgba(var(--red-rgb), 0.2);
+	--lan66-green-soft: rgba(var(--green-rgb), 0.22);
+}
+
+.top-bar {
+	filter: drop-shadow(0 1rem 2.5rem rgba(0, 0, 0, 0.36));
+}
+
+.current-round {
+	background:
+		linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+		var(--lan66-panel-fill);
+	border: 0.1rem solid var(--lan66-panel-border);
+	box-shadow:
+		0 0 0 0.1rem rgba(var(--red-rgb), 0.16),
+		inset 0 0.1rem 0 rgba(255, 255, 255, 0.06);
+}
+
+.focused-player {
+	filter: drop-shadow(0 1.2rem 2.8rem rgba(0, 0, 0, 0.38));
+}
+
+.name-and-stats::before,
+.name-and-stats::after {
+	box-shadow: 0 0 1.4rem rgba(var(--red-rgb), 0.18);
+}
+
+.standby-card {
+	border-color: rgba(var(--red-rgb), 0.34);
+	background:
+		linear-gradient(135deg, rgba(var(--red-rgb), 0.18), transparent 42%),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+		rgba(11, 13, 18, 0.9);
+	box-shadow:
+		0 1.8rem 5rem rgba(0, 0, 0, 0.48),
+		0 0 0 0.1rem rgba(var(--green-rgb), 0.12);
+}
+
+.standby-eyebrow {
+	color: rgba(var(--green-rgb), 0.9);
+}
+
+.sponsor-slot {
+	background:
+		linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+		var(--lan66-panel-fill);
+	border-color: rgba(var(--red-rgb), 0.24);
+}

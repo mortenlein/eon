@@ -1,0 +1,144 @@
+<div class="config-page">
+	<header class="page-header">
+		<div class="page-header__copy">
+			<p class="eyebrow">Eon</p>
+			<h1>Broadcast Config</h1>
+			<p class="page-header__description">
+				Adjust theme settings, timings, overlays, and style overrides from one operator-friendly panel.
+			</p>
+		</div>
+
+		<div class="page-header__actions">
+			<div class="buttons buttons--links">
+				<a href="/licenses" target="_blank">
+					Open Licenses
+				</a>
+
+				<a href="/hud" target="_blank">
+					Open HUD
+				</a>
+
+				<a href="/radar" target="_blank">
+					Open Radar
+				</a>
+			</div>
+
+			<div class="buttons buttons--primary">
+				<button class="force-hud-refresh" @click.prevent="forceHudRefresh">
+					Force HUD Refresh
+				</button>
+
+				<button class="save" @click.prevent="save">
+					Save
+				</button>
+			</div>
+
+			<p class="save-state" :class="`--${saveState}`">
+				<span v-if="saveState === 'saving'">Saving changes...</span>
+				<span v-else-if="saveState === 'saved'">Settings saved.</span>
+				<span v-else-if="saveState === 'error'">Could not save settings.</span>
+				<span v-else-if="hasUnsavedChanges">Unsaved changes</span>
+				<span v-else>All changes saved</span>
+			</p>
+		</div>
+	</header>
+
+	<div class="page-layout">
+		<aside v-if="sections.length" class="section-nav">
+			<p class="section-nav__title">Sections</p>
+
+			<a
+				v-for="section of sections"
+				:key="section.id"
+				class="section-nav__link"
+				:href="`#${section.id}`"
+			>
+				<span>{{ section.name }}</span>
+				<small>{{ section.options.length }}</small>
+			</a>
+		</aside>
+
+		<main class="page-sections">
+			<Update />
+
+			<section v-for="section of sections" :key="section.id" :id="section.id" class="option-section">
+				<header class="option-section__header">
+					<h2>{{ section.name }}</h2>
+
+					<p v-if="section.description">
+						{{ section.description }}
+					</p>
+				</header>
+
+				<div class="option-section__body">
+					<div v-for="option of section.options" :key="option.key" class="input-group">
+						<div class="option-copy">
+							<label :for="option.key">
+								<template v-for="(segment, i) of option.keySegments">
+									{{ segment }}{{ i === option.keySegments.length - 1 ? '' : '.' }}<wbr>
+								</template>
+							</label>
+
+							<p v-if="option.label" class="label">
+								{{ option.label }}
+							</p>
+						</div>
+
+						<div class="input">
+							<textarea
+								v-if="option.inputType === 'textarea'"
+								:id="option.key"
+								:placeholder="option.fallback"
+								v-model="optionValues[option.key]"
+							></textarea>
+
+							<input
+								v-else
+								:type="option.inputType"
+								:id="option.key"
+								:placeholder="option.fallback"
+								v-model="optionValues[option.key]"
+							>
+
+							<button v-if="option.type === 'color'" class="reset" @click.prevent="resetValue(option.key)">
+								Reset
+							</button>
+						</div>
+
+						<div class="default-and-label">
+							<p v-if="option.fallback" class="default">
+								Default:
+								<code v-if="option.type === 'boolean'">{{ option.fallback ? 'yes' : 'no' }}</code>
+								<code v-else>{{ option.fallback }}</code>
+							</p>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+	</div>
+
+	<div class="action-dock">
+		<div class="action-dock__status">
+			<p class="action-dock__title">Config Actions</p>
+
+			<p class="save-state" :class="`--${saveState}`">
+				<span v-if="saveState === 'saving'">Saving changes...</span>
+				<span v-else-if="saveState === 'saved'">Settings saved.</span>
+				<span v-else-if="saveState === 'error'">Could not save settings.</span>
+				<span v-else-if="hasUnsavedChanges">Unsaved changes</span>
+				<span v-else>All changes saved</span>
+			</p>
+		</div>
+
+		<div class="buttons buttons--primary action-dock__buttons">
+			<button class="force-hud-refresh" @click.prevent="forceHudRefresh">
+				Force HUD Refresh
+			</button>
+
+			<button class="save" @click.prevent="save">
+				Save
+			</button>
+		</div>
+	</div>
+</div>

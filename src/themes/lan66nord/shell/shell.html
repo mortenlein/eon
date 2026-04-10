@@ -1,0 +1,56 @@
+<SvgFilters />
+<Sponsors />
+
+<template v-if="$map.name">
+	<Radar />
+	<TopBar />
+	<PlayersAlive />
+
+	<div v-if="showObserverDataWarning" class="observer-warning">
+		<div class="observer-warning__title">Observer data unavailable</div>
+		<div class="observer-warning__copy">CS2 is connected, but full spectator `allplayers` data is not being sent yet.</div>
+	</div>
+
+	<Sidebars />
+	<FocusedPlayer />
+
+	<div
+		v-if="$opts['series.name.center'] || $opts['series.name.left'] || $opts['series.name.right']"
+		class="event-badge"
+	>
+		<img class="event-badge__logo" src="/hud/img/branding/logo-ubg.png" alt="6614Gamers logo">
+
+		<div class="event-badge__copy">
+			<div class="event-badge__title">
+				{{ $opts['series.name.center'] || 'LAN66NORD' }}
+			</div>
+
+			<div class="event-badge__meta">
+				<span v-if="$opts['series.name.left']">{{ $opts['series.name.left'] }}</span>
+				<span v-if="$opts['series.name.left'] && $opts['series.name.right']" class="event-badge__separator">|</span>
+				<span v-if="$opts['series.name.right']">{{ $opts['series.name.right'] }}</span>
+			</div>
+		</div>
+	</div>
+
+	<SeriesGraph />
+</template>
+
+<template v-else>
+	<Corners />
+
+	<div class="standby">
+		<div class="standby-card">
+			<div class="standby-brand">
+				<img class="standby-logo" src="/hud/img/branding/logo-ubg.png" alt="6614Gamers logo">
+				<div>
+					<div class="standby-eyebrow">6614Gamers presents</div>
+					<div class="standby-title">LAN66NORD Broadcast HUD</div>
+				</div>
+			</div>
+
+			<div class="standby-copy">The HUD server is running, but no live spectator map data has been received yet.</div>
+			<div class="standby-copy">Open CS2, load the GSI config, then spectate a match, GOTV, or demo.</div>
+		</div>
+	</div>
+</template>

@@ -1,0 +1,47 @@
+.name-row {
+	grid-area: name-row;
+
+	margin: 0 -1.75rem;
+	padding: 0 2.5rem;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	background: var(--black-50);
+	clip-path: var(--polygon-bordered-by-diagonals);
+	transition: background-color var(--fade-fast-duration) ease;
+}
+
+.name-row .primary,
+.name-row .subtitle {
+	display: block;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.name-row .primary {
+	font-size: 2.5rem;
+	font-weight: 700;
+	line-height: 1.05;
+}
+
+.name-row .subtitle {
+	margin-top: 0.2rem;
+	color: var(--white-80);
+	font-size: 1.1rem;
+	font-weight: 600;
+	line-height: 1;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.name-row.--ct {
+	background: var(--counter-terrorists-fill-60);
+}
+
+.name-row.--t {
+	background: var(--terrorists-fill-60);
+}

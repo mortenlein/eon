@@ -1,0 +1,53 @@
+.sponsors {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 6;
+}
+
+.sponsor-slot {
+	position: absolute;
+	top: var(--viewport-margin-top);
+	width: var(--sponsor-panel-width);
+	min-height: var(--sponsor-panel-height);
+	padding: 0.5rem 0.8rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+	background: rgba(8, 10, 14, 0.72);
+	border: 0.1rem solid rgba(255, 255, 255, 0.16);
+	box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.28);
+	backdrop-filter: blur(0.55rem);
+	pointer-events: auto;
+	text-decoration: none;
+}
+
+.sponsor-slot.--left {
+	left: var(--viewport-margin-left);
+}
+
+.sponsor-slot.--right {
+	right: var(--viewport-margin-right);
+}
+
+.sponsor-slot img {
+	display: block;
+	max-width: 100%;
+	max-height: calc(var(--sponsor-panel-height) - 1rem);
+	object-fit: contain;
+}
+
+.sponsor-title {
+	max-width: 100%;
+	overflow: hidden;
+	color: var(--white-90);
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-align: center;
+	text-overflow: ellipsis;
+	text-transform: uppercase;
+	white-space: nowrap;
+}

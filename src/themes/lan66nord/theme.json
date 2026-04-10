@@ -1,0 +1,149 @@
+{
+	"parent": "fennec",
+	"options": {
+		"series.name.left": {
+			"value": "Selfors / Fossetangen"
+		},
+		"series.name.center": {
+			"value": "LAN66NORD"
+		},
+		"series.name.right": {
+			"value": "17-19 APRIL 2026"
+		},
+		"css.base-scale-factor": {
+			"value": "0.9vh"
+		},
+		"css.sponsor-panel-width": {
+			"value": "13rem"
+		},
+		"css.sponsor-panel-height": {
+			"value": "4.8rem"
+		},
+		"css.viewport-margin-top": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Global top screen margin; e.g. `1.5rem`",
+			"value": "1.15rem"
+		},
+		"css.viewport-margin-right": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Global right screen margin; e.g. `2rem`",
+			"value": "2rem"
+		},
+		"css.viewport-margin-bottom": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Global bottom screen margin; e.g. `1.5rem`",
+			"value": "1.5rem"
+		},
+		"css.viewport-margin-left": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Global left screen margin; e.g. `2rem`",
+			"value": "2rem"
+		},
+		"css.lan66-radar-top": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Radar top position; e.g. `var(--viewport-margin-top)`",
+			"value": "var(--viewport-margin-top)"
+		},
+		"css.lan66-radar-left": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Radar left position; e.g. `var(--viewport-margin-left)`",
+			"value": "var(--viewport-margin-left)"
+		},
+		"css.lan66-top-bar-top": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Top bar top position; e.g. `var(--viewport-margin-top)`",
+			"value": "var(--viewport-margin-top)"
+		},
+		"css.lan66-focused-player-bottom": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Focused player bottom position; e.g. `var(--viewport-margin-bottom)`",
+			"value": "var(--viewport-margin-bottom)"
+		},
+		"css.lan66-players-alive-top": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Players alive top position; e.g. `var(--viewport-margin-top)`",
+			"value": "var(--viewport-margin-top)"
+		},
+		"css.lan66-players-alive-right": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Players alive right position; e.g. `var(--viewport-margin-right)`",
+			"value": "var(--viewport-margin-right)"
+		},
+		"css.lan66-sidebar-left": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Left roster position from screen edge; e.g. `var(--viewport-margin-left)`",
+			"value": "var(--viewport-margin-left)"
+		},
+		"css.lan66-sidebar-right": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Right roster position from screen edge; e.g. `var(--viewport-margin-right)`",
+			"value": "var(--viewport-margin-right)"
+		},
+		"css.lan66-sidebar-bottom": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Roster bottom position; e.g. `var(--viewport-margin-bottom)`",
+			"value": "var(--viewport-margin-bottom)"
+		},
+		"css.lan66-sidebar-scale-x": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Roster sidebar width scale; e.g. `0.5`",
+			"value": "0.5"
+		},
+		"css.lan66-sidebar-scale-y": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Roster sidebar height scale; e.g. `0.9`",
+			"value": "1"
+		},
+		"css.lan66-event-badge-top": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "LAN badge top offset; e.g. `calc(var(--radar-width) + 0.9rem)`",
+			"value": "calc(var(--radar-width) + 0.9rem)"
+		},
+		"css.lan66-event-badge-left": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "LAN badge left offset; e.g. `1rem`",
+			"value": "1rem"
+		},
+		"css.lan66-event-badge-width": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "LAN badge width; e.g. `clamp(14rem, calc(var(--radar-width) - 2rem), 22rem)`",
+			"value": "clamp(14rem, calc(var(--radar-width) - 2rem), 22rem)"
+		},
+		"css.lan66-event-badge-logo-height": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "LAN badge logo height; e.g. `2.1rem`",
+			"value": "2.1rem"
+		},
+		"css.lan66-event-badge-title-size": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "LAN badge title size; e.g. `0.98rem`",
+			"value": "0.98rem"
+		},
+		"css.lan66-event-badge-meta-size": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "LAN badge meta text size; e.g. `0.72rem`",
+			"value": "0.72rem"
+		}
+	}
+}

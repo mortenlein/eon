@@ -1,0 +1,39 @@
+.name {
+	grid-area: name;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	padding: 0 0.5rem;
+
+	overflow: hidden;
+}
+
+.name .primary,
+.name .subtitle {
+	display: block;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.name .primary {
+	font-weight: 700;
+	line-height: 1.05;
+}
+
+.name .subtitle {
+	margin-top: 0.15rem;
+	color: var(--white-70);
+	font-size: 0.68em;
+	font-weight: 600;
+	line-height: 1;
+	text-transform: none;
+}
+
+.name.--right {
+	text-align: right;
+	justify-content: flex-end;
+}

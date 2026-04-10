@@ -1,0 +1,172 @@
+.radar {
+	position: fixed;
+	top: var(--lan66-radar-top);
+	left: var(--lan66-radar-left);
+}
+
+.top-bar {
+	top: var(--lan66-top-bar-top);
+}
+
+.players-alive {
+	top: var(--lan66-players-alive-top);
+	right: var(--lan66-players-alive-right);
+}
+
+.focused-player {
+	bottom: var(--lan66-focused-player-bottom);
+}
+
+.focused-player.--has-overlay-bottom {
+	bottom: var(--lan66-focused-player-bottom);
+}
+
+.sidebar {
+	bottom: var(--lan66-sidebar-bottom);
+}
+
+.sidebar.--left {
+	left: var(--lan66-sidebar-left);
+	transform: scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
+	transform-origin: left bottom;
+}
+
+.sidebar.--right {
+	right: var(--lan66-sidebar-right);
+	transform: scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
+	transform-origin: right bottom;
+}
+
+.sidebar.--left.--moved-upwards-by-series-graph {
+	transform: translateY(calc(-1 * var(--series-graph-height) - var(--series-graph-margin-to-sidebars))) scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
+}
+
+.sidebar.--right.--moved-upwards-by-series-graph {
+	transform: translateY(calc(-1 * var(--series-graph-height) - var(--series-graph-margin-to-sidebars))) scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
+}
+
+.sidebar.--left.--moved-upwards-by-round-graph {
+	transform: translateY(calc(-1 * var(--round-graph-height) - var(--round-graph-margin-to-sidebars))) scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
+}
+
+.sidebar.--right.--moved-upwards-by-round-graph {
+	transform: translateY(calc(-1 * var(--round-graph-height) - var(--round-graph-margin-to-sidebars))) scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
+}
+
+.event-badge {
+	position: fixed;
+	top: var(--lan66-event-badge-top);
+	left: var(--lan66-event-badge-left);
+	width: var(--lan66-event-badge-width);
+	padding: 0.55rem 0.9rem;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.8rem;
+	background:
+		linear-gradient(135deg, rgba(var(--red-rgb), 0.18), rgba(var(--green-rgb), 0.1)),
+		rgba(8, 10, 14, 0.9);
+	border: 0.1rem solid rgba(var(--white-rgb), 0.14);
+	box-shadow:
+		inset 0 0.08rem 0 rgba(255, 255, 255, 0.05),
+		0 0.85rem 1.9rem rgba(0, 0, 0, 0.28);
+	pointer-events: none;
+	z-index: 40;
+}
+
+.event-badge__logo {
+	height: var(--lan66-event-badge-logo-height);
+	width: auto;
+	object-fit: contain;
+	flex: 0 0 auto;
+}
+
+.event-badge__copy {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.event-badge__title,
+.event-badge__meta {
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.event-badge__title {
+	color: var(--white);
+	font-size: var(--lan66-event-badge-title-size);
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	line-height: 1.05;
+	text-transform: uppercase;
+}
+
+.event-badge__meta {
+	margin-top: 0.16rem;
+	color: var(--white-80);
+	font-size: var(--lan66-event-badge-meta-size);
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	line-height: 1;
+	text-transform: uppercase;
+}
+
+.event-badge__separator {
+	margin: 0 0.3rem;
+	color: rgba(var(--green-rgb), 0.92);
+}
+
+.observer-warning {
+	position: fixed;
+	top: calc(var(--viewport-margin-top) + 6rem);
+	right: var(--viewport-margin-right);
+	width: min(24rem, calc(100vw - 4rem));
+	padding: 0.9rem 1rem;
+	border: 0.1rem solid rgba(255, 194, 64, 0.45);
+	background: rgba(18, 15, 9, 0.88);
+	box-shadow: 0 1rem 2.8rem rgba(0, 0, 0, 0.32);
+	backdrop-filter: blur(0.75rem);
+	color: #fff4d6;
+	pointer-events: none;
+	z-index: 50;
+}
+
+.observer-warning__title {
+	font-size: 1rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.observer-warning__copy {
+	margin-top: 0.35rem;
+	font-size: 0.9rem;
+	line-height: 1.35;
+	color: rgba(255, 244, 214, 0.85);
+}
+
+.standby-card {
+	width: min(54rem, 100%);
+}
+
+.standby-brand {
+	display: flex;
+	align-items: center;
+	gap: 1.4rem;
+	margin-bottom: 1.2rem;
+}
+
+.standby-logo {
+	height: 5rem;
+	width: auto;
+	object-fit: contain;
+	flex: 0 0 auto;
+}
+
+.standby-title {
+	margin-bottom: 0;
+}

@@ -1,0 +1,16 @@
+<div :class="['sidebar', positionClass, {
+	'--moved-upwards-by-series-graph': hasSeriesGraph && $round.isFreezetime,
+	'--moved-upwards-by-round-graph': ! hasSeriesGraph && $round.isFreezetime,
+}]">
+	<img v-if="overlayImageUrl" :class="['overlay', positionClass]" :src="overlayImageUrl" alt="">
+
+	<TeamEquipment :team="team" :position="position" />
+	<TeamGrenades :team="team" :position="position" />
+
+	<Player
+		v-for="player of team.players"
+		:key="player.steam64Id"
+		:player="player"
+		:position="position"
+	/>
+</div>

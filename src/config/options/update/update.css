@@ -1,0 +1,53 @@
+.inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1rem 1.25rem;
+}
+
+.version-summary {
+	color: var(--text-secondary);
+}
+
+button.check-for-updates {
+	padding: 0.75rem 1rem;
+	display: block;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid var(--panel-border);
+	border-radius: 0.9rem;
+	color: var(--text-primary);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+	cursor: pointer;
+	font-weight: 600;
+	text-align: center;
+	text-decoration: none;
+	transition:
+		border-color 0.2s ease,
+		background-color 0.3s ease,
+		color 0.3s ease,
+		opacity 0.3s ease,
+		transform 0.2s ease;
+}
+
+button.check-for-updates:not(:disabled):active {
+	transform: translateY(1px);
+}
+
+button.check-for-updates:not(:disabled):hover {
+	background: rgba(255, 255, 255, 0.08);
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+button.check-for-updates:disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
+}
+
+a {
+	color: var(--accent);
+}
+
+a:active,
+a:hover {
+	text-decoration: none;
+}

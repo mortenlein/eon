@@ -1,0 +1,44 @@
+{
+  "name": "eon",
+  "private": true,
+  "license": "ISC",
+  "type": "module",
+  "main": "src/server/index.js",
+  "scripts": {
+    "start": "node .",
+    "dev": "nodemon .",
+    "overlay": "electron src/electron/hud.js",
+    "config": "electron src/electron/config.js",
+    "radar": "electron src/electron/radar.js",
+    "start:all": "concurrently -k -n SERVER,OVERLAY \"npm run start\" \"npm run overlay\"",
+    "start:broadcast": "concurrently -k -n SERVER,OVERLAY,RADAR \"npm run start\" \"npm run overlay\" \"npm run radar\""
+  },
+  "dependencies": {
+    "@fontsource/noto-sans": "^5.2.10",
+    "@fontsource/quantico": "^5.2.7",
+    "@koa/router": "^14.0.0",
+    "koa": "^3.0.1",
+    "koa-bodyparser": "^4.4.1",
+    "koa-compress": "^5.1.1",
+    "koa-send": "^5.0.1",
+    "lodash-es": "^4.17.21",
+    "normalize.css": "^8.0.1",
+    "resolve-path": "^1.4.0",
+    "vue": "^3.5.22",
+    "vue3-sfc-loader": "^0.9.5",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "electron": "^37.2.0",
+    "nodemon": "^3.1.10"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "src/themes/userspace/**"
+    ],
+    "events": {
+      "start": "cls || clear"
+    }
+  }
+}
