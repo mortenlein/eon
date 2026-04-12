@@ -1,5 +1,7 @@
 .radar {
-	position: relative;
+	position: fixed;
+	top: var(--lan66-radar-top, var(--viewport-margin-top));
+	left: var(--lan66-radar-left, var(--viewport-margin-left));
 
 	width: var(--radar-width);
 	aspect-ratio: 1;

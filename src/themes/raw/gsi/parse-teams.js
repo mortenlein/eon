@@ -1,4 +1,4 @@
-import { gsiState, players } from '/hud/core/state.js'
+import { gsiState, options, players } from '/hud/core/state.js'
 import { getOverriddenTeamName, getTeamNameOverrides } from '/hud/gsi/helpers/team-name-overrides.js'
 
 const getGrenadeKey = (weaponName) => {
@@ -61,8 +61,17 @@ const makeTeam = (side, gsiTeamObject, teamNameOverrides) => {
 export const parseTeams = () => {
 	const teamNameOverrides = getTeamNameOverrides()
 
-	return [
+	const sorted = [
 		makeTeam(2, gsiState.map.team_t, teamNameOverrides),
 		makeTeam(3, gsiState.map.team_ct, teamNameOverrides),
 	].sort((a, b) => a.players[0]?.observerSlot - b.players[0]?.observerSlot)
+
+	// Simple team name overrides (takes priority over everything)
+	const leftName = options['teams.leftTeamName']?.trim()
+	const rightName = options['teams.rightTeamName']?.trim()
+
+	if (leftName && sorted[0]) sorted[0].name = leftName
+	if (rightName && sorted[1]) sorted[1].name = rightName
+
+	return sorted
 }

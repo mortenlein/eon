@@ -1,0 +1,19 @@
+.sponsor-slot {
+	width: var(--lan66-sponsor-width, var(--sponsor-panel-width));
+	height: var(--lan66-sponsor-height, var(--sponsor-panel-height));
+	min-height: 0;
+}
+
+.sponsor-slot.--left {
+	top: var(--lan66-sponsor-left-top, var(--viewport-margin-top));
+	left: var(--lan66-sponsor-left-left, var(--viewport-margin-left));
+}
+
+.sponsor-slot.--right {
+	top: var(--lan66-sponsor-right-top, var(--viewport-margin-top));
+	right: var(--lan66-sponsor-right-right, var(--viewport-margin-right));
+}
+
+.sponsor-slot img {
+	max-height: calc(var(--lan66-sponsor-height, var(--sponsor-panel-height)) - 1rem);
+}

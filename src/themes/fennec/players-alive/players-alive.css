@@ -1,7 +1,7 @@
 .players-alive {
 	position: fixed;
-	top: var(--viewport-margin-top);
-	right: var(--viewport-margin-right);
+	top: var(--lan66-players-alive-top, var(--viewport-margin-top));
+	right: var(--lan66-players-alive-right, var(--viewport-margin-right));
 
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);

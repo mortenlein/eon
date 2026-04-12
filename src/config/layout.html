@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>HUD Layout Editor — Eon</title>
+	<link rel="stylesheet" href="/config/layout.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+	<div id="toolbar">
+		<a href="/config" id="back-link">← Config</a>
+		<h1>Layout Editor</h1>
+		<div class="toolbar-actions">
+			<span id="save-status"></span>
+			<button id="btn-grid" title="Click to cycle grid size">Grid: 10px</button>
+			<button id="btn-save" title="Ctrl+S">Save</button>
+			<button id="btn-refresh">Force HUD Refresh</button>
+		</div>
+	</div>
+	<div id="editor">
+		<div id="sub-nav">
+			<button class="nav-tab --active" data-mode="visual">Visual Mode</button>
+			<button class="nav-tab" data-mode="advanced">Advanced (Code)</button>
+			<button class="nav-tab" data-mode="settings">Settings & Prefs</button>
+		</div>
+
+		<div id="editor-content">
+			<div id="viewport-wrap" class="editor-view active">
+				<div id="viewport">
+					<div id="viewport-background"></div>
+				</div>
+			</div>
+
+			<div id="advanced-wrap" class="editor-view">
+				<div class="code-editor-header">
+					<span>HUD_CONFIG.JSON</span>
+					<div class="code-actions">
+						<button id="btn-copy-json">Copy to Clipboard</button>
+						<button id="btn-format-json">Format JSON</button>
+					</div>
+				</div>
+				<textarea id="advanced-editor" spellcheck="false" placeholder='{ "css.radar-width": "20%" }'></textarea>
+			</div>
+
+			<div id="settings-wrap" class="editor-view">
+				<div class="settings-grid" id="preferences-list">
+					<!-- Dynamically generated preferences -->
+				</div>
+			</div>
+
+			<div id="panel">
+				<div id="presets-section" class="panel-section">
+					<div class="panel-section-title">Presets</div>
+					
+					<div class="preset-controls">
+						<div class="preset-selector-row">
+							<select id="preset-select" class="custom-select">
+								<option value="">— Current —</option>
+							</select>
+							<button id="btn-preset-load" class="btn-icon-label" title="Load selected preset">
+								<span>Load</span>
+							</button>
+						</div>
+
+						<div class="preset-actions-grid">
+							<button id="btn-preset-save" class="btn-primary-soft" title="Save current layout as new preset">
+								<span>Save New</span>
+							</button>
+							<button id="btn-preset-rename" class="btn-secondary" title="Rename selected preset">
+								<span>Rename</span>
+							</button>
+							<button id="btn-preset-delete" class="btn-danger-soft" title="Delete selected preset">
+								<span>Delete</span>
+							</button>
+						</div>
+
+						<div class="preset-utils">
+							<button id="btn-preset-export" class="btn-ghost" title="Export all presets to JSON">
+								<span>Export</span>
+							</button>
+							<button id="btn-preset-import" class="btn-ghost" title="Import presets from JSON">
+								<span>Import</span>
+							</button>
+							<input type="file" id="import-file" accept=".json" style="display:none">
+						</div>
+					</div>
+				</div>
+
+				<div class="panel-divider"></div>
+
+				<div id="event-setup-section" class="panel-section">
+					<div class="panel-section-title" style="padding:0 0 6px">Event Branding</div>
+					<div id="event-branding-fields" class="panel-fields-list">
+						<!-- Populated via JS -->
+					</div>
+				</div>
+
+				<div class="panel-divider"></div>
+
+				<div id="sponsor-setup-section" class="panel-section">
+					<div class="panel-section-title" style="padding:0 0 6px">Sponsors</div>
+					<div id="sponsor-branding-fields" class="panel-fields-list">
+						<!-- Populated via JS -->
+					</div>
+				</div>
+
+				<div class="panel-divider"></div>
+
+				<div id="layer-section">
+					<div class="panel-section-title" style="padding:0 0 6px">Layers</div>
+					<div id="layer-list"></div>
+				</div>
+
+				<div class="panel-divider"></div>
+
+				<div id="view-section" class="panel-section">
+					<div class="panel-section-title">View Mode</div>
+					<div class="preset-selector-row">
+						<select id="view-mode-select" class="custom-select">
+							<option value="5v5">Standard (5v5)</option>
+							<option value="2v2">Wingman (2v2)</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="panel-divider"></div>
+
+				<div id="panel-content">
+					<p class="panel-hint">Click an element to edit its properties.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="statusbar">
+		<span id="status-coords">—</span>
+		<span id="status-info">1920 × 1080</span>
+	</div>
+	<script src="/config/layout.js"></script>
+</body>
+</html>

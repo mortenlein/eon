@@ -1,0 +1,7 @@
+.focused-player {
+	bottom: var(--lan66-focused-player-bottom);
+}
+
+.focused-player.--has-overlay-bottom {
+	bottom: var(--lan66-focused-player-bottom);
+}

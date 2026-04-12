@@ -81,7 +81,7 @@ export const getThemeTree = async (firstTheme = 'userspace') => {
 		} else if (await fileExists(`${builtinThemesDirectory}/${themeTree[themeTree.length - 1]}/theme.json`)) {
 			settingsObject = await readJson(`${builtinThemesDirectory}/${themeTree[themeTree.length - 1]}/theme.json`)
 		} else {
-			throw new Error(`Theme "${parent}" not found`)
+			throw new Error(`Theme "${themeTree[themeTree.length - 1]}" not found`)
 		}
 
 		if (! settingsObject?.parent) return themeTree

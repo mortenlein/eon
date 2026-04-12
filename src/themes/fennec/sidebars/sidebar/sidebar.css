@@ -1,17 +1,21 @@
 .sidebar {
 	position: absolute;
-	bottom: var(--viewport-margin-bottom);
+	bottom: var(--lan66-sidebar-bottom, var(--viewport-margin-bottom));
 	width: var(--sidebar-width);
 
 	transition: transform var(--fade-slow-duration) ease;
 }
 
 .sidebar.--left {
-	left: var(--viewport-margin-left);
+	left: var(--lan66-sidebar-left, var(--viewport-margin-left));
+	transform-origin: bottom left;
+	scale: var(--lan66-sidebar-scale-x, 1) var(--lan66-sidebar-scale-y, 1);
 }
 
 .sidebar.--right {
-	right: var(--viewport-margin-right);
+	right: var(--lan66-sidebar-right, var(--viewport-margin-right));
+	transform-origin: bottom right;
+	scale: var(--lan66-sidebar-scale-x, 1) var(--lan66-sidebar-scale-y, 1);
 }
 
 .sidebar.--moved-upwards-by-series-graph {

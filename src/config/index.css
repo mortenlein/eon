@@ -50,3 +50,46 @@ textarea {
 code {
 	font-family: 'Cascadia Code', 'Consolas', 'SFMono-Regular', ui-monospace, monospace;
 }
+
+/* ── Mocks: lan66 aesthetic (slants) ── */
+.mock-topbar-team {
+	transform: skewX(-20deg);
+	padding: 0 1rem;
+	background: rgba(255, 255, 255, 0.05);
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+.mock-topbar-team.--right {
+	transform: skewX(20deg);
+}
+.mock-topbar-team > * {
+	transform: skewX(20deg); /* Counter-skew text/logos */
+}
+.mock-topbar-team.--right > * {
+	transform: skewX(-20deg);
+}
+
+.mock-sidebar {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.mock-player-row {
+	transform: skewX(-15deg);
+	background: rgba(15, 23, 35, 0.9);
+	padding: 2px 10px;
+	border-left: 3px solid var(--accent);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.mock-player-row > * {
+	transform: skewX(15deg);
+}
+.mock-hp-bar {
+	position: absolute;
+	left: 0; bottom: 0;
+	height: 2px;
+	background: var(--success);
+}

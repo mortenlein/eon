@@ -1,0 +1,4 @@
+.players-alive {
+	top: var(--lan66-players-alive-top);
+	right: var(--lan66-players-alive-right);
+}

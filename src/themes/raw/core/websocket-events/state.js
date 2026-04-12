@@ -1,19 +1,48 @@
 import { additionalState, bombsites, gsiState, options, radars } from '/hud/core/state.js'
 import { parseGsiState } from '/hud/core/parse-gsi-state.js'
 
+let lastUpdateTs = 0
+
 export const handleState = (body) => {
-	console.debug(body)
-
-	Object.assign(additionalState, body.additionalState, { unixTimestamp: body.unixTimestamp })
-	Object.assign(bombsites, body.bombsites)
-	Object.assign(gsiState, body.gsiState)
-	Object.assign(radars, body.radars)
-
-	Object.assign(options, body.options)
-
-	for (const key of Object.keys(options)) {
-		if (! body.options.hasOwnProperty(key)) delete options[key]
+	// 1. Update timestamp and static data only if provided
+	if (body.unixTimestamp) {
+		additionalState.unixTimestamp = body.unixTimestamp
 	}
 
-	parseGsiState()
+	if (body.bombsites) Object.assign(bombsites, body.bombsites)
+	if (body.radars) Object.assign(radars, body.radars)
+
+	// 2. Handle GSI state update
+	let hasGsiChanged = false
+	if (body.gsiState) {
+		Object.assign(gsiState, body.gsiState)
+		hasGsiChanged = true
+	}
+	
+	if (body.additionalState) {
+		Object.assign(additionalState, body.additionalState)
+		// Usually if additionalState comes in (win probability, etc), we want a re-parse
+		hasGsiChanged = true
+	}
+
+	// 3. Merge options reactively
+	if (body.options) {
+		for (const [key, value] of Object.entries(body.options)) {
+			options[key] = value
+		}
+		
+		// Only perform a full destructive sync if this is a full 'state' event
+		// or if static_data is specifically trying to rebuild the options.
+		if (body.isFullState) {
+			for (const key of Object.keys(options)) {
+				if (!(key in body.options)) delete options[key]
+			}
+		}
+	}
+
+	// 4. Optimization: Only re-parse if core GSI data has actually updated
+	if (hasGsiChanged && body.unixTimestamp !== lastUpdateTs) {
+		lastUpdateTs = body.unixTimestamp
+		parseGsiState()
+	}
 }

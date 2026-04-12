@@ -1,6 +1,6 @@
 .focused-player {
 	position: fixed;
-	bottom: var(--viewport-margin-bottom);
+	bottom: var(--lan66-focused-player-bottom, var(--viewport-margin-bottom));
 	left: calc((100% - var(--focused-player-width)) / 2);
 	right: calc((100% - var(--focused-player-width)) / 2);
 

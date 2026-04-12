@@ -27,12 +27,17 @@
 	--lan66-event-badge-title-size: 0.98rem;
 	--lan66-event-badge-meta-size: 0.72rem;
 
+	--lan66-current-map-bottom: var(--viewport-margin-bottom);
+	--lan66-current-map-right: var(--viewport-margin-right);
+	--lan66-current-map-width: 16rem;
+
 	--lan66-panel-fill: rgba(10, 12, 18, 0.88);
 	--lan66-panel-border: rgba(255, 255, 255, 0.18);
 	--lan66-accent: rgba(var(--red-rgb), 0.92);
 	--lan66-accent-soft: rgba(var(--red-rgb), 0.2);
 	--lan66-green-soft: rgba(var(--green-rgb), 0.22);
 }
+
 
 .top-bar {
 	filter: drop-shadow(0 1rem 2.5rem rgba(0, 0, 0, 0.36));

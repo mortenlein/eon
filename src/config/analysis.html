@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Analysis Board — Eon</title>
+    <link rel="stylesheet" href="/hud/css/vars.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: #fff;
+        }
+        #app {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        .analysis-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        /* Full screen radar config */
+        .radar-container {
+            position: absolute;
+            inset: 0;
+            background: #080808;
+        }
+        .drawing-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            cursor: crosshair;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            background: rgba(18, 18, 18, 0.9);
+            padding: 1rem 1.5rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+        .controls:hover {
+            opacity: 1;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        button.--active {
+            background: #ff5a00;
+            border-color: #ff5a00;
+            color: #000;
+        }
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .color-dot.--active {
+            border-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="module" src="/config/analysis.js"></script>
+</body>
+</html>

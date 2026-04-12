@@ -9,15 +9,15 @@ const getWinningSide = () => {
 }
 
 export const parseRound = () => {
-	const maxrounds = options['cvars.mp_maxrounds']
-	const overtimeMaxrounds = options['cvars.mp_overtime_maxrounds']
+	const maxrounds = Number(options['cvars.mp_maxrounds'] || 24)
+	const overtimeMaxrounds = Number(options['cvars.mp_overtime_maxrounds'] || 6)
 	const phase = gsiState.phase_countdowns?.phase || gsiState.round?.phase
 	const phaseEndsInSec = getPhaseEndsInSec(phase)
-	const roundNumber = gsiState.map.round + 1 - Number(phase === 'over')
+	const roundNumber = (gsiState.map?.round || 0) + 1 - Number(phase === 'over')
 	const isOvertime = roundNumber > maxrounds
 
 	const roundsInOvertimes = isOvertime ? roundNumber - maxrounds : 0
-	const overtimeNumber = isOvertime ? Math.floor((roundsInOvertimes - 1) / overtimeMaxrounds) + 1 : 0
+	const overtimeNumber = isOvertime ? Math.floor((roundsInOvertimes - 1) / Math.max(1, overtimeMaxrounds)) + 1 : 0
 	const matchPointAtScore = isOvertime ? (maxrounds / 2) + (overtimeMaxrounds / 2) + (overtimeNumber - 1) * (overtimeMaxrounds / 2) : Math.floor(maxrounds / 2)
 
 	return {

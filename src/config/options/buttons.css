@@ -9,6 +9,13 @@
 	justify-content: flex-end;
 }
 
+.divider {
+	width: 1px;
+	height: 1.5rem;
+	background: var(--panel-border);
+	margin: 0 0.5rem;
+}
+
 .buttons a,
 .buttons button {
 	padding: 0.75rem 1.05rem;

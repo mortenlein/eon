@@ -1,8 +1,9 @@
 import { additionalState, bomb, grenades, gsiState, map, misc, players, round, rounds, teams } from '/hud/core/state.js'
 import { onMessage } from '/hud/core/websocket-on-message.js'
 
-const wsUrl = window.location.toString().replace(/^http/, 'ws')
-let ws
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const wsUrl = `${protocol}//${window.location.host}`;
+export let ws
 
 export const connectToWebsocket = () => {
 	if (ws) ws.close()

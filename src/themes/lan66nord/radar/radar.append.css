@@ -1,0 +1,5 @@
+.radar {
+	position: fixed;
+	top: var(--lan66-radar-top);
+	left: var(--lan66-radar-left);
+}

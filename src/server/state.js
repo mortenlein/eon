@@ -18,4 +18,10 @@ export const additionalState = {
 	lastKnownPlayerObserverSlot: {},
 	moneyAtStartOfRound: {},
 	roundDamages: {},
+	// Clutch & MVP Engine
+	currentRoundProb: 0.5,
+	probHistory: [],
+	maxProbSwing: 0,
+	roundKillStats: {},
+	mvpDisplay: null,
 }

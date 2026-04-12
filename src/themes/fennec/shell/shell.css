@@ -1,3 +1,7 @@
+.--layout-hidden {
+	display: none !important;
+}
+
 .standby {
 	position: absolute;
 	inset: 0;

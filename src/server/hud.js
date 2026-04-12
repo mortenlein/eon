@@ -21,34 +21,10 @@ const textFormats = [
 ]
 
 export const registerHudRoutes = (router) => {
-	router.get('/hud{/*path}', async (context) => {
-		const themeTree = await getThemeTree(context.query.theme)
-
-		const path = decodeURIComponent(
-			context.params.path?.trim() || 'index.html',
-		)
-
-		// don't serve hidden files
-		const pathBasename = basename(path)
-		if (pathBasename.startsWith('.')) return context.status = 404
-
-		const body = await concatStaticFileFromThemeTreeRecursively(
-			path,
-			[],
-			themeTree,
-		)
-
-		if (! body) return context.status = 404
-
-		context.type = extname(path)
-
-		context.body = Buffer.isBuffer(body[0])
-			? Buffer.concat(body)
-			: body.join('\n')
-	})
+	// HUD routing moved to fallback middleware in index.js for better reliability
 }
 
-const concatStaticFileFromThemeTreeRecursively = async (path, concatTree, themeTree) => {
+export const concatStaticFileFromThemeTreeRecursively = async (path, concatTree, themeTree) => {
 	if (! themeTree.length) {
 		if (concatTree.length) return concatTree
 

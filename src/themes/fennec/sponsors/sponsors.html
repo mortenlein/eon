@@ -8,7 +8,9 @@
 		:rel="slot.href ? 'noreferrer noopener' : undefined"
 		:class="['sponsor-slot', `--${slot.position}`]"
 	>
-		<img v-if="slot.imageUrl" :src="slot.imageUrl" :alt="slot.title || `${slot.position} sponsor`">
+		<transition name="fade" mode="out-in">
+			<img :key="slot.imageUrl" v-if="slot.imageUrl" :src="slot.imageUrl" :alt="slot.title || `${slot.position} sponsor`">
+		</transition>
 		<span v-if="slot.title" class="sponsor-title">{{ slot.title }}</span>
 	</component>
 </div>

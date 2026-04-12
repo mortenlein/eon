@@ -24,6 +24,7 @@
     "lodash-es": "^4.17.21",
     "normalize.css": "^8.0.1",
     "resolve-path": "^1.4.0",
+    "tiny-emitter": "^2.1.0",
     "vue": "^3.5.22",
     "vue3-sfc-loader": "^0.9.5",
     "ws": "^8.20.0"

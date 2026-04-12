@@ -9,13 +9,27 @@ export class Websocket {
 
 		this.websocket.on('connection', (client) => {
 			this.sendState(client)
+
+			client.on('message', (data) => {
+				try {
+					const { event, body } = JSON.parse(data)
+					// Relay drawing and config events to all clients
+					if (event && (event.startsWith('draw:') || event.startsWith('config:'))) {
+						this.broadcastToWebsockets(event, body)
+					}
+				} catch (err) {
+					console.error('Error handling websocket message:', err)
+				}
+			})
 		})
 
 		this.bombsitesCache = {}
 		this.optionsCache = {}
 		this.radarsCache = {}
+	}
 
-		this.updateCaches()
+	async init() {
+		await this.updateCaches()
 	}
 
 	async updateCaches() {
@@ -25,7 +39,13 @@ export class Websocket {
 		this.optionsCache = Object.fromEntries(Object.entries(settings.options).map(([key, { fallback, value }]) => [key, value ?? fallback]))
 		this.radarsCache = radars
 
-		this.broadcastState()
+		// Static data changed? Tell clients to refresh their menus/static state
+		this.broadcastToWebsockets('static_data', {
+			bombsites: this.bombsitesCache,
+			options: this.optionsCache,
+			radars: this.radarsCache,
+			isFullState: true,
+		})
 	}
 
 	getState() {
@@ -36,11 +56,16 @@ export class Websocket {
 			bombsites: this.bombsitesCache,
 			options: this.optionsCache,
 			radars: this.radarsCache,
-			unixTimestamp: +new Date(),
+			unixTimestamp: Date.now(),
 		}
 	}
 
 	broadcastToWebsockets(event, body) {
+		// Update optionsCache if this is a config update
+		if (event === 'config:update' && body.key) {
+			this.optionsCache[body.key] = body.value;
+		}
+
 		const message = body !== undefined
 			? JSON.stringify({ event, body })
 			: JSON.stringify({ event })
@@ -52,12 +77,20 @@ export class Websocket {
 	}
 
 	sendState(client) {
-		client.send(JSON.stringify({ event: 'state', body: this.getState() }))
+		const state = this.getState()
+		client.send(JSON.stringify({ 
+			event: 'state', 
+			body: { ...state, isFullState: true } 
+		}))
 	}
 
 	broadcastState() {
-		const state = this.getState()
-		this.broadcastToWebsockets('state', state)
+		// Optimization: GSI updates only broadcast the dynamic part of the state
+		this.broadcastToWebsockets('gsi_update', {
+			gsiState,
+			additionalState,
+			unixTimestamp: Date.now(),
+		})
 	}
 
 	broadcastRefresh() {

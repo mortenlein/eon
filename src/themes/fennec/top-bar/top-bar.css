@@ -1,6 +1,6 @@
 .top-bar {
 	position: fixed;
-	top: var(--viewport-margin-top);
+	top: var(--lan66-top-bar-top, var(--viewport-margin-top));
 	left: calc((100% - var(--top-bar-width)) / 2);
 	right: calc((100% - var(--top-bar-width)) / 2);
 

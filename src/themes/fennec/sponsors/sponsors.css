@@ -7,7 +7,6 @@
 
 .sponsor-slot {
 	position: absolute;
-	top: var(--viewport-margin-top);
 	width: var(--sponsor-panel-width);
 	min-height: var(--sponsor-panel-height);
 	padding: 0.5rem 0.8rem;
@@ -25,11 +24,15 @@
 }
 
 .sponsor-slot.--left {
-	left: var(--viewport-margin-left);
+	display: flex;
+	top: var(--lan66-sponsor-left-top, var(--viewport-margin-top));
+	left: var(--lan66-sponsor-left-left, var(--viewport-margin-left));
 }
 
 .sponsor-slot.--right {
-	right: var(--viewport-margin-right);
+	display: flex;
+	top: var(--lan66-sponsor-right-top, var(--viewport-margin-top));
+	right: var(--lan66-sponsor-right-right, var(--viewport-margin-right));
 }
 
 .sponsor-slot img {
@@ -50,4 +53,15 @@
 	text-overflow: ellipsis;
 	text-transform: uppercase;
 	white-space: nowrap;
+}
+
+/* ── Carousel Transitions ── */
+.fade-enter-active,
+.fade-leave-active {
+	transition: opacity 0.4s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+	opacity: 0;
 }

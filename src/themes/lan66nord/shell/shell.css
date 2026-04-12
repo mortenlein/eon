@@ -1,65 +1,12 @@
-.radar {
-	position: fixed;
-	top: var(--lan66-radar-top);
-	left: var(--lan66-radar-left);
-}
 
-.top-bar {
-	top: var(--lan66-top-bar-top);
-}
-
-.players-alive {
-	top: var(--lan66-players-alive-top);
-	right: var(--lan66-players-alive-right);
-}
-
-.focused-player {
-	bottom: var(--lan66-focused-player-bottom);
-}
-
-.focused-player.--has-overlay-bottom {
-	bottom: var(--lan66-focused-player-bottom);
-}
-
-.sidebar {
-	bottom: var(--lan66-sidebar-bottom);
-}
-
-.sidebar.--left {
-	left: var(--lan66-sidebar-left);
-	transform: scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
-	transform-origin: left bottom;
-}
-
-.sidebar.--right {
-	right: var(--lan66-sidebar-right);
-	transform: scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
-	transform-origin: right bottom;
-}
-
-.sidebar.--left.--moved-upwards-by-series-graph {
-	transform: translateY(calc(-1 * var(--series-graph-height) - var(--series-graph-margin-to-sidebars))) scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
-}
-
-.sidebar.--right.--moved-upwards-by-series-graph {
-	transform: translateY(calc(-1 * var(--series-graph-height) - var(--series-graph-margin-to-sidebars))) scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
-}
-
-.sidebar.--left.--moved-upwards-by-round-graph {
-	transform: translateY(calc(-1 * var(--round-graph-height) - var(--round-graph-margin-to-sidebars))) scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
-}
-
-.sidebar.--right.--moved-upwards-by-round-graph {
-	transform: translateY(calc(-1 * var(--round-graph-height) - var(--round-graph-margin-to-sidebars))) scale(var(--lan66-sidebar-scale-x), var(--lan66-sidebar-scale-y));
-}
 
 .event-badge {
 	position: fixed;
+	display: var(--lan66-event-badge-display, flex);
 	top: var(--lan66-event-badge-top);
 	left: var(--lan66-event-badge-left);
 	width: var(--lan66-event-badge-width);
 	padding: 0.55rem 0.9rem;
-	display: flex;
 	align-items: center;
 	justify-content: flex-start;
 	gap: 0.8rem;
@@ -120,6 +67,45 @@
 	color: rgba(var(--green-rgb), 0.92);
 }
 
+.current-map {
+	position: fixed;
+	display: var(--lan66-current-map-display, flex);
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	bottom: var(--lan66-current-map-bottom, var(--viewport-margin-bottom));
+	right: var(--lan66-current-map-right, var(--viewport-margin-right));
+	width: var(--lan66-current-map-width, 16rem);
+	padding: 0.8rem 1rem;
+	background: rgba(8, 10, 14, 0.92);
+	border: 0.1rem solid rgba(var(--white-rgb), 0.14);
+	box-shadow:
+		inset 0 0.08rem 0 rgba(255, 255, 255, 0.05),
+		0 0.85rem 1.9rem rgba(0, 0, 0, 0.28);
+	pointer-events: none;
+	z-index: 40;
+}
+
+.current-map__label {
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: rgba(var(--green-rgb), 0.95);
+	line-height: 1;
+	margin-bottom: 0.35rem;
+}
+
+.current-map__name {
+	font-size: 1.2rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--white);
+	line-height: 1.05;
+	text-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.5);
+}
+
 .observer-warning {
 	position: fixed;
 	top: calc(var(--viewport-margin-top) + 6rem);
@@ -169,4 +155,209 @@
 
 .standby-title {
 	margin-bottom: 0;
+}
+
+/* ── HUD Viewport & Scenes ── */
+.hud-viewport {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+}
+
+.telestrator {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	pointer-events: none;
+}
+
+.telestrator canvas {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.hud-scene-background {
+	position: fixed;
+	inset: 0;
+	background-size: cover;
+	background-position: center;
+	filter: blur(4rem) brightness(0.3);
+	opacity: 0;
+	transition: opacity 0.6s ease;
+	z-index: 0;
+}
+
+/* ── Scene: Full Radar ── */
+.--scene-radar .hud-scene-background,
+.--scene-analytics .hud-scene-background {
+	opacity: 1;
+	background-image: var(--map-image-url);
+}
+
+.--scene-radar .sidebars,
+.--scene-radar .top-bar,
+.--scene-radar .focused-player,
+.--scene-radar .players-alive,
+.--scene-radar .event-badge,
+.--scene-radar .series-graph,
+.--scene-radar .current-map {
+	opacity: 0;
+	transform: scale(0.95);
+	pointer-events: none;
+	transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.--scene-radar .radar {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) scale(2.5);
+	transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+	z-index: 100;
+}
+
+/* ── Specific Scene Board Logic ── */
+.scene-board {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 200;
+	pointer-events: none;
+	opacity: 0;
+	transform: scale(1.1);
+	transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.--scene-intro .scene-board.--intro,
+.--scene-halftime .scene-board.--halftime,
+.--scene-fulltime .scene-board.--halftime,
+.--scene-over .scene-board.--halftime,
+.--scene-analytics .scene-board.--halftime {
+	opacity: 1;
+	transform: scale(1);
+}
+
+/* Hide standard HUD elements in these scenes */
+.--scene-intro .sidebars, .--scene-intro .top-bar, .--scene-intro .focused-player,
+.--scene-halftime .sidebars, .--scene-halftime .top-bar, .--scene-halftime .focused-player,
+.--scene-over .sidebars, .--scene-over .top-bar, .--scene-over .focused-player,
+.--scene-fulltime .sidebars, .--scene-fulltime .top-bar, .--scene-fulltime .focused-player,
+.--scene-analytics .sidebars, .--scene-analytics .top-bar, .--scene-analytics .focused-player {
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* Intro Scene Details */
+.intro-teams {
+	display: flex;
+	align-items: center;
+	gap: 6rem;
+	margin-bottom: 4rem;
+}
+
+.intro-team {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 25rem;
+}
+
+.intro-team__logo {
+	height: 14rem;
+	object-fit: contain;
+	filter: drop-shadow(0 0 2rem rgba(255, 255, 255, 0.15));
+	margin-bottom: 1.5rem;
+}
+
+.intro-team__name {
+	font-size: 3.2rem;
+	font-weight: 900;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+}
+
+.intro-vs {
+	font-size: 2.4rem;
+	font-weight: 800;
+	opacity: 0.4;
+}
+
+.intro-info {
+	text-align: center;
+}
+
+.intro-map {
+	font-size: 1.8rem;
+	font-weight: 700;
+	letter-spacing: 0.15em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+
+/* Scoreboard Scene Details */
+.scoreboard-large {
+	display: flex;
+	align-items: center;
+	gap: 4rem;
+	background: rgba(0, 0, 0, 0.6);
+	padding: 3rem 6rem;
+	border-radius: 2rem;
+	backdrop-filter: blur(2rem);
+	border: 0.15rem solid rgba(255, 255, 255, 0.1);
+}
+
+.sb-team {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 20rem;
+}
+
+.sb-team__score {
+	font-size: 8rem;
+	font-weight: 900;
+	line-height: 1;
+}
+
+.sb-team__name {
+	font-size: 1.8rem;
+	font-weight: 700;
+	margin-top: 1rem;
+	color: var(--white-60);
+}
+
+.sb-divider {
+	font-size: 6rem;
+	font-weight: 900;
+	opacity: 0.2;
+}
+
+.scoreboard-meta {
+	margin-top: 2rem;
+	font-size: 1.2rem;
+	font-weight: 800;
+	letter-spacing: 0.4em;
+	color: var(--accent);
+}
+
+/* Win Probability Graph */
+.analysis-overlay {
+	position: fixed;
+	bottom: var(--viewport-margin-bottom);
+	left: var(--viewport-margin-left);
+	width: 32rem;
+	z-index: 300;
+	opacity: 0;
+	transform: translateY(2rem);
+	transition: all 0.5s ease;
+}
+
+.--scene-radar .analysis-overlay,
+.--scene-over .analysis-overlay {
+	opacity: 1;
+	transform: translateY(0);
 }

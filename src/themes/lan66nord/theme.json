@@ -2,13 +2,21 @@
 	"parent": "fennec",
 	"options": {
 		"series.name.left": {
+			"section": "Event",
 			"value": "Selfors / Fossetangen"
 		},
 		"series.name.center": {
+			"section": "Event",
 			"value": "LAN66NORD"
 		},
 		"series.name.right": {
+			"section": "Event",
 			"value": "17-19 APRIL 2026"
+		},
+		"series.logoUrl": {
+			"section": "Event",
+			"label": "Event Logo URL",
+			"value": "/hud/img/branding/logo-ubg.png"
 		},
 		"css.base-scale-factor": {
 			"value": "0.9vh"
@@ -144,6 +152,163 @@
 			"section": "HUD Layout",
 			"label": "LAN badge meta text size; e.g. `0.72rem`",
 			"value": "0.72rem"
-		}
+		},
+		"css.lan66-current-map-bottom": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Current map panel bottom position; e.g. `var(--viewport-margin-bottom)`",
+			"value": "var(--viewport-margin-bottom)"
+		},
+		"css.lan66-current-map-right": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Current map panel right position; e.g. `var(--viewport-margin-right)`",
+			"value": "var(--viewport-margin-right)"
+		},
+		"css.lan66-current-map-width": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Current map panel width; e.g. `16rem`",
+			"value": "16rem"
+		},
+		"css.lan66-sponsor-left-top": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Left sponsor top position; e.g. `var(--viewport-margin-top)`",
+			"value": "var(--viewport-margin-top)"
+		},
+		"css.lan66-sponsor-left-left": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Left sponsor left position; e.g. `var(--viewport-margin-left)`",
+			"value": "var(--viewport-margin-left)"
+		},
+		"css.lan66-sponsor-right-top": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Right sponsor top position; e.g. `var(--viewport-margin-top)`",
+			"value": "var(--viewport-margin-top)"
+		},
+		"css.lan66-sponsor-right-right": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Right sponsor right position; e.g. `var(--viewport-margin-right)`",
+			"value": "var(--viewport-margin-right)"
+		},
+		"css.lan66-sponsor-width": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Sponsor panel width; e.g. `13rem`",
+			"value": "13rem"
+		},
+		"css.lan66-sponsor-height": {
+			"type": "text",
+			"section": "HUD Layout",
+			"label": "Sponsor panel height; e.g. `4.8rem`",
+			"value": "4.8rem"
+		},
+		"sponsors.rotationInterval": {
+			"type": "number",
+			"section": "Sponsors",
+			"label": "Sponsor rotation interval (ms); e.g. `5000`",
+			"value": 5000
+		},
+		"preferences.seriesGraph.sideMode": {
+			"type": "boolean",
+			"section": "HUD Layout",
+			"label": "Show Series Graph on the side (vertical)",
+			"value": false
+		},
+		"promotion.visible": {
+			"type": "boolean",
+			"section": "Promotion",
+			"label": "Show Promotion Panel (Manual Toggle)",
+			"value": false
+		},
+		"promotion.autoShow": {
+			"type": "boolean",
+			"section": "Promotion",
+			"label": "Auto-show during Freezetime",
+			"value": false
+		},
+		"promotion.side": {
+			"type": "select",
+			"section": "Promotion",
+			"label": "Alignment Side",
+			"value": "left",
+			"options": ["left", "right"]
+		},
+		"promotion.imageUrl": {
+			"type": "string",
+			"section": "Promotion",
+			"label": "Image URL (Badge/Logo)"
+		},
+		"promotion.title": {
+			"type": "string",
+			"section": "Promotion",
+			"label": "Title Text"
+		},
+		"promotion.subtitle": {
+			"type": "string",
+			"section": "Promotion",
+			"label": "Subtitle / CTA"
+		},
+		"match.mode": {
+			"type": "select",
+			"section": "Match Rules",
+			"label": "Game mode",
+			"value": "standard",
+			"options": ["standard", "wingman"]
+		},
+		"match.activeScene": {
+			"type": "string",
+			"section": "Match Rules",
+			"label": "Active HUD Scene",
+			"value": "default"
+		},
+		"teams.leftTeamName": {
+			"type": "string",
+			"section": "Teams",
+			"label": "Left Team Name (overrides game data)"
+		},
+		"teams.rightTeamName": {
+			"type": "string",
+			"section": "Teams",
+			"label": "Right Team Name (overrides game data)"
+		},
+		"teams.teamNameOverrides": {
+			"type": "textarea",
+			"section": "Teams",
+			"label": "Team name overrides (advanced, by SteamID)",
+			"placeholder": "7656... SteamID TeamName\n(one per line)"
+		},
+		"teams.playerNameOverrides": {
+			"type": "textarea",
+			"section": "Teams",
+			"label": "Player name overrides",
+			"placeholder": "7656... SteamID PlayerName\n(one per line)"
+		},
+		"teams.playerSubtitleOverrides": {
+			"type": "textarea",
+			"section": "Teams",
+			"label": "Player subtitle overrides",
+			"placeholder": "7656... SteamID Role/Subtitle\n(one per line)"
+		},
+		"css.lan66-radar-display": { "type": "boolean", "label": "Show Radar" },
+		"css.lan66-top-bar-display": { "type": "boolean", "label": "Show Top Bar" },
+		"css.lan66-players-alive-display": { "type": "boolean", "label": "Show Players Alive" },
+		"css.lan66-sidebar-left-display": { "type": "boolean", "label": "Show Left Sidebar" },
+		"css.lan66-sidebar-right-display": { "type": "boolean", "label": "Show Right Sidebar" },
+		"css.lan66-focused-player-display": { "type": "boolean", "label": "Show Focused Player" },
+		"css.lan66-event-badge-display": { "type": "boolean", "label": "Show Event Badge" },
+		"css.lan66-current-map-display": { "type": "boolean", "label": "Show Current Map" },
+		"css.lan66-sponsor-left-display": { "type": "boolean", "label": "Show Left Sponsor" },
+		"css.lan66-sponsor-right-display": { "type": "boolean", "label": "Show Right Sponsor" }
+	},
+	"optionSectionDescriptions": {
+		"Teams": "Use **new lines** (\n) to separate entries. Format: **Steam64ID Name**. Example: `76561198... Marcus`",
+		"Series": "Consolidated series and map-specific settings.",
+		"Sponsors": "Manage rotation and branding links.",
+		"Match Rules": "Global HUD settings and game mode selection."
 	}
 }
