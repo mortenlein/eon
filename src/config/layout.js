@@ -120,6 +120,7 @@ const DEFS = [
 
 /* ═══════════════  State  ═══════════════ */
 let opts = {};
+let initialTheme = null;
 let remPx = 10;
 let els = [];
 let selectedId = null;
@@ -245,7 +246,9 @@ async function init() {
 		initSubNav();
 		initAdvancedEditor();
 		renderPreferences();
+		renderSystemBranding();
 		renderEventBranding();
+		renderPromotionBranding();
 		renderSponsorBranding();
 		window.addEventListener('resize', layoutViewport);
 	} catch (err) {
@@ -258,7 +261,10 @@ async function loadOptions() {
 	const res = await fetch('/config/options');
 	const json = await res.json();
 	opts = {};
-	for (const o of json) opts[o.key] = o.value ?? o.fallback ?? null;
+	for (const o of json) {
+		opts[o.key] = o.value ?? o.fallback ?? null;
+		if (o.key === 'theme') initialTheme = opts[o.key];
+	}
 }
 
 function computeRemPx() {
@@ -521,6 +527,107 @@ function renderEventBranding() {
 
 		if (f.type === 'upload') {
 			row.appendChild(createImageUploader(f.key));
+		} else {
+			const input = document.createElement('input');
+			input.type = 'text';
+			input.value = opts[f.key] || '';
+			input.placeholder = 'None';
+			input.addEventListener('input', () => {
+				opts[f.key] = input.value;
+				broadcast(f.key, input.value);
+				syncAdvancedEditor();
+			});
+			row.appendChild(input);
+		}
+
+		container.appendChild(row);
+	});
+}
+
+function renderSystemBranding() {
+	const container = document.getElementById('system-branding-fields');
+	if (! container) return;
+	container.innerHTML = '';
+
+	const row = document.createElement('div');
+	row.className = 'panel-field';
+
+	const label = document.createElement('label');
+	label.textContent = 'HUD Theme';
+	row.appendChild(label);
+
+	const select = document.createElement('select');
+	select.className = 'custom-select';
+	
+	// Available themes found in src/themes
+	const themes = ['fennec', 'lan66nord', 'raw'];
+	themes.forEach(t => {
+		const opt = document.createElement('option');
+		opt.value = t;
+		opt.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+		if (opts.theme === t) opt.selected = true;
+		select.appendChild(opt);
+	});
+
+	select.addEventListener('change', () => {
+		opts.theme = select.value;
+		syncAdvancedEditor();
+	});
+
+	row.appendChild(select);
+	container.appendChild(row);
+}
+
+function renderPromotionBranding() {
+	const container = document.getElementById('promotion-branding-fields');
+	if (! container) return;
+	container.innerHTML = '';
+
+	const fields = [
+		{ key: 'promotion.visible', label: 'Visible', type: 'checkbox' },
+		{ key: 'promotion.autoShow', label: 'Auto-show (Freezetime)', type: 'checkbox' },
+		{ key: 'promotion.side', label: 'Alignment Side', type: 'select', options: ['left', 'right'] },
+		{ key: 'promotion.imageUrl', label: 'Promo Image (Upload)', type: 'upload' },
+		{ key: 'promotion.title', label: 'Title Text' },
+		{ key: 'promotion.subtitle', label: 'Subtitle / CTA' },
+	];
+
+	fields.forEach(f => {
+		const row = document.createElement('div');
+		row.className = 'panel-field';
+
+		const label = document.createElement('label');
+		label.textContent = f.label;
+		row.appendChild(label);
+
+		if (f.type === 'upload') {
+			row.appendChild(createImageUploader(f.key));
+		} else if (f.type === 'checkbox') {
+			const input = document.createElement('input');
+			input.type = 'checkbox';
+			input.checked = !!opts[f.key];
+			input.addEventListener('change', () => {
+				opts[f.key] = input.checked;
+				broadcast(f.key, input.checked);
+				syncAdvancedEditor();
+			});
+			row.appendChild(input);
+		} else if (f.type === 'select') {
+			const select = document.createElement('select');
+			select.className = 'custom-select';
+			f.options.forEach(optVal => {
+				const opt = document.createElement('option');
+				opt.value = optVal;
+				opt.textContent = optVal.charAt(0).toUpperCase() + optVal.slice(1);
+				if (opts[f.key] === optVal) opt.selected = true;
+				select.appendChild(opt);
+			});
+			select.addEventListener('change', () => {
+				opts[f.key] = select.value;
+				broadcast(f.key, select.value);
+				syncAdvancedEditor();
+			});
+			row.appendChild(select);
 		} else {
 			const input = document.createElement('input');
 			input.type = 'text';
@@ -1230,8 +1337,10 @@ async function save() {
 	
 	// Merge with all other layout-related opts (from advanced/settings views)
 	const finalPayload = { ...changes };
+	if (opts.theme) finalPayload.theme = opts.theme;
+
 	Object.keys(opts).forEach(k => {
-		if (k.startsWith('css.') || k.startsWith('preferences.') || k.startsWith('series.name.')) {
+		if (k.startsWith('css.') || k.startsWith('preferences.') || k.startsWith('series.name.') || k.startsWith('promotion.') || k.startsWith('sponsors.')) {
 			finalPayload[k] = opts[k];
 		}
 	});
@@ -1242,6 +1351,12 @@ async function save() {
 			headers: { 'Content-Type': 'application/json' }, 
 			body: JSON.stringify(finalPayload) 
 		});
+		
+		if (opts.theme && opts.theme !== initialTheme) {
+			window.location.reload();
+			return;
+		}
+
 		await fetch('/config/force-hud-refresh', { method: 'POST' });
 		status.textContent = 'Saved ✓';
 		setTimeout(() => { if (status.textContent === 'Saved ✓') status.textContent = ''; }, 2500);

@@ -60,13 +60,17 @@ code {
 	align-items: center;
 	gap: 0.5rem;
 }
+
 .mock-topbar-team.--right {
 	transform: skewX(20deg);
 }
-.mock-topbar-team > * {
-	transform: skewX(20deg); /* Counter-skew text/logos */
+
+.mock-topbar-team>* {
+	transform: skewX(20deg);
+	/* Counter-skew text/logos */
 }
-.mock-topbar-team.--right > * {
+
+.mock-topbar-team.--right>* {
 	transform: skewX(-20deg);
 }
 
@@ -75,6 +79,7 @@ code {
 	flex-direction: column;
 	gap: 2px;
 }
+
 .mock-player-row {
 	transform: skewX(-15deg);
 	background: rgba(15, 23, 35, 0.9);
@@ -84,12 +89,15 @@ code {
 	align-items: center;
 	gap: 10px;
 }
-.mock-player-row > * {
+
+.mock-player-row>* {
 	transform: skewX(15deg);
 }
+
 .mock-hp-bar {
 	position: absolute;
-	left: 0; bottom: 0;
+	left: 0;
+	bottom: 0;
 	height: 2px;
 	background: var(--success);
 }

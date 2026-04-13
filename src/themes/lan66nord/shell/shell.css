@@ -1,7 +1,7 @@
 
 
 .event-badge {
-	position: fixed;
+	position: absolute;
 	display: var(--lan66-event-badge-display, flex);
 	top: var(--lan66-event-badge-top);
 	left: var(--lan66-event-badge-left);
@@ -68,7 +68,7 @@
 }
 
 .current-map {
-	position: fixed;
+	position: absolute;
 	display: var(--lan66-current-map-display, flex);
 	flex-direction: column;
 	align-items: center;
@@ -107,7 +107,7 @@
 }
 
 .observer-warning {
-	position: fixed;
+	position: absolute;
 	top: calc(var(--viewport-margin-top) + 6rem);
 	right: var(--viewport-margin-right);
 	width: min(24rem, calc(100vw - 4rem));
@@ -164,10 +164,26 @@
 	pointer-events: none;
 }
 
-.telestrator {
-	position: fixed;
+.hud-stage {
+	position: absolute;
 	inset: 0;
-	z-index: 1000;
+	margin: auto;
+	aspect-ratio: 16 / 9;
+	height: 100vh;
+	width: auto;
+	max-width: 100vw;
+	pointer-events: none;
+	overflow: hidden;
+	/* Force the 1920x1080 logical coordinate grid for all children */
+	container-type: size;
+}
+
+.telestrator {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
 	pointer-events: none;
 }
 
@@ -178,7 +194,7 @@
 }
 
 .hud-scene-background {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	background-size: cover;
 	background-position: center;
@@ -209,7 +225,7 @@
 }
 
 .--scene-radar .radar {
-	position: fixed;
+	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%) scale(2.5);
@@ -219,7 +235,7 @@
 
 /* ── Specific Scene Board Logic ── */
 .scene-board {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	display: flex;
 	flex-direction: column;
@@ -346,7 +362,7 @@
 
 /* Win Probability Graph */
 .analysis-overlay {
-	position: fixed;
+	position: absolute;
 	bottom: var(--viewport-margin-bottom);
 	left: var(--viewport-margin-left);
 	width: 32rem;

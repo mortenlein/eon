@@ -1,57 +1,57 @@
 <div :class="['hud-viewport', '--scene-' + ($opts['match.activeScene'] || 'default')]">
-	<Telestrator />
-	<MvpCard />
-	<PromotionPanel />
-	<div class="hud-scene-background"></div>
+	<div v-if="$map.name" class="hud-stage">
+		<Telestrator />
+		<MvpCard />
+		<PromotionPanel />
+		<div class="hud-scene-background"></div>
 
-	<!-- Scene: Match Intro -->
-	<div class="scene-board --intro">
-		<div class="intro-teams">
-			<div class="intro-team --ct">
-				<img :src="$map.team_ct.logo" v-if="$map.team_ct && $map.team_ct.logo" class="intro-team__logo">
-				<div class="intro-team__name" v-if="$map.team_ct">{{ $map.team_ct.name }}</div>
+		<!-- Scene: Match Intro -->
+		<div class="scene-board --intro">
+			<div class="intro-teams">
+				<div class="intro-team --ct">
+					<img :src="$map.team_ct.logo" v-if="$map.team_ct && $map.team_ct.logo" class="intro-team__logo">
+					<div class="intro-team__name" v-if="$map.team_ct">{{ $map.team_ct.name }}</div>
+				</div>
+				<div class="intro-vs">VS</div>
+				<div class="intro-team --t">
+					<img :src="$map.team_t.logo" v-if="$map.team_t && $map.team_t.logo" class="intro-team__logo">
+					<div class="intro-team__name" v-if="$map.team_t">{{ $map.team_t.name }}</div>
+				</div>
 			</div>
-			<div class="intro-vs">VS</div>
-			<div class="intro-team --t">
-				<img :src="$map.team_t.logo" v-if="$map.team_t && $map.team_t.logo" class="intro-team__logo">
-				<div class="intro-team__name" v-if="$map.team_t">{{ $map.team_t.name }}</div>
-			</div>
-		</div>
-		<div class="intro-info">
-			<div class="intro-map" v-if="$map">{{ $map.formattedName }}</div>
-			<div class="intro-mode" v-if="$opts">{{ $opts['match.mode'] }}</div>
-		</div>
-	</div>
-
-	<!-- Scene: Halftime / Over Scoreboard -->
-	<div class="scene-board --halftime">
-		<div class="scoreboard-large">
-			<div class="sb-team --ct">
-				<div class="sb-team__score" v-if="$map.team_ct">{{ $map.team_ct.score }}</div>
-				<div class="sb-team__name" v-if="$map.team_ct">{{ $map.team_ct.name }}</div>
-			</div>
-			<div class="sb-divider">:</div>
-			<div class="sb-team --t">
-				<div class="sb-team__score" v-if="$map.team_t">{{ $map.team_t.score }}</div>
-				<div class="sb-team__name" v-if="$map.team_t">{{ $map.team_t.name }}</div>
+			<div class="intro-info">
+				<div class="intro-map" v-if="$map">{{ $map.formattedName }}</div>
+				<div class="intro-mode" v-if="$opts">{{ $opts['match.mode'] }}</div>
 			</div>
 		</div>
-		<div class="scoreboard-meta">
-			<span v-if="$opts['match.activeScene'] === 'over' || $opts['match.activeScene'] === 'fulltime'">MATCH COMPLETE</span>
-			<span v-else-if="$opts['match.activeScene'] === 'analytics'">ANALYTICS & DRAWING</span>
-			<span v-else>HALFTIME</span>
+
+		<!-- Scene: Halftime / Over Scoreboard -->
+		<div class="scene-board --halftime">
+			<div class="scoreboard-large">
+				<div class="sb-team --ct">
+					<div class="sb-team__score" v-if="$map.team_ct">{{ $map.team_ct.score }}</div>
+					<div class="sb-team__name" v-if="$map.team_ct">{{ $map.team_ct.name }}</div>
+				</div>
+				<div class="sb-divider">:</div>
+				<div class="sb-team --t">
+					<div class="sb-team__score" v-if="$map.team_t">{{ $map.team_t.score }}</div>
+					<div class="sb-team__name" v-if="$map.team_t">{{ $map.team_t.name }}</div>
+				</div>
+			</div>
+			<div class="scoreboard-meta">
+				<span v-if="$opts['match.activeScene'] === 'over' || $opts['match.activeScene'] === 'fulltime'">MATCH COMPLETE</span>
+				<span v-else-if="$opts['match.activeScene'] === 'analytics'">ANALYTICS & DRAWING</span>
+				<span v-else>HALFTIME</span>
+			</div>
 		</div>
-	</div>
 
-	<!-- Win Probability Graph Overlay -->
-	<div class="analysis-overlay">
-		<WinProbGraph />
-	</div>
-	
-	<SvgFilters />
-	<Sponsors />
+		<!-- Win Probability Graph Overlay -->
+		<div class="analysis-overlay">
+			<WinProbGraph />
+		</div>
+		
+		<SvgFilters />
+		<Sponsors />
 
-	<template v-if="$map.name">
 		<Radar />
 		<TopBar />
 		<PlayersAlive />
@@ -89,7 +89,7 @@
 			<div class="current-map__label">NOW PLAYING</div>
 			<div class="current-map__name">{{ $map.formattedName }}</div>
 		</div>
-	</template>
+	</div>
 
 	<template v-else>
 		<Corners />

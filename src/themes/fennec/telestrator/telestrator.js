@@ -28,18 +28,21 @@ export default {
 	methods: {
 		resize() {
 			if (! this.canvas) return
-			this.canvas.width = window.innerWidth
-			this.canvas.height = window.innerHeight
+			const rect = this.canvas.parentElement.getBoundingClientRect()
+			this.canvas.width = rect.width
+			this.canvas.height = rect.height
 		},
 
 		handleSocketDrawLine(e) {
 			const { x1, y1, x2, y2, color, size } = e.detail
 			if (!this.ctx) return
+			
 			this.ctx.beginPath()
 			this.ctx.moveTo(x1 * this.canvas.width, y1 * this.canvas.height)
 			this.ctx.lineTo(x2 * this.canvas.width, y2 * this.canvas.height)
-			this.ctx.strokeStyle = color || '#ff0000'
-			this.ctx.lineWidth = (size || 3) * (this.canvas.width / 1920) // Scale line width
+			
+			this.ctx.strokeStyle = color || '#ff5a00'
+			this.ctx.lineWidth = (size || 3) * (this.canvas.width / 1920) // Scale relative to 1080p width
 			this.ctx.lineCap = 'round'
 			this.ctx.lineJoin = 'round'
 			this.ctx.stroke()

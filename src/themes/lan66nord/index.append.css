@@ -5,9 +5,12 @@
 	--green-rgb: 56, 148, 107;
 
 	--viewport-margin-top: 1.15rem;
-	--viewport-margin-right: 2rem;
 	--viewport-margin-bottom: 1.5rem;
-	--viewport-margin-left: 2rem;
+	/* ── Geometric Lock: Horizontal Layout ── */
+	--viewport-margin-left: 2%;
+	--viewport-margin-right: 2%;
+	--sidebar-width: 22.3%;
+	--sidebar-player-width: 100%; /* Force players to fill the percentage-width sidebar */
 	--top-bar-width: 62%;
 	--lan66-radar-top: var(--viewport-margin-top);
 	--lan66-radar-left: var(--viewport-margin-left);
@@ -18,10 +21,9 @@
 	--lan66-sidebar-left: var(--viewport-margin-left);
 	--lan66-sidebar-right: var(--viewport-margin-right);
 	--lan66-sidebar-bottom: var(--viewport-margin-bottom);
-	--lan66-sidebar-scale-x: 0.5;
-	--lan66-sidebar-scale-y: 1;
-	--lan66-event-badge-top: calc(var(--radar-width) + 0.9rem);
-	--lan66-event-badge-left: 1rem;
+	
+	/* Refine margins specifically for the 16:9 Stage centering */
+	--lan66-event-badge-left: 2%;
 	--lan66-event-badge-width: clamp(14rem, calc(var(--radar-width) - 2rem), 22rem);
 	--lan66-event-badge-logo-height: 2.1rem;
 	--lan66-event-badge-title-size: 0.98rem;
@@ -36,6 +38,40 @@
 	--lan66-accent: rgba(var(--red-rgb), 0.92);
 	--lan66-accent-soft: rgba(var(--red-rgb), 0.2);
 	--lan66-green-soft: rgba(var(--green-rgb), 0.22);
+}
+
+/* ── Absolute Geometric Lock (16:9 Stage Percentages) ── */
+/* Forced at the global level to override all scoped component math */
+.hud-stage .radar {
+	width: 25% !important;
+	left: 1.5% !important;
+	top: 1.5% !important;
+	position: absolute !important;
+}
+
+.hud-stage .sidebar.--left {
+	width: 21.5% !important;
+	left: 1.5% !important;
+	bottom: 1.5% !important;
+	position: absolute !important;
+	transform: none !important;
+	scale: none !important;
+}
+
+.hud-stage .sidebar.--right {
+	width: 21.5% !important;
+	right: 1.5% !important;
+	bottom: 1.5% !important;
+	position: absolute !important;
+	transform: none !important;
+	scale: none !important;
+}
+
+.hud-stage .top-bar {
+	width: 62% !important;
+	left: 19% !important;
+	top: 1.5% !important;
+	position: absolute !important;
 }
 
 
@@ -55,6 +91,12 @@
 
 .focused-player {
 	filter: drop-shadow(0 1.2rem 2.8rem rgba(0, 0, 0, 0.38));
+}
+
+/* Fix Right Sidebar clipping by normalizing grid columns to fill the absolute 21.5% width */
+.player-wrapper.--right {
+	grid-template-columns: 0 0 100% !important;
+	grid-template-areas: '. . player' !important;
 }
 
 .name-and-stats::before,

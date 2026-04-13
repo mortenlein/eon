@@ -52,7 +52,7 @@
 					<div class="option-section__body">
 						<div class="drawing-canvas-container">
 							<div class="drawing-canvas-overlay">
-								<div class="drawing-pad-bg"></div>
+								<iframe src="/hud/?transparent" class="drawing-hud-bg" id="analysis-hud-bg"></iframe>
 								<canvas 
 									ref="drawingCanvas" 
 									@mousedown="startDrawing" 
@@ -68,42 +68,45 @@
 					</div>
 				</section>
 
-				<!-- Quick Scenes -->
-				<section class="option-section --quick-scenes">
-					<header class="option-section__header">
-						<h2>HUD Scenes</h2>
-					</header>
-					<div class="option-section__body">
-						<div class="scene-buttons">
-							<button :class="{ '--active': optionValues['match.activeScene'] === 'default' }" @click="setScene('default')">Live View</button>
-							<button :class="{ '--active': optionValues['match.activeScene'] === 'radar' }" @click="setScene('radar')">Full Radar</button>
-							<button :class="{ '--active': optionValues['match.activeScene'] === 'intro' }" @click="setScene('intro')">Match Intro</button>
-							<button :class="{ '--active': optionValues['match.activeScene'] === 'halftime' }" @click="setScene('halftime')">Halftime</button>
-							<button :class="{ '--active': optionValues['match.activeScene'] === 'fulltime' }" @click="setScene('fulltime')">Fulltime</button>
-							<button :class="{ '--active': optionValues['match.activeScene'] === 'analytics' }" @click="setScene('analytics')">Analytics</button>
-							<button :class="{ '--active': optionValues['match.activeScene'] === 'over'}" @click="setScene('over')">Post-Match</button>
+				<!-- Sidebar Controls -->
+				<div class="dashboard-controls">
+					<!-- Quick Scenes -->
+					<section class="option-section --quick-scenes">
+						<header class="option-section__header">
+							<h2>HUD Scenes</h2>
+						</header>
+						<div class="option-section__body">
+							<div class="scene-buttons">
+								<button :class="{ '--active': optionValues['match.activeScene'] === 'default' }" @click="setScene('default')">Live View</button>
+								<button :class="{ '--active': optionValues['match.activeScene'] === 'radar' }" @click="setScene('radar')">Full Radar</button>
+								<button :class="{ '--active': optionValues['match.activeScene'] === 'intro' }" @click="setScene('intro')">Match Intro</button>
+								<button :class="{ '--active': optionValues['match.activeScene'] === 'halftime' }" @click="setScene('halftime')">Halftime</button>
+								<button :class="{ '--active': optionValues['match.activeScene'] === 'fulltime' }" @click="setScene('fulltime')">Fulltime</button>
+								<button :class="{ '--active': optionValues['match.activeScene'] === 'analytics' }" @click="setScene('analytics')">Analytics</button>
+								<button :class="{ '--active': optionValues['match.activeScene'] === 'over'}" @click="setScene('over')">Post-Match</button>
+							</div>
 						</div>
-					</div>
-				</section>
+					</section>
 
-				<!-- Promotion Panel -->
-				<section class="option-section --promotion">
-					<header class="option-section__header">
-						<h2>Promotion Panel</h2>
-					</header>
-					<div class="option-section__body">
-						<div class="promo-controls">
-							<button 
-								:class="['btn-toggle-promo', { '--active': optionValues['promotion.visible'] }]" 
-								@click="togglePromotion"
-							>
-								{{ optionValues['promotion.visible'] ? 'HIDE PANEL' : 'SHOW PANEL' }}
-							</button>
-							
-							<div class="promo-hint">Slides in from the {{ optionValues['promotion.side'] || 'left' }} side</div>
+					<!-- Promotion Panel -->
+					<section class="option-section --promotion">
+						<header class="option-section__header">
+							<h2>Promotion Panel</h2>
+						</header>
+						<div class="option-section__body">
+							<div class="promo-controls">
+								<button 
+									:class="['btn-toggle-promo', { '--active': optionValues['promotion.visible'] }]" 
+									@click="togglePromotion"
+								>
+									{{ optionValues['promotion.visible'] ? 'HIDE PANEL' : 'SHOW PANEL' }}
+								</button>
+								
+								<div class="promo-hint">Slides in from the {{ optionValues['promotion.side'] || 'left' }} side</div>
+							</div>
 						</div>
-					</div>
-				</section>
+					</section>
+				</div>
 			</div>
 
 			<!-- Dynamic Match Selector for Setup Tab -->

@@ -23,7 +23,6 @@ export default {
 				{ id: 'dashboard', label: 'Live Control', icon: '🔴' },
 				{ id: 'rules', label: 'Match Rules', icon: '📝' },
 				{ id: 'setup', label: 'Match Setup', icon: '🎮' },
-				{ id: 'branding', label: 'Branding', icon: '🎨' },
 				{ id: 'advanced', label: 'System', icon: '⚙️' }
 			]
 		}
@@ -100,7 +99,7 @@ export default {
 
 				for (const option of json) {
 					const sectionName = option.section || 'General'
-					if (sectionName === 'HUD Layout' || sectionName === 'Style Overrides' || sectionName === 'General' || sectionName === 'Event' || sectionName === 'Sponsors') continue
+					if (sectionName === 'HUD Layout' || sectionName === 'Style Overrides' || sectionName === 'General' || sectionName === 'Event' || sectionName === 'Sponsors' || sectionName === 'Theme' || sectionName === 'Promotion') continue
 
 					if (! sections[sectionName]) {
 						sections[sectionName] = {

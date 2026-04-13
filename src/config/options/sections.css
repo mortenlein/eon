@@ -19,10 +19,9 @@ body {
 	letter-spacing: -0.01em;
 }
 
-.config-page {
-	width: min(1400px, calc(100vw - 2rem));
-	margin: 0 auto;
-	padding: 1.5rem 0 8rem;
+.options {
+	width: 100%;
+	padding: 1.5rem 0 15rem;
 }
 
 /* ── Tactile Device Header ── */
@@ -35,7 +34,7 @@ body {
 	padding: 1.25rem 2rem;
 	border-radius: var(--device-corner);
 	margin-bottom: 1rem;
-	box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 .page-header h1 {
@@ -159,7 +158,7 @@ body {
 	height: 2.2rem;
 	padding: 0.1rem;
 	border: 1px solid var(--panel-border);
-	background: rgba(0,0,0,0.2);
+	background: rgba(0, 0, 0, 0.2);
 	border-radius: 0.5rem;
 	cursor: pointer;
 }
@@ -179,16 +178,22 @@ body {
 	position: relative;
 	aspect-ratio: 16/9;
 	border-radius: 8px;
-	border: 2px solid #000;
-	box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+	box-shadow: 
+		0 0 0 2px #000,
+		inset 0 0 20px rgba(0, 0, 0, 0.8);
 	overflow: hidden;
 }
 
-.drawing-pad-bg {
+.drawing-hud-bg {
 	position: absolute;
 	inset: 0;
+	width: 100%;
+	height: 100%;
+	border: none;
+	pointer-events: none;
+	opacity: 0.6;
 	background: #111;
-	opacity: 0.3;
+	z-index: 0;
 }
 
 .drawing-canvas-container canvas {
@@ -226,6 +231,7 @@ body {
 .page-sections {
 	display: grid;
 	gap: 1.5rem;
+	padding-bottom: 8rem; /* Final fix to prevent Config Actions bar from covering content */
 }
 
 .action-dock {
@@ -331,11 +337,11 @@ body {
 	transition: 0.2s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
 	background-color: var(--accent);
 }
 
-input:checked + .slider::before {
+input:checked+.slider::before {
 	transform: translateX(16px);
 	background-color: #000;
 }
@@ -377,7 +383,8 @@ input:checked + .slider::before {
 }
 
 .technical-key {
-	display: none; /* Keep it clean like a device */
+	display: none;
+	/* Keep it clean like a device */
 }
 
 .input {
@@ -439,8 +446,15 @@ input:checked + .slider::before {
 /* ── Specific Overrides for Dashboard ── */
 .dashboard-grid {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 1rem;
+	grid-template-columns: 3fr 1fr;
+	gap: 1.5rem;
+	align-items: start;
+}
+
+.dashboard-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
 }
 
 .option-section.--telestrator .option-section__body {

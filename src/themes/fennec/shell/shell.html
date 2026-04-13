@@ -1,7 +1,6 @@
 <SvgFilters />
-<Sponsors />
-
-<template v-if="$map.name">
+<div v-if="$map.name" class="hud-stage">
+	<Sponsors />
 	<Radar />
 	<TopBar />
 	<PlayersAlive />
@@ -15,7 +14,8 @@
 	<FocusedPlayer />
 
 	<SeriesGraph />
-</template>
+	<Telestrator />
+</div>
 
 <template v-else>
 	<Corners />
