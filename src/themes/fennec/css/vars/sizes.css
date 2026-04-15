@@ -45,7 +45,7 @@
 	--sponsor-panel-height: 4.5rem;
 
 	/* Sidebars */
-	--sidebar-width: calc(var(--sidebar-player-width) + var(--sidebar-player-focused-player-highlight-width) + var(--sidebar-player-additional-stats-width));
+	--sidebar-width: calc(var(--sidebar-player-width) + var(--sidebar-player-focused-player-highlight-width));
 	--sidebar-margin-to-focused-player: var(--viewport-margin-x);
 
 	--sidebar-vertical-spacing: 0.5rem;
@@ -58,16 +58,16 @@
 
 	/* Sidebar Players */
 	--sidebar-player-width: calc(
-		var(--sidebar-deaths-width)
-		+ var(--sidebar-grenades-half-width)
-		+ var(--sidebar-health-width)
-		+ var(--sidebar-kills-width)
-		+ var(--sidebar-money-width)
-		+ var(--sidebar-observer-slot-width)
-		+ var(--sidebar-primary-and-secondary-width)
-		+ var(--sidebar-round-kills-width)
-		+ var(--sidebar-start-and-end-width) * 2
-		+ var(--sidebar-taser-width)
+		var(--sidebar-deaths-width) +
+		var(--sidebar-grenades-half-width) +
+		var(--sidebar-health-width) +
+		var(--sidebar-kills-width) +
+		var(--sidebar-money-width) +
+		var(--sidebar-observer-slot-width) +
+		var(--sidebar-primary-and-secondary-width) +
+		var(--sidebar-round-kills-width) +
+		var(--sidebar-start-and-end-width) * 2 +
+		var(--sidebar-taser-width)
 	);
 
 	--sidebar-player-focused-player-highlight-width: 0.5rem;

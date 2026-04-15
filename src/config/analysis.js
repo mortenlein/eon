@@ -1,6 +1,6 @@
 import * as Vue from '/dependencies/vue.js'
 import { bomb, grenades, map, options, players, radars } from '/hud/core/state.js'
-import { connectToWebsocket } from '/hud/core/websocket.js'
+import { connectToWebsocket, ws } from '/hud/core/websocket.js'
 import { loadModule } from '/dependencies/vue3-sfc-loader.js'
 import { sfcLoaderOptions } from '/dependencies/vue3-sfc-loader-options.js'
 
@@ -20,19 +20,35 @@ const app = Vue.createApp({
                     @mousemove="draw"
                     @mouseup="stopDrawing"
                     @mouseleave="stopDrawing"
+                    @touchstart="startDrawing"
+                    @touchmove="draw"
+                    @touchend="stopDrawing"
                 ></canvas>
             </div>
             
             <div class="controls">
-                <div 
-                    v-for="color in colors" 
-                    :key="color" 
-                    class="color-dot" 
-                    :class="{ '--active': drawingColor === color }"
-                    :style="{ background: color }"
-                    @click="drawingColor = color"
-                ></div>
-                <button @click="clearDrawing">Clear</button>
+                <div class="drawing-palette">
+                    <div 
+                        v-for="color in colors" 
+                        :key="color" 
+                        class="color-dot" 
+                        :class="{ '--active': drawingColor === color }"
+                        :style="{ background: color }"
+                        @click="drawingColor = color"
+                    ></div>
+                </div>
+                <div class="drawing-sizes">
+                    <button 
+                        v-for="sz in sizes" 
+                        :key="sz.value"
+                        class="btn-size"
+                        :class="{ '--active': drawingSize === sz.value }"
+                        @click="drawingSize = sz.value"
+                    >
+                        {{ sz.label }}
+                    </button>
+                </div>
+                <button class="btn-clear" @click="clearDrawing">Clear</button>
             </div>
         </div>
     `,
@@ -43,31 +59,65 @@ const app = Vue.createApp({
             lastY: 0,
             drawingColor: '#ff5a00',
             drawingSize: 5,
-            colors: ['#ff5a00', '#3498db', '#2ecc71', '#f1c40f', '#ffffff']
+            colors: [
+                '#ff5a00', '#3498db', '#2ecc71', '#f1c40f', '#ffffff', '#e74c3c',
+                '#9b59b6', '#ff79c6', '#aaff00', '#00ffff', '#2c3e50', '#000000'
+            ],
+            sizes: [
+                { label: 'Thin', value: 2 },
+                { label: 'Medium', value: 5 },
+                { label: 'Thick', value: 10 },
+                { label: 'Marker', value: 20 }
+            ]
         }
     },
     mounted() {
         window.addEventListener('resize', this.resizeCanvas)
         this.resizeCanvas()
         
-        // Listen for drawing events from others
-        window.addEventListener('message', this.handleWsMessage)
-        
-        // Hook into the same websocket logic
-        this.initWsHandlers()
+        // Listen for drawing events from others via the global event bus
+        window.addEventListener('socket:draw:line', this.handleSocketDrawLine)
+        window.addEventListener('socket:draw:clear', this.handleSocketClear)
+    },
+    beforeUnmount() {
+        window.removeEventListener('resize', this.resizeCanvas)
+        window.removeEventListener('socket:draw:line', this.handleSocketDrawLine)
+        window.removeEventListener('socket:draw:clear', this.handleSocketClear)
     },
     methods: {
         resizeCanvas() {
             const canvas = this.$refs.drawingCanvas
             if (!canvas) return
-            canvas.width = window.innerWidth
-            canvas.height = window.innerHeight
+            const rect = canvas.parentElement.getBoundingClientRect()
+            canvas.width = rect.width
+            canvas.height = rect.height
         },
         
-        initWsHandlers() {
-            // We need to listen to the global broadcast stream
-            // This is handled by websocket-on-message.js in the core
-            // But we can also add custom listeners here if needed
+        handleSocketDrawLine(e) {
+            const { x1, y1, x2, y2, color, size } = e.detail
+            this.drawLineOnCanvas(x1, y1, x2, y2, color, size)
+        },
+
+        handleSocketClear() {
+            const canvas = this.$refs.drawingCanvas
+            if (!canvas) return
+            const ctx = canvas.getContext('2d')
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+        },
+
+        drawLineOnCanvas(x1, y1, x2, y2, color, size) {
+            const canvas = this.$refs.drawingCanvas
+            if (!canvas) return
+            const ctx = canvas.getContext('2d')
+            
+            ctx.beginPath()
+            ctx.moveTo(x1 * canvas.width, y1 * canvas.height)
+            ctx.lineTo(x2 * canvas.width, y2 * canvas.height)
+            
+            ctx.strokeStyle = color
+            ctx.lineWidth = size
+            ctx.lineCap = 'round'
+            ctx.stroke()
         },
 
         startDrawing(e) {
@@ -91,7 +141,12 @@ const app = Vue.createApp({
             }
 
             // Sync with server
-            window.ws?.send(JSON.stringify({ event: 'draw:line', body: eventData }))
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ event: 'draw:line', body: eventData }))
+            }
+
+            // Local echo
+            this.drawLineOnCanvas(this.lastX, this.lastY, pos.x, pos.y, this.drawingColor, this.drawingSize)
 
             this.lastX = pos.x
             this.lastY = pos.y
@@ -102,15 +157,21 @@ const app = Vue.createApp({
         },
 
         clearDrawing() {
-            window.ws?.send(JSON.stringify({ event: 'draw:clear' }))
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ event: 'draw:clear' }))
+            }
+            this.handleSocketClear()
         },
 
         getCanvasPos(e) {
             const canvas = this.$refs.drawingCanvas
             const rect = canvas.getBoundingClientRect()
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY
+
             return {
-                x: (e.clientX - rect.left) / rect.width,
-                y: (e.clientY - rect.top) / rect.height
+                x: (clientX - rect.left) / rect.width,
+                y: (clientY - rect.top) / rect.height
             }
         }
     }

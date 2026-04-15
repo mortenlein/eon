@@ -32,6 +32,10 @@ export default {
 		level() {
 			return this.getLevel(this.position[2])
 		},
+
+		isPositionValid() {
+			return this.position && (this.position[0] !== 0 || this.position[1] !== 0)
+		},
 	},
 
 	methods: {

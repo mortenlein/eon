@@ -1,5 +1,6 @@
 import { positionClass } from '/hud/helpers/position-class.js'
 import { seriesMapNumbers } from '/hud/helpers/series-map-numbers.js'
+
 import Player from '/hud/sidebars/sidebar/player/player.vue'
 import TeamEquipment from '/hud/sidebars/sidebar/team-equipment/team-equipment.vue'
 import TeamGrenades from '/hud/sidebars/sidebar/team-grenades/team-grenades.vue'

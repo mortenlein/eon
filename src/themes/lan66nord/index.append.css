@@ -6,21 +6,10 @@
 
 	--viewport-margin-top: 1.15rem;
 	--viewport-margin-bottom: 1.5rem;
-	/* ── Geometric Lock: Horizontal Layout ── */
-	--viewport-margin-left: 2%;
-	--viewport-margin-right: 2%;
-	--sidebar-width: 22.3%;
-	--sidebar-player-width: 100%; /* Force players to fill the percentage-width sidebar */
-	--top-bar-width: 62%;
-	--lan66-radar-top: var(--viewport-margin-top);
-	--lan66-radar-left: var(--viewport-margin-left);
-	--lan66-top-bar-top: var(--viewport-margin-top);
-	--lan66-focused-player-bottom: var(--viewport-margin-bottom);
-	--lan66-players-alive-top: var(--viewport-margin-top);
-	--lan66-players-alive-right: var(--viewport-margin-right);
-	--lan66-sidebar-left: var(--viewport-margin-left);
-	--lan66-sidebar-right: var(--viewport-margin-right);
-	--lan66-sidebar-bottom: var(--viewport-margin-bottom);
+	--viewport-margin-top: 1.15rem;
+	--viewport-margin-bottom: 1.5rem;
+	/* Base variables restored from fennec theme */
+
 	
 	/* Refine margins specifically for the 16:9 Stage centering */
 	--lan66-event-badge-left: 2%;
@@ -40,32 +29,8 @@
 	--lan66-green-soft: rgba(var(--green-rgb), 0.22);
 }
 
-/* ── Absolute Geometric Lock (16:9 Stage Percentages) ── */
-/* Forced at the global level to override all scoped component math */
-.hud-stage .radar {
-	width: 25% !important;
-	left: 1.5% !important;
-	top: 1.5% !important;
-	position: absolute !important;
-}
+/* Sidebar overrides removed to restore base fennec layout */
 
-.hud-stage .sidebar.--left {
-	width: 21.5% !important;
-	left: 1.5% !important;
-	bottom: 1.5% !important;
-	position: absolute !important;
-	transform: none !important;
-	scale: none !important;
-}
-
-.hud-stage .sidebar.--right {
-	width: 21.5% !important;
-	right: 1.5% !important;
-	bottom: 1.5% !important;
-	position: absolute !important;
-	transform: none !important;
-	scale: none !important;
-}
 
 .hud-stage .top-bar {
 	width: 62% !important;
@@ -93,11 +58,12 @@
 	filter: drop-shadow(0 1.2rem 2.8rem rgba(0, 0, 0, 0.38));
 }
 
-/* Fix Right Sidebar clipping by normalizing grid columns to fill the absolute 21.5% width */
-.player-wrapper.--right {
-	grid-template-columns: 0 0 100% !important;
-	grid-template-areas: '. . player' !important;
-}
+/* 
+   Fix Sidebar vertical stacking while maintaining reference proportions.
+   By normalizing the grid areas, we prevent implicit rows that cause vertical gaps.
+*/
+/* Player wrapping overrides removed to restore base fennec layout */
+
 
 .name-and-stats::before,
 .name-and-stats::after {
@@ -124,4 +90,8 @@
 		linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
 		var(--lan66-panel-fill);
 	border-color: rgba(var(--red-rgb), 0.24);
+}
+
+.series-graph-wrapper {
+	display: none !important;
 }

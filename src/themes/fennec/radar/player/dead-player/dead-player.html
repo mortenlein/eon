@@ -1,4 +1,5 @@
 <div
+	v-if="isPositionValid"
 	:class="['dead-player', { '--default-level': level === 'default' }]"
 	:style="{ left: `${coordinates.x}%`, top: `${coordinates.y}%` }"
 >

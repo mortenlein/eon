@@ -38,13 +38,27 @@
 						<div class="header-with-actions">
 							<h2>Analysis Board</h2>
 							<div class="drawing-config">
-								<input type="color" v-model="drawingColor">
-								<select v-model="drawingSize" class="custom-select">
-									<option :value="2">Thin</option>
-									<option :value="5">Medium</option>
-									<option :value="10">Thick</option>
-									<option :value="20">Marker</option>
-								</select>
+								<div class="drawing-palette">
+									<div 
+										v-for="color in drawingColors" 
+										:key="color" 
+										class="color-swatch"
+										:class="{ '--active': drawingColor === color }"
+										:style="{ backgroundColor: color }"
+										@click="drawingColor = color"
+									></div>
+								</div>
+								<div class="drawing-sizes">
+									<button 
+										v-for="sz in drawingSizes" 
+										:key="sz.value"
+										class="btn-size"
+										:class="{ '--active': drawingSize === sz.value }"
+										@click="drawingSize = sz.value"
+									>
+										{{ sz.label }}
+									</button>
+								</div>
 								<button class="btn-clear" @click="clearDrawing">Clear</button>
 							</div>
 						</div>

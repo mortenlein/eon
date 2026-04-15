@@ -150,17 +150,67 @@ body {
 
 .drawing-config {
 	display: flex;
-	gap: 0.5rem;
+	align-items: center;
+	gap: 1.5rem;
 }
 
-.drawing-config input[type="color"] {
-	width: 2.2rem;
-	height: 2.2rem;
-	padding: 0.1rem;
-	border: 1px solid var(--panel-border);
-	background: rgba(0, 0, 0, 0.2);
-	border-radius: 0.5rem;
+.drawing-palette {
+	display: flex;
+	gap: 0.4rem;
+	background: rgba(0, 0, 0, 0.3);
+	padding: 0.4rem;
+	border-radius: 0.75rem;
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.color-swatch {
+	width: 1.6rem;
+	height: 1.6rem;
+	border-radius: 0.4rem;
 	cursor: pointer;
+	border: 2px solid transparent;
+	transition: transform 0.1s, border-color 0.1s;
+}
+
+.color-swatch:hover {
+	transform: scale(1.1);
+}
+
+.color-swatch.--active {
+	border-color: #fff;
+	transform: scale(1.1);
+	box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.drawing-sizes {
+	display: flex;
+	gap: 0.25rem;
+	background: rgba(0, 0, 0, 0.3);
+	padding: 0.3rem;
+	border-radius: 0.6rem;
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-size {
+	background: none;
+	border: none;
+	color: var(--text-muted);
+	padding: 0.3rem 0.6rem;
+	font-size: 0.75rem;
+	font-weight: 700;
+	font-family: 'JetBrains Mono', monospace;
+	border-radius: 0.4rem;
+	cursor: pointer;
+	transition: all 0.15s;
+}
+
+.btn-size:hover {
+	color: var(--text-primary);
+}
+
+.btn-size.--active {
+	background: rgba(255, 255, 255, 0.1);
+	color: var(--accent);
 }
 
 .btn-clear {

@@ -24,6 +24,16 @@ export default {
 				{ id: 'rules', label: 'Match Rules', icon: '📝' },
 				{ id: 'setup', label: 'Match Setup', icon: '🎮' },
 				{ id: 'advanced', label: 'System', icon: '⚙️' }
+			],
+			drawingColors: [
+				'#ff5a00', '#3498db', '#2ecc71', '#f1c40f', '#ffffff', '#e74c3c',
+				'#9b59b6', '#ff79c6', '#aaff00', '#00ffff', '#2c3e50', '#000000'
+			],
+			drawingSizes: [
+				{ label: 'Thin', value: 2 },
+				{ label: 'Medium', value: 5 },
+				{ label: 'Thick', value: 10 },
+				{ label: 'Marker', value: 20 }
 			]
 		}
 	},
@@ -266,6 +276,10 @@ export default {
 					} else if ((event === 'static_data' || event === 'state') && body.options) {
 						// Sync full configuration blob (e.g. after layout save)
 						Object.assign(this.optionValues, body.options)
+					} else if (event === 'draw:line') {
+						this.renderRemoteLine(body)
+					} else if (event === 'draw:clear') {
+						this.clearLocalCanvas()
 					}
 				} catch (e) {}
 			}
@@ -331,11 +345,30 @@ export default {
 		},
 
 		clearDrawing() {
+			this.clearLocalCanvas()
+			this.sendDrawEvent('draw:clear')
+		},
+
+		clearLocalCanvas() {
 			if (this.$refs.drawingCanvas) {
 				const ctx = this.$refs.drawingCanvas.getContext('2d')
 				ctx.clearRect(0, 0, this.$refs.drawingCanvas.width, this.$refs.drawingCanvas.height)
 			}
-			this.sendDrawEvent('draw:clear')
+		},
+
+		renderRemoteLine(body) {
+			const { x1, y1, x2, y2, color, size } = body
+			if (this.$refs.drawingCanvas) {
+				const ctx = this.$refs.drawingCanvas.getContext('2d')
+				const rect = this.$refs.drawingCanvas.getBoundingClientRect()
+				ctx.beginPath()
+				ctx.moveTo(x1 * rect.width, y1 * rect.height)
+				ctx.lineTo(x2 * rect.width, y2 * rect.height)
+				ctx.strokeStyle = color
+				ctx.lineWidth = size
+				ctx.lineCap = 'round'
+				ctx.stroke()
+			}
 		},
 
 		getCanvasPos(e) {

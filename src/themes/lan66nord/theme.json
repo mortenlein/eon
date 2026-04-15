@@ -253,6 +253,42 @@
 			"section": "Promotion",
 			"label": "Subtitle / CTA"
 		},
+		"css.promotion-panel-width": {
+			"type": "text",
+			"section": "Promotion",
+			"label": "Panel Width (e.g. 40rem)",
+			"value": "40rem"
+		},
+		"css.promotion-panel-height": {
+			"type": "text",
+			"section": "Promotion",
+			"label": "Panel Height (e.g. 40rem or auto)",
+			"value": "auto"
+		},
+		"css.promotion-panel-padding": {
+			"type": "text",
+			"section": "Promotion",
+			"label": "Internal Padding (e.g. 1.5rem)",
+			"value": "1.5rem"
+		},
+		"css.promotion-panel-image-height": {
+			"type": "text",
+			"section": "Promotion",
+			"label": "Image Height (e.g. 20rem)",
+			"value": "20rem"
+		},
+		"css.promotion-panel-title-size": {
+			"type": "text",
+			"section": "Promotion",
+			"label": "Title Font Size (e.g. 2.8rem)",
+			"value": "2.8rem"
+		},
+		"css.promotion-panel-subtitle-size": {
+			"type": "text",
+			"section": "Promotion",
+			"label": "Subtitle Font Size (e.g. 1.2rem)",
+			"value": "1.2rem"
+		},
 		"match.mode": {
 			"type": "select",
 			"section": "Match Rules",

@@ -34,7 +34,9 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	width: 26rem;
+	justify-content: center;
+	width: var(--promotion-panel-width, 26rem);
+	height: var(--promotion-panel-height, auto);
 	background: 
 		linear-gradient(135deg, rgba(var(--red-rgb), 0.1), rgba(var(--green-rgb), 0.05)),
 		rgba(8, 10, 14, 0.94);
@@ -43,13 +45,13 @@
 		inset 0 0.1rem 0 rgba(255, 255, 255, 0.04),
 		0 1.5rem 3.5rem rgba(0, 0, 0, 0.45);
 	backdrop-filter: blur(2rem);
-	padding: 1.5rem;
+	padding: var(--promotion-panel-padding, 1.5rem);
 	overflow: hidden;
 }
 
 .promotion-panel__image {
 	width: 100%;
-	height: 12rem;
+	height: var(--promotion-panel-image-height, 12rem);
 	object-fit: contain;
 	margin-bottom: 1.2rem;
 	filter: drop-shadow(0 0.8rem 1.6rem rgba(0, 0, 0, 0.4));
@@ -62,7 +64,7 @@
 
 .promotion-panel__title {
 	color: var(--white);
-	font-size: 1.6rem;
+	font-size: var(--promotion-panel-title-size, 1.6rem);
 	font-weight: 800;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
@@ -72,7 +74,7 @@
 
 .promotion-panel__subtitle {
 	color: rgba(var(--green-rgb), 0.95);
-	font-size: 0.9rem;
+	font-size: var(--promotion-panel-subtitle-size, 0.9rem);
 	font-weight: 700;
 	letter-spacing: 0.18em;
 	text-transform: uppercase;

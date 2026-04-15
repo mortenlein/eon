@@ -1,8 +1,20 @@
-<div class="additional-stats-wrapper">
-	<div :class="['additional-stats', positionClass, { '--active': isActive }]">
-		<Kills :player="player" />
-		<Assists :player="player" />
-		<Deaths :player="player" />
-		<Adr :player="player" />
+<div :class="['additional-stats', positionClass]">
+	<div class="additional-stats-inner">
+		<div class="stat">
+			<div class="label">K</div>
+			<div class="value">{{ player.kills || 0 }}</div>
+		</div>
+		<div class="stat">
+			<div class="label">D</div>
+			<div class="value">{{ player.deaths || 0 }}</div>
+		</div>
+		<div class="stat">
+			<div class="label">A</div>
+			<div class="value">{{ player.assists || 0 }}</div>
+		</div>
+		<div class="stat">
+			<div class="label">ADR</div>
+			<div class="value">{{ player.adr || 0 }}</div>
+		</div>
 	</div>
 </div>
