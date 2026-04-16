@@ -3,17 +3,22 @@
 
 	display: flex;
 	align-items: center;
+	justify-content: center;
+
+	background: var(--red); /* Making it a dedicated red square for the subtitle */
+	color: var(--white);
 }
 
 .round-kills.--right {
-	justify-content: flex-end;
+	justify-content: center;
 }
 
 img.label {
-	height: 1.5rem;
-	margin-right: 0.5rem;
+	display: none;
 }
 
 .value {
-	font-size: 1.6rem;
+	font-size: 1rem;
+	font-weight: 700;
+	text-transform: uppercase;
 }

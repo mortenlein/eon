@@ -1,11 +1,12 @@
 .radar {
-	position: fixed;
-	top: var(--lan66-radar-top, var(--viewport-margin-top));
-	left: var(--lan66-radar-left, var(--viewport-margin-left));
+	position: absolute;
+	top: var(--lan66-radar-top, 1.5rem);
+	left: var(--lan66-radar-left, 2.5rem);
 
 	width: var(--radar-width);
 	aspect-ratio: 1;
-	overflow: hidden; /* might break the drop shadow on some maps (not sure), but prevents players floating around on screen during 1v1 warmups */
+
+	overflow: hidden !important; /* Definitive clip for rogue markers */
 }
 
 img.radar-image {

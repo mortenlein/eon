@@ -99,6 +99,26 @@
 								<button :class="{ '--active': optionValues['match.activeScene'] === 'analytics' }" @click="setScene('analytics')">Analytics</button>
 								<button :class="{ '--active': optionValues['match.activeScene'] === 'over'}" @click="setScene('over')">Post-Match</button>
 							</div>
+
+							<div class="win-celebration">
+								<div class="win-celebration__title">Manual Win Celebration</div>
+								<div class="win-buttons">
+									<button 
+										class="btn-win --t1" 
+										:class="{ '--active': optionValues['preferences.celebration.forceWinner'] === 'team1' }" 
+										@click="setWinner('team1')"
+									>🏆 T1 WIN</button>
+									<button 
+										class="btn-win --t2" 
+										:class="{ '--active': optionValues['preferences.celebration.forceWinner'] === 'team2' }" 
+										@click="setWinner('team2')"
+									>🏆 T2 WIN</button>
+									<button 
+										class="btn-win --clear" 
+										@click="setWinner('none')"
+									>❌ CLEAR</button>
+								</div>
+							</div>
 						</div>
 					</section>
 

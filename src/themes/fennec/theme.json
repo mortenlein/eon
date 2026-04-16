@@ -315,6 +315,17 @@
 			"label": "Maximum HP that will be highlighted in red (e.g. 20)"
 		},
 
+		"preferences.celebration.forceWinner": {
+			"type": "select",
+			"section": "Preferences",
+			"label": "Manual Win Celebration (FOR TESTING)",
+			"options": [
+				{ "value": "none", "label": "None (Automatic)" },
+				{ "value": "team1", "label": "Force Team 1 Win" },
+				{ "value": "team2", "label": "Force Team 2 Win" }
+			]
+		},
+
 		"css.base-scale-factor": {
 			"type": "text",
 			"section": "Style Overrides",

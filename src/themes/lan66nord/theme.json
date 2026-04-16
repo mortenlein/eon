@@ -302,6 +302,17 @@
 			"label": "Active HUD Scene",
 			"value": "default"
 		},
+		"preferences.celebration.forceWinner": {
+			"type": "select",
+			"section": "Match Rules",
+			"label": "Manual Win Celebration (FOR REHEARSAL)",
+			"options": [
+				{ "value": "none", "label": "None (Automatic)" },
+				{ "value": "team1", "label": "Force Team 1 Win" },
+				{ "value": "team2", "label": "Force Team 2 Win" }
+			],
+			"value": "none"
+		},
 		"teams.leftTeamName": {
 			"type": "string",
 			"section": "Teams",

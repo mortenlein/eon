@@ -1,4 +1,3 @@
-<div v-if="player.roundKills" :class="['round-kills', positionClass]">
-	<img src="/hud/img/icons/round-kills.svg" alt="" class="label">
-	<div class="value">{{ player.roundKills }}</div>
+<div v-if="player.subtitle" :class="['round-kills', positionClass]">
+	<div class="value">{{ player.subtitle }}</div>
 </div>

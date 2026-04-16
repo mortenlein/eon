@@ -1,10 +1,36 @@
 .name-and-stats {
 	display: grid;
-	grid-template-columns: max-content 1fr max-content;
-	grid-template-rows: 1fr 1fr;
+	grid-template-columns: max-content 1fr auto max-content;
+	grid-template-rows: repeat(2, 1fr);
 	grid-template-areas:
-		'before name-row after'
-		'before data-row after';
+		'before name-row subtitle after'
+		'before data-row subtitle after';
+}
+
+.subtitle-box {
+	grid-area: subtitle;
+	margin: 0.1rem 1.7rem 0.1rem -1.7rem; /* Accounting for the name-row's negative margin */
+	padding: 0 1.5rem;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	background: var(--black-75);
+	color: var(--white);
+	font-size: 1.25rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	transition: background-color var(--fade-fast-duration) ease;
+	z-index: 10;
+}
+
+.name-and-stats.--ct .subtitle-box {
+	border-left: 0.2rem solid var(--counter-terrorists-fill);
+}
+
+.name-and-stats.--t .subtitle-box {
+	border-left: 0.2rem solid var(--terrorists-fill);
 }
 
 .name-and-stats::before,

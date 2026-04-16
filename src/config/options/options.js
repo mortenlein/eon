@@ -295,6 +295,12 @@ export default {
 			this.sendDrawEvent('config:update', { key: 'match.activeScene', value: id })
 			this.save({ 'match.activeScene': id })
 		},
+
+		setWinner(id) {
+			this.optionValues['preferences.celebration.forceWinner'] = id
+			this.sendDrawEvent('config:update', { key: 'preferences.celebration.forceWinner', value: id })
+			this.save({ 'preferences.celebration.forceWinner': id })
+		},
 		
 		togglePromotion() {
 			const newVal = ! this.optionValues['promotion.visible']

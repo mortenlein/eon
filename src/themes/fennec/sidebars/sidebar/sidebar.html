@@ -1,7 +1,4 @@
-<div :class="['sidebar', positionClass, {
-	'--moved-upwards-by-series-graph': hasSeriesGraph && $round.isFreezetime,
-	'--moved-upwards-by-round-graph': ! hasSeriesGraph && $round.isFreezetime,
-}]">
+<div :class="['sidebar', positionClass]">
 	<img v-if="overlayImageUrl" :class="['overlay', positionClass]" :src="overlayImageUrl" alt="">
 
 	<TeamEquipment :team="team" :position="position" />
