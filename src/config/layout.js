@@ -770,35 +770,46 @@ function updateGridOverlay() {
 function mouseToVp(e) {
 	const vp = document.getElementById('viewport');
 	const r = vp.getBoundingClientRect();
-	return { x: (e.clientX - r.left) / r.width * VP_W, y: (e.clientY - r.top) / r.height * VP_H };
+	const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+	const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+	return { x: (clientX - r.left) / r.width * VP_W, y: (clientY - r.top) / r.height * VP_H };
 }
 
 /* ═══════════════  Events  ═══════════════ */
 function attachGlobalEvents() {
 	const vp = document.getElementById('viewport');
 
-	vp.addEventListener('mousedown', (e) => {
+	const onDown = (e) => {
 		const handle = e.target.closest('.resize-h');
 		const elDom = e.target.closest('.hud-el');
 		if (!elDom) { selectEl(null); return; }
 		const el = els.find(x => x.def.id === elDom.dataset.id);
 		if (!el) return;
 		selectEl(el.def.id);
-		if (el.def.readonly) return; // sponsors are view-only
-		e.preventDefault();
+		if (el.def.readonly) return;
+		if (e.type === 'mousedown' || e.type === 'touchstart') e.preventDefault();
+		const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+		const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
 		const mode = handle ? (handle.dataset.axis === 'x' ? 'rx' : 'ry') : 'move';
-		drag = { el, startMx: e.clientX, startMy: e.clientY, startTop: el.top, startLeft: el.left, startW: el.w, startH: el.h, mode };
+		drag = { el, startMx: clientX, startMy: clientY, startTop: el.top, startLeft: el.left, startW: el.w, startH: el.h, mode };
 		elDom.classList.add('--dragging');
-	});
+	};
 
-	document.addEventListener('mousemove', (e) => {
+	vp.addEventListener('mousedown', onDown);
+	vp.addEventListener('touchstart', onDown, { passive: false });
+
+	const onMove = (e) => {
 		const c = mouseToVp(e);
+		const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+		const clientY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+
 		document.getElementById('status-coords').textContent = `${Math.round(c.x)}, ${Math.round(c.y)} px  ·  ${pxToRem(c.x).toFixed(1)}, ${pxToRem(c.y).toFixed(1)} rem`;
 		if (!drag) return;
-		e.preventDefault();
+		if (e.type === 'mousemove' || e.type === 'touchmove') e.preventDefault();
+		
 		const r = document.getElementById('viewport').getBoundingClientRect();
 		const sx = VP_W / r.width, sy = VP_H / r.height;
-		const dx = (e.clientX - drag.startMx) * sx, dy = (e.clientY - drag.startMy) * sy;
+		const dx = (clientX - drag.startMx) * sx, dy = (clientY - drag.startMy) * sy;
 		const el = drag.el, def = el.def;
 
 		if (drag.mode === 'move') {
@@ -840,9 +851,14 @@ function attachGlobalEvents() {
 		positionEl(el); 
 		updatePanel();
 		syncAdvancedEditor();
-	});
+	};
 
-	document.addEventListener('mouseup', () => { if (drag) { drag.el.dom.classList.remove('--dragging'); drag = null; } });
+	document.addEventListener('mousemove', onMove);
+	document.addEventListener('touchmove', onMove, { passive: false });
+
+	const onUp = () => { if (drag) { drag.el.dom.classList.remove('--dragging'); drag = null; } };
+	document.addEventListener('mouseup', onUp);
+	document.addEventListener('touchend', onUp);
 
 	document.addEventListener('keydown', (e) => {
 		if (e.key.toLowerCase() === 's' && e.ctrlKey && !e.altKey && !e.metaKey) { e.preventDefault(); save(); return; }
@@ -862,6 +878,9 @@ function attachGlobalEvents() {
 	});
 
 	document.getElementById('btn-save').addEventListener('click', save);
+	document.getElementById('btn-toggle-panel').addEventListener('click', () => {
+		document.getElementById('editor').classList.toggle('--panel-open');
+	});
 	document.getElementById('btn-refresh').addEventListener('click', async () => { await fetch('/config/force-hud-refresh', { method: 'POST' }); });
 	document.getElementById('btn-grid').addEventListener('click', () => {
 		gridIdx = (gridIdx + 1) % GRID_SIZES.length;
@@ -1073,18 +1092,19 @@ async function loadPreset(id) {
 		const scaleY = el.def.scaleKeys ? resolveNum(el.def.scaleKeys.y, 1) : 1;
 		let bw = el.def.baseW, bh = el.def.baseH;
 
-		if (el.def.sizeKey === 'css.radar-width') { bw = resolvePctOrRem('css.radar-width', VP_W, el.def.baseW); bh = bw; }
-		if (el.def.sizeKey === 'css.lan66-event-badge-width') { bw = resolvePctOrRem('css.lan66-event-badge-width', VP_W, el.def.baseW); }
-		if (el.def.sizeKey === 'css.lan66-current-map-width') { bw = resolvePctOrRem('css.lan66-current-map-width', VP_W, el.def.baseW); bh = bw * 9 / 16; }
+		if (el.def.sizeKey === 'css.radar-width') { bw = evaluateCss(opts['css.radar-width'], VP_W, el.def.baseW); bh = bw; }
+		if (el.def.sizeKey === 'css.lan66-event-badge-width') { bw = evaluateCss(opts['css.lan66-event-badge-width'], VP_W, el.def.baseW); }
+		if (el.def.sizeKey === 'css.lan66-current-map-width') { bw = evaluateCss(opts['css.lan66-current-map-width'], VP_W, el.def.baseW); bh = bw * 9 / 16; }
 
 		if (el.def.id.startsWith('sponsor-')) {
-			bw = resolvePctOrRem('css.sponsor-panel-width', VP_W, 120);
-			bh = resolvePctOrRem('css.sponsor-panel-height', VP_H, 45);
+			bw = evaluateCss(opts['css.sponsor-panel-width'], VP_W, 120);
+			bh = evaluateCss(opts['css.sponsor-panel-height'], VP_H, 45);
 		}
 
 		el.baseW = bw; el.baseH = bh; el.scaleX = scaleX; el.scaleY = scaleY;
 		el.w = bw * scaleX; el.h = bh * scaleY;
 
+		const positions = {};
 		for (const prop of el.def.props) {
 			const refSize = (prop.edge === 'top' || prop.edge === 'bottom') ? VP_H : VP_W;
 			const fb = (prop.edge === 'top' || prop.edge === 'bottom') ? 11 : 20; // 1.15rem -> ~11px on 1080p
@@ -1274,8 +1294,8 @@ function applyPanelInput(input) {
 	if (type === 'scale') {
 		const v = parseFloat(raw); if (isNaN(v) || v <= 0) return;
 		if (key.endsWith('scale-x')) { el.scaleX = v; el.w = el.baseW * v; } else { el.scaleY = v; el.h = el.baseH * v; }
-		if (el.def.anchor.h === 'right') el.left = VP_W - el.w - remToPx(resolveToRem('css.lan66-sidebar-right', 2));
-		if (el.def.anchor.v === 'bottom') el.top = VP_H - el.h - remToPx(resolveToRem('css.lan66-sidebar-bottom', 1.5));
+		if (el.def.anchor.h === 'right') el.left = VP_W - el.w - remToPx(evaluateCss(opts['css.lan66-sidebar-right'], VP_W, 2));
+		if (el.def.anchor.v === 'bottom') el.top = VP_H - el.h - remToPx(evaluateCss(opts['css.lan66-sidebar-bottom'], VP_H, 1.5));
 		syncSidebarScale(el); positionEl(el); updatePanel(); return;
 	}
 	if (type === 'radar-size') {

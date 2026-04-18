@@ -38,6 +38,7 @@ export const registerGsiRoutes = (router, websocket) => {
 		const body = context.request.body || {}
 		const authToken = body.auth?.token
 		lastGsiMeta.requestCount++
+		console.log(`[GSI] Request received from ${userAgent} (Token: ${authToken})`);
 		lastGsiMeta.lastUserAgent = userAgent || null
 
 		if (gsiToken && authToken !== gsiToken) {

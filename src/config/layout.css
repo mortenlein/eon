@@ -28,6 +28,42 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 
 /* ── Editor layout ── */
 #editor { display: flex; flex-direction: column; height: calc(100% - 48px - 28px); position: relative; }
+/* ── Responsive Mobile ── */
+@media (max-width: 900px) {
+	#toolbar { height: auto; flex-wrap: wrap; padding: 8px; gap: 8px; }
+	#toolbar h1 { width: 100%; order: -1; font-size: 13px; margin: 0; }
+	#back-link { font-size: 12px; padding: 4px 8px; }
+	.toolbar-actions { width: 100%; justify-content: space-between; gap: 4px; }
+	.toolbar-actions button { flex: 1; padding: 6px 4px; font-size: 10px; }
+	#save-status { position: absolute; top: 8px; right: 16px; font-size: 10px; }
+
+	#editor { height: calc(100% - 88px - 24px); }
+	#editor-content { flex-direction: column; }
+
+	#sub-nav { padding: 8px; overflow-x: auto; white-space: nowrap; }
+	.nav-tab { padding: 6px 10px; font-size: 10px; }
+
+	#viewport-wrap { padding: 8px; }
+
+	#panel {
+		position: absolute; inset: 0;
+		width: 100%; height: 100%;
+		z-index: 100;
+		background: var(--bg);
+		transform: translateX(100%);
+		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		border-left: none;
+	}
+	#editor.--panel-open #panel { transform: translateX(0); }
+
+	#btn-toggle-panel { display: block !important; background: var(--accent-soft); border-color: var(--accent); }
+	
+	#statusbar { height: 24px; padding: 0 8px; font-size: 10px; }
+}
+
+@media (min-width: 901px) {
+	#btn-toggle-panel { display: none; }
+}
 
 #editor-content {
 	flex: 1; display: flex; flex-direction: row; overflow: hidden;

@@ -70,8 +70,13 @@ export const parseTeams = () => {
 	const leftName = options['teams.leftTeamName']?.trim()
 	const rightName = options['teams.rightTeamName']?.trim()
 
+	console.log('[Teams] Overrides:', { leftName, rightName });
+	console.log('[Teams] Before Overrides:', sorted.map(t => t.name));
+
 	if (leftName && sorted[0]) sorted[0].name = leftName
 	if (rightName && sorted[1]) sorted[1].name = rightName
+
+	console.log('[Teams] After Overrides:', sorted.map(t => t.name));
 
 	return sorted
 }

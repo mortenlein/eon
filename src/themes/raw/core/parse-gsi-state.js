@@ -13,7 +13,10 @@ export const parseGsiState = () => {
 
 	players.splice(0, players.length, ...parsePlayers())
 	players.focused = gsiState.player?.steamid ? players.find((player) => player.steam64Id === gsiState.player.steamid) : undefined
-	teams.splice(0, teams.length, ...parseTeams()) // this depends on players already being updated
+	
+	const parsedTeams = parseTeams()
+	teams.splice(0, teams.length, ...parsedTeams) // this depends on players already being updated
+	
 	rounds.splice(0, rounds.length, ...parseRounds()) // this depends on teams already being updated
 	grenades.splice(0, grenades.length, ...parseGrenades())
 
@@ -21,4 +24,8 @@ export const parseGsiState = () => {
 	Object.assign(misc, parseMisc())
 	Object.assign(map, parseMap())
 	Object.assign(round, parseRound())
+
+	// Propagate parsed teams to map object for themes that expect it there
+	map.team_t = parsedTeams.find(t => t.side === 2)
+	map.team_ct = parsedTeams.find(t => t.side === 3)
 }
