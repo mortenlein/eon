@@ -19,6 +19,14 @@
 	white-space: nowrap;
 }
 
+.name .real-name {
+	display: inline;
+	margin-left: 0.3rem;
+	color: var(--white-50);
+	font-size: 0.8em;
+	font-weight: 500;
+}
+
 .name .primary {
 	font-weight: 700;
 	line-height: 1.05;

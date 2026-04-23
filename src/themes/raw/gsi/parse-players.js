@@ -78,7 +78,9 @@ export const parsePlayers = () => {
 	for (const [steam64Id, player] of playerEntries) {
 		if (hiddenPlayerSteam64Ids.has(steam64Id)) continue
 
-		const name = playerNameOverrides.get(steam64Id) || player.name
+		const realName = player.name
+		const overriddenName = playerNameOverrides.get(steam64Id)
+		const name = overriddenName || realName
 		const subtitle = playerSubtitleOverrides.get(steam64Id) || ''
 		if (hiddenPlayerNames.has(name)) continue
 		if (hideCoachesByName && /\bcoach\b/i.test(name)) continue
@@ -127,6 +129,8 @@ export const parsePlayers = () => {
 			observerSlot: observerSlot ?? 0,
 			primary,
 			secondary,
+			overriddenName,
+			realName,
 			steam64Id,
 			taser,
 			weapons,

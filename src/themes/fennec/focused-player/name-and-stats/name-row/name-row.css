@@ -22,6 +22,14 @@
 	white-space: nowrap;
 }
 
+.name-row .real-name {
+	display: inline;
+	margin-left: 0.6rem;
+	color: var(--white-60);
+	font-size: 1.4rem;
+	font-weight: 500;
+}
+
 .name-row .primary {
 	font-size: 2.5rem;
 	font-weight: 700;

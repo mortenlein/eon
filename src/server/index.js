@@ -1,4 +1,5 @@
 import http from 'http'
+import os from 'os'
 import { parse } from 'url'
 import { join, basename, extname } from 'path'
 
@@ -25,7 +26,7 @@ const run = async () => {
 	await initSettings()
 	const { settings } = await getSettings()
 
-	const host = process.env.HOST || settings.host || '127.0.0.1'
+	const host = process.env.HOST || settings.host || '0.0.0.0'
 	const port = process.env.PORT || settings.port || 31982
 
 	const app = new Koa()
@@ -106,7 +107,26 @@ const run = async () => {
 	})
 
 	server.listen(port, host)
-	console.info(`cs-hud active at http://${host}:${port}. Press Ctrl+C to quit.`)
+	
+	const interfaces = os.networkInterfaces()
+	const addresses = []
+	for (const k in interfaces) {
+		for (const k2 in interfaces[k]) {
+			const address = interfaces[k][k2]
+			if (address.family === 'IPv4' && !address.internal) {
+				addresses.push(address.address)
+			}
+		}
+	}
+
+	console.info(`\n[Server] cs-hud active at:`)
+	console.info(` > Local:    http://localhost:${port}`)
+	addresses.forEach(addr => console.info(` > Network:  http://${addr}:${port}`))
+	if (host === '0.0.0.0') {
+		console.info(`\n[Server] Bound to all interfaces (0.0.0.0)`)
+	} else {
+		console.info(`\n[Server] Bound to host: ${host}`)
+	}
 }
 
 run().then(() => {}).catch(console.error)
