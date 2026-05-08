@@ -4,6 +4,7 @@ import * as Vue from '/dependencies/vue.js'
 export const sfcLoaderOptions = {
 	moduleCache: {
 		vue: Vue,
+		'/dependencies/vue.js': Vue,
 	},
 
 	getFile: async (url) => {

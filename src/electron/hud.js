@@ -22,6 +22,9 @@ app.on('ready', () => {
 		height,
 		webPreferences: {
 			backgroundThrottling: false,
+			contextIsolation: true,
+			nodeIntegration: false,
+			sandbox: true,
 		},
 	})
 

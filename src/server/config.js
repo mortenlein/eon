@@ -20,7 +20,7 @@ export const registerConfigRoutes = (router, websocket) => {
 
 		context.body = [
 			{
-				fallback: 'fennec',
+				fallback: 'default',
 				key: 'theme',
 				section: 'Theme',
 				type: 'string',
@@ -65,8 +65,8 @@ export const registerConfigRoutes = (router, websocket) => {
 
 		for (const [key, value] of Object.entries(incoming)) {
 			if (key === 'theme') {
-				wasThemeChanged = settings.parent !== (value || 'fennec')
-				settings.parent = (value || 'fennec')
+				wasThemeChanged = settings.parent !== (value || 'default')
+				settings.parent = (value || 'default')
 			} else if (value != null) { // this SHOULD be a double-equal instead of triple-equal (similar to lodash's isNil)
 				if (! settings.options[key]) settings.options[key] = {}
 				settings.options[key].value = value

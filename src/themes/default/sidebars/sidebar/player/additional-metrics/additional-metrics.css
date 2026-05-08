@@ -1,0 +1,53 @@
+.additional-stats {
+	grid-area: additional-stats;
+	width: var(--sidebar-player-additional-stats-width);
+	height: 100%;
+	overflow: visible; /* Allowing the inner box to be fully visible */
+	pointer-events: none;
+	position: relative;
+	z-index: 10;
+}
+
+/* 
+   Ghosting Logic: 
+   On the right, we shift the stats box 14rem to the left of its 0-width anchor.
+   On the left, it naturally sits to the right of the roster.
+*/
+.additional-stats.--right {
+	margin-left: calc(-1 * var(--sidebar-player-additional-stats-width));
+}
+
+.additional-stats-inner {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr 1.3fr;
+	grid-gap: 0 0.4rem;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	padding: 0 0.5rem;
+	background: var(--black-75);
+	box-shadow: 0 0.5rem 1.0rem rgba(0, 0, 0, 0.4);
+	border-radius: 0.1rem;
+}
+
+.additional-stats .stat {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.additional-stats .label {
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: var(--white-40);
+	text-transform: uppercase;
+}
+
+.additional-stats .value {
+	font-size: 1.35rem;
+	font-weight: 700;
+	color: var(--white-90);
+}
+
+

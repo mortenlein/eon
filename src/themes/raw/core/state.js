@@ -1,4 +1,4 @@
-import { reactive } from '/dependencies/vue.js'
+import { reactive, shallowReactive } from '/dependencies/vue.js'
 
 export const additionalState = reactive({})
 export const bombsites = reactive({})

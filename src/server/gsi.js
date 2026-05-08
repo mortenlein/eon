@@ -1,5 +1,8 @@
+import fs from 'fs'
+import path from 'path'
 import { additionalState, gsiState } from './state.js'
 import { logRound } from './helpers/logger.js'
+import { isUiDevMode } from './dev-mode.js'
 
 const gsiToken = process.env.GSI_TOKEN || '7ATvXUzTfBYyMLrA'
 let lastGsiMeta = {
@@ -38,8 +41,12 @@ export const registerGsiRoutes = (router, websocket) => {
 		const body = context.request.body || {}
 		const authToken = body.auth?.token
 		lastGsiMeta.requestCount++
-		console.log(`[GSI] Request received from ${userAgent} (Token: ${authToken})`);
 		lastGsiMeta.lastUserAgent = userAgent || null
+
+		if (isUiDevMode) {
+			lastGsiMeta.lastError = 'ui_dev_mode_ignored'
+			return context.status = 204
+		}
 
 		if (gsiToken && authToken !== gsiToken) {
 			lastGsiMeta.authFailedAtUnixTimestamp = Date.now()
@@ -50,9 +57,20 @@ export const registerGsiRoutes = (router, websocket) => {
 		const wasRoundFreezetime = gsiState.round?.phase === 'freezetime'
 		const wasRoundLive = gsiState.round?.phase === 'live'
 		const wasRoundOver = gsiState.round?.phase === 'over' || gsiState.round?.phase === 'timeout'
+		
+		const wasBombPlanted = gsiState.bomb?.state === 'planted'
 
 		updateGsiState(body)
-		updateAdditionalState(body)
+		
+		const { mapChanged } = updateLastKnownMapName(body)
+		updateLastKnownBombPlantedCountdown(body)
+
+		// Caster Alerts
+		if (body.bomb?.state === 'planted' && !wasBombPlanted) {
+			websocket.broadcastToWebsockets('CASTER_ALERT', { message: 'Bomb Planted', type: 'warning' })
+		} else if (body.bomb?.state === 'defused' && gsiState.bomb?.state !== 'defused') {
+			websocket.broadcastToWebsockets('CASTER_ALERT', { message: 'Bomb Defused', type: 'success' })
+		}
 
 		// Clutch Logic: Initialize on round start
 		if (gsiState.round?.phase === 'live' && !wasRoundLive) {
@@ -62,13 +80,10 @@ export const registerGsiRoutes = (router, websocket) => {
 			additionalState.roundKillStats = {}
 		}
 
-		// Update Probability during Live/Planted phase
-		if (gsiState.round?.phase === 'live' || gsiState.map?.phase === 'live' || gsiState.bomb?.state === 'planted') {
-			calculateWinProbability(body)
-		}
+		// Combined Player Processing pass
+		processAllPlayers(body, mapChanged)
 
 		if (!wasRoundFreezetime && gsiState.round?.phase === 'freezetime') {
-			updateMoneyAtStartOfRound(body)
 			broadcastMvp(websocket)
 		}
 
@@ -98,6 +113,7 @@ export const registerGsiRoutes = (router, websocket) => {
 	router.post('/api/gsi/status', (context) => {
 		context.body = {
 			gsiTokenConfigured: !!gsiToken,
+			uiDevMode: isUiDevMode,
 			lastGsiMeta,
 			hasMapState: !!gsiState.map,
 			hasPlayerState: !!gsiState.player,
@@ -137,25 +153,9 @@ const updateGsiState = (body) => {
 	}
 }
 
-const updateAdditionalState = (body) => {
-	const { mapChanged } = updateLastKnownMapName(body)
-
-	updateLastKnownBombPlantedCountdown(body)
-	updateLastKnownPlayerObserverSlot(body)
-
-	// clear some data on map change instead of updating
-	if (mapChanged || body?.player?.activity === 'menu') {
-		additionalState.roundDamages = {}
-	} else {
-		updateRoundDamages(body, mapChanged)
-	}
-}
-
 const updateLastKnownMapName = (body) => {
 	const previousMapName = additionalState.lastKnownMapName
-
 	additionalState.lastKnownMapName = body.map?.name
-
 	return {
 		mapChanged: additionalState.lastKnownMapName !== previousMapName,
 	}
@@ -176,81 +176,93 @@ const updateLastKnownBombPlantedCountdown = (body) => {
 	}
 }
 
-const updateLastKnownPlayerObserverSlot = (body) => {
+const processAllPlayers = (body, mapChanged) => {
 	if (! body.allplayers) return
 
-	for (const [steam64Id, player] of Object.entries(body.allplayers)) {
-		if (player.observer_slot === null || player.observer_slot === undefined) continue
-		additionalState.lastKnownPlayerObserverSlot[steam64Id] = player.observer_slot
-	}
-}
-
-const updateMoneyAtStartOfRound = (body) => {
-	additionalState.moneyAtStartOfRound = {}
-
-	for (const [steam64Id, player] of Object.entries(body.allplayers || {})) {
-		additionalState.moneyAtStartOfRound[steam64Id] = player.state.money
-	}
-}
-
-const updateRoundDamages = (body, mapChanged) => {
+	const isFreezetime = body.round?.phase === 'freezetime'
+	const isLive = body.round?.phase === 'live' || body.map?.phase === 'live' || body.bomb?.state === 'planted'
 	const roundNumber = body.map?.round + 1 - Number(body.phase_countdowns?.phase === 'over')
-	if (! roundNumber) return
 
-	for (const [steam64Id, player] of Object.entries(body.allplayers || {})) {
-		if (! additionalState.roundDamages[steam64Id]) {
-			additionalState.roundDamages[steam64Id] = {}
-		}
-
-		// CS2 (CS:GO maybe too) sometimes overwrites round_totaldmg with a zero once the player dies; work around that by ignoring zero if we already have a value set
-		if (
-			player.state.round_totaldmg !== 0
-			|| ! additionalState.roundDamages[steam64Id].hasOwnProperty(roundNumber)
-		) {
-			additionalState.roundDamages[steam64Id][roundNumber] = player.state.round_totaldmg
-		}
+	// 1. Reset round damages on map change or menu
+	if (mapChanged || body?.player?.activity === 'menu') {
+		additionalState.roundDamages = {}
 	}
-}
 
-const calculateWinProbability = (body) => {
-	if (!body.allplayers) return
+	if (isFreezetime) {
+		additionalState.moneyAtStartOfRound = {}
+	}
 
 	let ctPlayers = 0, tPlayers = 0
 	let ctHp = 0, tHp = 0
 
-	for (const player of Object.values(body.allplayers)) {
-		if (player.state.health <= 0) continue
-		if (player.team === 'CT') {
-			ctPlayers++
-			ctHp += player.state.health
-		} else {
-			tPlayers++
-			tHp += player.state.health
+	for (const [steam64Id, player] of Object.entries(body.allplayers)) {
+		// A. Observer Slot
+		if (player.observer_slot !== null && player.observer_slot !== undefined) {
+			additionalState.lastKnownPlayerObserverSlot[steam64Id] = player.observer_slot
+		}
+
+		// B. Money at start
+		if (isFreezetime) {
+			additionalState.moneyAtStartOfRound[steam64Id] = player.state.money
+		}
+
+		// C. Round Damages
+		if (roundNumber) {
+			if (! additionalState.roundDamages[steam64Id]) {
+				additionalState.roundDamages[steam64Id] = {}
+			}
+			if (player.state.round_totaldmg !== 0 || ! additionalState.roundDamages[steam64Id].hasOwnProperty(roundNumber)) {
+				additionalState.roundDamages[steam64Id][roundNumber] = player.state.round_totaldmg
+			}
+		}
+
+		// D. Win Prob Accumulators
+		if (isLive && player.state.health > 0) {
+			if (player.team === 'CT') {
+				ctPlayers++
+				ctHp += player.state.health
+			} else {
+				tPlayers++
+				tHp += player.state.health
+			}
 		}
 	}
 
-	if (ctPlayers + tPlayers === 0) return
+	// 2. Finalize Win Probability
+	if (isLive && (ctPlayers + tPlayers > 0)) {
+		const totalPlayers = ctPlayers + tPlayers
+		const playerWeight = ctPlayers / totalPlayers
+		const hpRatio = (ctHp + tHp) > 0 ? ctHp / (ctHp + tHp) : 0.5
+		let prob = (playerWeight * 0.5) + (hpRatio * 0.5)
 
-	// Base prob from player count and HP
-	const totalPlayers = ctPlayers + tPlayers
-	const playerWeight = ctPlayers / totalPlayers
-	const hpRatio = (ctHp + tHp) > 0 ? ctHp / (ctHp + tHp) : 0.5
-	let prob = (playerWeight * 0.5) + (hpRatio * 0.5)
+		if (body.bomb?.state === 'planted') {
+			const countdown = body.bomb.countdown || 40
+			const bombFactor = Math.pow(countdown / 40, 2)
+			prob = prob * bombFactor
+		}
 
-	// Bomb logic: If planted, probability for CT decays
-	if (body.bomb?.state === 'planted') {
-		const countdown = body.bomb.countdown || 40
-		const bombFactor = Math.pow(countdown / 40, 2)
-		prob = prob * bombFactor
+		additionalState.currentRoundProb = prob
+		const lastProb = additionalState.probHistory[additionalState.probHistory.length - 1]
+		if (lastProb === undefined || Math.abs(prob - lastProb) > 0.01) {
+			additionalState.probHistory.push(prob)
+		}
 	}
+}
 
-	additionalState.currentRoundProb = prob
-	
-	// Only record significant changes (>1%) to save memory and bandwidth
-	const lastProb = additionalState.probHistory[additionalState.probHistory.length - 1]
-	if (lastProb === undefined || Math.abs(prob - lastProb) > 0.01) {
-		additionalState.probHistory.push(prob)
-	}
+const HIGHLIGHT_LOG_DIR = path.join(process.cwd(), 'logs')
+const HIGHLIGHT_LOG_PATH = path.join(HIGHLIGHT_LOG_DIR, 'highlights.txt')
+
+// Ensure directory exists
+if (!fs.existsSync(HIGHLIGHT_LOG_DIR)) {
+	fs.mkdirSync(HIGHLIGHT_LOG_DIR, { recursive: true })
+}
+
+// Helper to log highlights locally
+const logHighlight = (roundNum, clutchMetric, mvpName) => {
+	const logLine = `[${new Date().toISOString()}] Round ${roundNum} | Huge Swing: ${clutchMetric} | Clutch King: ${mvpName}\n`
+	fs.appendFile(HIGHLIGHT_LOG_PATH, logLine, (err) => {
+		if (err) console.error('Failed to write highlight log', err)
+	})
 }
 
 const handleRoundEnd = (body) => {
@@ -268,12 +280,19 @@ const handleRoundEnd = (body) => {
 		additionalState.maxProbSwing = highestProb - finalProb
 	}
 
+	const mvpName = body.player?.name || 'Unknown'
+	const clutchMetric = (additionalState.maxProbSwing * 100).toFixed(1) + '%'
+
+	if (additionalState.maxProbSwing > 0.6) {
+		logHighlight(roundNum, clutchMetric, mvpName)
+	}
+
 	// Logging
 	logRound({
 		round_num: roundNum,
 		winner,
-		mvp_player_name: body.player?.name || 'Unknown',
-		clutch_metric: (additionalState.maxProbSwing * 100).toFixed(1) + '%',
+		mvp_player_name: mvpName,
+		clutch_metric: clutchMetric,
 		final_stats: body.allplayers || {}
 	})
 }

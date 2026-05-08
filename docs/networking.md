@@ -21,7 +21,7 @@ You can set a `host` and `port` key in a `theme.json`, either in your `userspace
 For example:
 ```json
 {
-	"parent": "fennec",
+	"parent": "default",
 	"host": "0.0.0.0",
 	"port": 3000
 }

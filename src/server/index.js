@@ -18,6 +18,7 @@ import { registerVersionRoutes } from './version.js'
 import { Websocket } from './websocket.js'
 import send from 'koa-send'
 import { builtinRootDirectory } from './helpers/paths.js'
+import { isUiDevMode } from './dev-mode.js'
 
 Error.stackTraceLimit = 64
 
@@ -78,8 +79,9 @@ const run = async () => {
 				await send(context, file, { root })
 				if (context.body) {
 					context.status = 200
-					if (file.endsWith('.js')) context.type = 'application/javascript'
-					if (file.endsWith('.css')) context.type = 'text/css'
+					if (file.endsWith('.vue')) context.type = 'text/plain'
+					else if (file.endsWith('.js')) context.type = 'application/javascript'
+					else if (file.endsWith('.css')) context.type = 'text/css'
 				}
 			} 
 			else if (urlPath.startsWith('/radar/')) {
@@ -107,6 +109,9 @@ const run = async () => {
 
 	server.listen(port, host)
 	console.info(`cs-hud active at http://${host}:${port}. Press Ctrl+C to quit.`)
+	if (isUiDevMode) {
+		console.info('UI dev mode enabled: serving static match state and ignoring live GSI posts.')
+	}
 }
 
 run().then(() => {}).catch(console.error)

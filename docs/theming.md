@@ -1,7 +1,7 @@
 # Theming
 
 ## Style Overrides
-If you're using the default theme `fennec`, the most common styling changes (CT and T colors, font) can be applied using Style Overrides.
+If you're using the default theme `default`, the most common styling changes (CT and T colors, font) can be applied using Style Overrides.
 Open the HUD config page at http://localhost:31982/config and scroll down to `Style Overrides`:
 
 ### CT/T colors
@@ -25,7 +25,7 @@ Note that changes to the scale factor are only applied after refreshing the HUD.
 Anything you can't achieve with Style Overrides, you can by using a theme.
 Themes can append to, and override any file in their parent theme, and can add additional files.
 
-Have a look at the `src/themes/fennec` directory; you can append to and override every file in there.
+Have a look at the `src/themes/default` directory; you can append to and override every file in there.
 
 To create a theme, find the themes directory:
 If you're using a pre-packaged executable for running the HUD, it'll be a `cs-hud` directory in the same folder as the `cs-hud-win.exe`/`cs-hud-linux`.
@@ -35,10 +35,10 @@ Create a new folder in the themes directory; the name of that directory will be 
 Inside your newly created folder, create a file called `theme.json` with the following contents:
 ```json
 {
-	"parent": "fennec"
+	"parent": "default"
 }
 ```
-This will tell the HUD that your theme extends the base theme, `fennec`.
+This will tell the HUD that your theme extends the base theme, `default`.
 
 Switch to your theme by opening the HUD config page at http://localhost:31982/config, and type in your theme's name in the `theme` text box near the top, then press `Save`.
 
@@ -51,7 +51,7 @@ In a browser, just press `Ctrl`+`R`/`F5`/the refresh button; if you're using the
 ### Creating a theme (mostly) from scratch
 If you want your instance of the HUD to be very different visually from the default theme, you can use `raw` as a parent instead.
 This is a lot of work and usually **not recommended.**
-Consider using `fennec` as your parent theme instead.
+Consider using `default` as your parent theme instead.
 
 `raw` provides communications with the server side, a couple helper functions, and an entry point for your own theme.
 To use `raw` as a parent, set the value of `parent` in your `theme.json` to `raw`.
@@ -88,13 +88,13 @@ See [src/themes/raw/index.html](src/themes/raw/index.html) for inspiration.
 
 ## Appending to Files
 You can append to your parent theme's files by adding `.append` to the file name, just before the file extension.
-For example, to override `src/themes/fennec/players-alive/players-alive.css`, create `my-theme/players-alive/players-alive.append.css`.
+For example, to override `src/themes/default/players-alive/players-alive.css`, create `my-theme/players-alive/players-alive.append.css`.
 Note that this will just concatenate both files without any merging logic.
 This can be useful for CSS, where you can just override things by creating a new selector.
 
 For example, if your parent theme defined this CSS for the "Players Alive" component (which shows the number of players alive per team):
 ```css
-/* src/themes/fennec/players-alive/players-alive.css */
+/* src/themes/default/players-alive/players-alive.css */
 .team.--ct {
 	background: lightblue;
 	color: black;
@@ -143,10 +143,10 @@ For example, this could would reset the text color value of `.team.--ct` to the 
 ```
 
 ### Overriding CSS variables
-The default theme `fennec` uses CSS variables for most colors and many other values.
-These variables are defined in `src/themes/fennec/css/vars`, and you can override them by appending to those files.
+The default theme `default` uses CSS variables for most colors and many other values.
+These variables are defined in `src/themes/default/css/vars`, and you can override them by appending to those files.
 
-For example, the color of money in the sidebars is defined by the CSS variable `--sidebar-player-money-text`, found in `src/themes/fennec/css/vars/colors.css`.
+For example, the color of money in the sidebars is defined by the CSS variable `--sidebar-player-money-text`, found in `src/themes/default/css/vars/colors.css`.
 To override this, create `my-theme/css/vars/colors.append.css` with the following contents:
 ```css
 /* my-theme/css/vars/colors.append.css */
@@ -164,10 +164,10 @@ If you're using it in OBS or otherwise can't directly interact with the HUD page
 
 ## Overriding Files
 You can also completely replace a file by creating a file of the same name in your theme.
-For example, to override `src/themes/fennec/players-alive/players-alive.html`, create `my-theme/players-alive/players-alive.html`.
+For example, to override `src/themes/default/players-alive/players-alive.html`, create `my-theme/players-alive/players-alive.html`.
 You'll need to do this if you want to make changes to an HTML or JS file.
 
-For example, to replace the letter `K` that prefixes the kill count in the sidebar with an icon, create `my-theme/sidebars/sidebar/player/kills/kills.html`, and copy in the contents of the original [src/themes/fennec/sidebars/sidebar/player/kills/kills.html](src/themes/fennec/sidebars/sidebar/player/kills/kills.html).
+For example, to replace the letter `K` that prefixes the kill count in the sidebar with an icon, create `my-theme/sidebars/sidebar/player/kills/kills.html`, and copy in the contents of the original [src/themes/default/sidebars/sidebar/player/kills/kills.html](src/themes/default/sidebars/sidebar/player/kills/kills.html).
 
 Replace the line `<div :class="['label', colorClass]">K</div>` with the following:
 ```xml
@@ -190,8 +190,8 @@ To import a file from the parent theme (or any other available theme, for that m
 
 For example, if you want everyone to always have 100 kills, create `my-theme/focused-player/name-and-stats/data-row/stats/stat/stat.js`, with these contents:
 ```js
-// this line will import `stat.js` from fennec, and make it available as `Stat` in this JS module
-import Stat from '/hud/focused-player/name-and-stats/data-row/stats/stat/stat.js?theme=fennec'
+// this line will import `stat.js` from default, and make it available as `Stat` in this JS module
+import Stat from '/hud/focused-player/name-and-stats/data-row/stats/stat/stat.js?theme=default'
 
 // we need to export a Vue component, just like the parent theme does
 export default {

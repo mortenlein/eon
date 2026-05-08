@@ -7,6 +7,8 @@
   "scripts": {
     "start": "node .",
     "dev": "nodemon .",
+    "start:ui-dev": "node . --ui-dev-mode",
+    "dev:ui": "nodemon . --ui-dev-mode",
     "overlay": "electron src/electron/hud.js",
     "config": "electron src/electron/config.js",
     "radar": "electron src/electron/radar.js",

@@ -12,7 +12,7 @@ export const initSettings = async () => {
 	await mkdir(userspaceDirectory, { recursive: true })
 
 	await writeJson(userspaceSettingsPath, {
-		parent: 'fennec',
+		parent: 'default',
 	})
 }
 
@@ -27,16 +27,20 @@ export const getSettings = async () => {
 		const parent = settingsObjects[settingsObjects.length - 1].parent
 		themeTree.push(parent)
 
+		let themeData
 		if (await fileExists(`${customThemesDirectory}/${parent}/theme.json`)) {
-			settingsObjects.push(
-				await readJson(`${customThemesDirectory}/${parent}/theme.json`),
-			)
+			themeData = await readJson(`${customThemesDirectory}/${parent}/theme.json`)
 		} else if (await fileExists(`${builtinThemesDirectory}/${parent}/theme.json`)) {
-			settingsObjects.push(
-				await readJson(`${builtinThemesDirectory}/${parent}/theme.json`),
-			)
+			themeData = await readJson(`${builtinThemesDirectory}/${parent}/theme.json`)
 		} else {
 			throw new Error(`Theme "${parent}" not found. Please change the "theme" value in cs-hud/userspace/theme.json.`)
+		}
+
+		if (themeData && typeof themeData === 'object') {
+			if (!themeData.name && !themeData.parent) {
+				console.warn(`Warning: Theme "${parent}" missing valid schema properties (name/parent).`)
+			}
+			settingsObjects.push(themeData)
 		}
 
 		if (await fileExists(`${customThemesDirectory}/${parent}/bombsites.json`)) {

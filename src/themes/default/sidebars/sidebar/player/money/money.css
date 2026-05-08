@@ -1,0 +1,15 @@
+.money {
+	grid-area: money;
+
+	padding: 0.5rem 0.55rem;
+	align-self: center;
+	font-size: 1.5rem;
+	color: var(--sidebar-player-money-text);
+	font-weight: 800;
+}
+
+.money.--right {
+	text-align: right;
+}
+
+

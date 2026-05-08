@@ -23,6 +23,7 @@ Useful scripts:
 
 ```powershell
 npm start
+npm run start:ui-dev
 npm run overlay
 npm run config
 npm run radar
@@ -62,7 +63,7 @@ The server accepts GSI on:
 
 - Default theme settings live in `src/themes`
 - Local operator overrides live in `src/themes/userspace`
-- The active LAN theme in this fork is `lan66nord`
+- The active HUD theme is `default`
 
 ## Environment
 
@@ -71,6 +72,14 @@ The server and Electron launchers support standard runtime environment variables
 - `HOST`
 - `PORT`
 - `GSI_TOKEN`
+
+## UI Dev Mode
+
+Run `npm run start:ui-dev` to serve a static in-round match state without CS2.
+The HUD, radar, and config UI still use the normal websocket and parser path, but
+live GSI posts are ignored so the layout stays stable while you work.
+
+You can also enable it with `node . --ui-dev-mode` or `EON_UI_DEV_MODE=1`.
 
 ## Repo Bootstrap
 

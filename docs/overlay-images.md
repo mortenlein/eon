@@ -24,7 +24,7 @@ Default width at 1920x1080px viewport size: 467px
 This overlay will be placed at the bottom center, just below the focused player.
 It will not be visible during freezetimes.
 
-In the default theme `fennec`, the solid-colored angled bars on the left and right sides of the focused player are at 20 degree angles.
+In the default theme `default`, the solid-colored angled bars on the left and right sides of the focused player are at 20 degree angles.
 
 
 ### Sidebar Left and Right
