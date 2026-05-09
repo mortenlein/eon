@@ -414,6 +414,79 @@
 	background: var(--player-panel-fill);
 }
 
+.hud-viewport.--style-classic .sidebar,
+.hud-viewport.--style-classic .player-wrapper,
+.hud-viewport.--style-compact .sidebar,
+.hud-viewport.--style-compact .player-wrapper {
+	width: var(--sidebar-width);
+	max-width: var(--sidebar-width);
+}
+
+.hud-viewport.--style-classic .player,
+.hud-viewport.--style-compact .player {
+	width: var(--sidebar-player-width);
+}
+
+.hud-viewport.--style-classic .player.--left {
+	grid-template-columns:
+		0.1rem
+		var(--sidebar-health-width)
+		var(--sidebar-observer-slot-width)
+		var(--sidebar-money-width)
+		var(--sidebar-kills-width)
+		var(--sidebar-deaths-width)
+		var(--sidebar-taser-width)
+		var(--sidebar-grenades-half-width)
+		var(--sidebar-round-kills-width)
+		var(--sidebar-primary-and-secondary-width)
+		0.1rem;
+}
+
+.hud-viewport.--style-classic .player.--right {
+	grid-template-columns:
+		0.1rem
+		var(--sidebar-primary-and-secondary-width)
+		var(--sidebar-round-kills-width)
+		var(--sidebar-grenades-half-width)
+		var(--sidebar-taser-width)
+		var(--sidebar-kills-width)
+		var(--sidebar-deaths-width)
+		var(--sidebar-money-width)
+		var(--sidebar-observer-slot-width)
+		var(--sidebar-health-width)
+		0.1rem;
+}
+
+.hud-viewport.--style-compact .player.--left {
+	grid-template-columns:
+		0
+		var(--sidebar-health-width)
+		var(--sidebar-observer-slot-width)
+		var(--sidebar-money-width)
+		var(--sidebar-kills-width)
+		var(--sidebar-deaths-width)
+		var(--sidebar-taser-width)
+		var(--sidebar-grenades-half-width)
+		var(--sidebar-round-kills-width)
+		var(--sidebar-primary-and-secondary-width)
+		0;
+}
+
+.hud-viewport.--style-compact .player.--right {
+	grid-template-columns:
+		0
+		var(--sidebar-primary-and-secondary-width)
+		var(--sidebar-round-kills-width)
+		var(--sidebar-grenades-half-width)
+		var(--sidebar-taser-width)
+		var(--sidebar-kills-width)
+		var(--sidebar-deaths-width)
+		var(--sidebar-money-width)
+		var(--sidebar-observer-slot-width)
+		var(--sidebar-health-width)
+		0;
+}
+
 .hud-viewport.--style-classic .current-round,
 .hud-viewport.--style-compact .current-round {
 	box-shadow:
@@ -430,22 +503,12 @@
 	backdrop-filter: blur(0.18rem);
 }
 
-.hud-viewport.--style-compact .sidebar,
-.hud-viewport.--style-compact .player-wrapper {
-	width: var(--sidebar-width);
-	max-width: var(--sidebar-width);
-}
-
 .hud-viewport.--style-compact .sidebar.--left {
 	left: 0;
 }
 
 .hud-viewport.--style-compact .sidebar.--right {
 	right: 0;
-}
-
-.hud-viewport.--style-compact .player {
-	width: var(--sidebar-player-width);
 }
 
 .hud-viewport.--style-compact .score .inner,
