@@ -12,6 +12,7 @@ import { registerConfigRoutes } from './config.js'
 import { registerDependencyRoutes } from './dependencies.js'
 import { registerGsiRoutes } from './gsi.js'
 import { registerHudRoutes, concatStaticFileFromThemeTreeRecursively } from './hud.js'
+import { registerKomplettligaenRoutes } from './komplettligaen.js'
 import { registerLicensesRoutes } from './licenses.js'
 import { registerRadarRoutes } from './radar.js'
 import { registerVersionRoutes } from './version.js'
@@ -60,6 +61,7 @@ const run = async () => {
 	registerDependencyRoutes(router)
 	registerGsiRoutes(router, websocket)
 	registerHudRoutes(router)
+	registerKomplettligaenRoutes(router, websocket)
 	registerLicensesRoutes(router)
 	registerRadarRoutes(router)
 	registerVersionRoutes(router)

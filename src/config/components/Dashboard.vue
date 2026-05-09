@@ -39,7 +39,7 @@
 			<!-- Quick Actions -->
 			<div class="card">
 				<div class="card-header">
-					<h2>HUD Scenes</h2>
+					<h2>Live Control Scenes</h2>
 				</div>
 				<div class="scene-grid">
 					<button 
@@ -51,6 +51,21 @@
 						{{ s.label }}
 					</button>
 				</div>
+			</div>
+
+			<div class="card">
+				<div class="card-header">
+					<h2>Komplettligaen Match</h2>
+				</div>
+				<div class="override-group">
+					<label>GG Arena Match ID</label>
+					<input v-model="komplettligaen.matchId" class="text-input" placeholder="256437">
+				</div>
+				<div class="button-row" style="margin-top: 12px;">
+					<button class="btn-promo" @click="saveKomplettligaen" :disabled="komplettligaenLoading">Save Match</button>
+					<button class="btn-win --clear" @click="testKomplettligaen" :disabled="komplettligaenLoading || !komplettligaen.matchId">Test</button>
+				</div>
+				<div class="kl-status" :class="{ '--error': komplettligaenError }">{{ komplettligaenStatus }}</div>
 			</div>
 
 			<!-- Manual Overrides -->
@@ -121,13 +136,17 @@ export default {
 			lastX: 0,
 			lastY: 0,
 			colors: ['#ff5a00', '#3498db', '#2ecc71', '#f1c40f', '#ffffff', '#e74c3c', '#9b59b6', '#000000'],
+			komplettligaen: { matchId: '', activeView: 'match' },
+			komplettligaenLoading: false,
+			komplettligaenStatus: '',
+			komplettligaenError: false,
 			scenes: [
 				{ id: 'default', label: 'Live HUD' },
 				{ id: 'radar', label: 'Full Radar' },
-				{ id: 'intro', label: 'Match Intro' },
-				{ id: 'halftime', label: 'Halftime' },
-				{ id: 'fulltime', label: 'Fulltime' },
-				{ id: 'analytics', label: 'Analytics' },
+				{ id: 'intro', label: 'KL Match Overview' },
+				{ id: 'halftime', label: 'KL Waiting' },
+				{ id: 'fulltime', label: 'KL Result' },
+				{ id: 'analytics', label: 'KL Table/Form' },
 			],
 			uiStyleChoices: [
 				{ value: 'slanted', label: 'Default' },
@@ -143,6 +162,50 @@ export default {
 			state.options['match.activeScene'] = id
 			actions.broadcast('match.activeScene', id)
 			actions.save({ 'match.activeScene': id })
+		},
+		async loadKomplettligaen() {
+			try {
+				const res = await fetch('/config/komplettligaen')
+				this.komplettligaen = await res.json()
+			} catch (err) {
+				this.komplettligaenStatus = 'Could not load Komplettligaen config'
+				this.komplettligaenError = true
+			}
+		},
+		async saveKomplettligaen() {
+			this.komplettligaenLoading = true
+			this.komplettligaenError = false
+			this.komplettligaenStatus = 'Saving...'
+			try {
+				const res = await fetch('/config/komplettligaen', {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(this.komplettligaen),
+				})
+				this.komplettligaen = await res.json()
+				this.komplettligaenStatus = 'Saved. HUD scenes will refresh.'
+			} catch (err) {
+				this.komplettligaenStatus = 'Save failed'
+				this.komplettligaenError = true
+			} finally {
+				this.komplettligaenLoading = false
+			}
+		},
+		async testKomplettligaen() {
+			this.komplettligaenLoading = true
+			this.komplettligaenError = false
+			this.komplettligaenStatus = 'Fetching...'
+			try {
+				const res = await fetch(`/api/komplettligaen/preview?matchId=${encodeURIComponent(this.komplettligaen.matchId)}`)
+				const data = await res.json()
+				if (!res.ok || data.error) throw new Error(data.error || 'Fetch failed')
+				this.komplettligaenStatus = `${data.match.home.name} vs ${data.match.away.name}`
+			} catch (err) {
+				this.komplettligaenStatus = err.message || 'Fetch failed'
+				this.komplettligaenError = true
+			} finally {
+				this.komplettligaenLoading = false
+			}
 		},
 		setWinner(id) {
 			state.options['preferences.celebration.forceWinner'] = id
@@ -210,6 +273,7 @@ export default {
 		const rect = canvas.getBoundingClientRect()
 		canvas.width = rect.width
 		canvas.height = rect.height
+		this.loadKomplettligaen()
 	}
 }
 </script>
@@ -309,6 +373,25 @@ canvas {
 	border-radius: 6px;
 	color: #c9d1d9;
 }
+
+.text-input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 10px;
+	background: #0d1117;
+	border: 1px solid #30363d;
+	border-radius: 6px;
+	color: #c9d1d9;
+}
+
+.kl-status {
+	min-height: 20px;
+	margin-top: 10px;
+	color: #8b949e;
+	font-size: 0.9rem;
+}
+
+.kl-status.--error { color: #e74c3c; }
 
 .style-pill-grid {
 	display: grid;

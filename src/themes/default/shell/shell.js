@@ -32,6 +32,64 @@ export default {
 	},
 
 	computed: {
+		komplettligaenView() {
+			const scene = this.$opts?.['match.activeScene']
+			if (scene === 'intro') return 'match'
+			if (scene === 'halftime') return 'waiting'
+			if (scene === 'fulltime' || scene === 'over') return 'result'
+			if (scene === 'analytics') return 'table'
+			return this.komplettligaen?.config?.activeView || 'match'
+		},
+
+		komplettligaenMatch() {
+			return this.komplettligaen?.data?.match
+		},
+
+		komplettligaenTableRows() {
+			return this.komplettligaen?.data?.table?.rows || []
+		},
+
+		komplettligaenTeamGames() {
+			return this.komplettligaen?.data?.teamGames?.teams || []
+		},
+
+		komplettligaenMatchDetail() {
+			const match = this.komplettligaenMatch
+			if (!match) return { label: '', homeScore: '', awayScore: '', hasScore: false }
+
+			if (match.currentMap) {
+				return {
+					label: match.currentMap.name || `Map ${match.currentMap.number || ''}`.trim(),
+					homeScore: match.currentMap.homeScore ?? '-',
+					awayScore: match.currentMap.awayScore ?? '-',
+					hasScore: true,
+				}
+			}
+
+			if (match.matchWinner) {
+				return { label: `${match[match.matchWinner].name} wins`, homeScore: '', awayScore: '', hasScore: false }
+			}
+
+			const startsAt = match.startsAt ? new Date(match.startsAt) : null
+			if (startsAt && !Number.isNaN(startsAt.getTime()) && new Date() < startsAt) {
+				return { label: this.formatKomplettligaenDate(match.startsAt), homeScore: '', awayScore: '', hasScore: false }
+			}
+
+			return { label: '', homeScore: '', awayScore: '', hasScore: false }
+		},
+
+		komplettligaenMatchState() {
+			const match = this.komplettligaenMatch
+			if (!match) return ''
+			if (match.matchWinner) return `${match[match.matchWinner].name} wins`
+			if (match.currentMap) {
+				return `${match.currentMap.name || `Map ${match.currentMap.number || ''}`.trim()} ${match.currentMap.homeScore ?? '-'}-${match.currentMap.awayScore ?? '-'}`
+			}
+			const startsAt = match.startsAt ? new Date(match.startsAt) : null
+			if (startsAt && !Number.isNaN(startsAt.getTime()) && new Date() < startsAt) return this.formatKomplettligaenDate(match.startsAt)
+			return `BO${match.bestOf || 3}`
+		},
+
 		hasObserverData() {
 			return this.$players?.length > 0
 		},
@@ -45,6 +103,12 @@ export default {
 		},
 	},
 
+	data() {
+		return {
+			komplettligaen: null,
+		}
+	},
+
 	mounted() {
 		this.applyCssVariableOverrides()
 		this.applyCustomFontFace()
@@ -52,6 +116,7 @@ export default {
 		this.setMapImageUrl()
 
 		window.addEventListener('resize', this.setScaleFactor)
+		this.loadKomplettligaen()
 	},
 
 	watch: {
@@ -76,6 +141,47 @@ export default {
 	},
 
 	methods: {
+		async loadKomplettligaen() {
+			try {
+				const response = await fetch('/api/komplettligaen')
+				this.komplettligaen = await response.json()
+				this.setMapImageUrl()
+			} catch (err) {
+				this.komplettligaen = null
+			}
+		},
+
+		formatKomplettligaenDate(value) {
+			if (!value) return 'TBD'
+			const date = new Date(value)
+			if (Number.isNaN(date.getTime())) return 'TBD'
+
+			return new Intl.DateTimeFormat('en-GB', {
+				day: '2-digit',
+				month: 'short',
+				hour: '2-digit',
+				minute: '2-digit',
+				hourCycle: 'h23',
+				timeZone: 'Europe/Oslo',
+			}).format(date)
+		},
+
+		isFeaturedKomplettligaenTeam(team) {
+			return team?.name === '6614Gamers'
+		},
+
+		isFeaturedTableRow(row) {
+			const names = [this.komplettligaenMatch?.home?.name, this.komplettligaenMatch?.away?.name].filter(Boolean)
+			return names.includes(row.team) || String(row.team || '').includes('6614Gamers')
+		},
+
+		mapBackgroundStyle(map) {
+			if (!map?.image) return {}
+			return {
+				backgroundImage: `linear-gradient(90deg, rgba(7, 13, 23, 0.82), rgba(7, 13, 23, 0.55)), url("${map.image}")`,
+			}
+		},
+
 		applyCssVariableOverrides() {
 			if (!this.$opts) return
 
@@ -168,6 +274,13 @@ export default {
 		},
 
 		setMapImageUrl() {
+			const komplettligaenMapImage = this.komplettligaenMatch?.currentMap?.image
+				|| this.komplettligaenMatch?.maps?.find?.((map) => map.image)?.image
+			if (komplettligaenMapImage && !this.$map?.sanitizedName) {
+				document.documentElement.style.setProperty('--map-image-url', `url("${komplettligaenMapImage}")`)
+				return
+			}
+
 			if (!this.$map?.sanitizedName) return
 			document.documentElement.style.setProperty(
 				'--map-image-url',
