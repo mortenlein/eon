@@ -89,6 +89,26 @@
 	z-index: 2;
 }
 
+.hud-viewport.--style-classic,
+.hud-viewport.--style-compact {
+	--sidebar-player-width: calc(
+		var(--sidebar-start-and-end-width) +
+		var(--sidebar-start-and-end-width) +
+		var(--sidebar-health-width) +
+		var(--sidebar-observer-slot-width) +
+		var(--sidebar-money-width) +
+		var(--sidebar-kills-width) +
+		var(--sidebar-deaths-width) +
+		var(--sidebar-taser-width) +
+		var(--sidebar-grenades-half-width) +
+		var(--sidebar-round-kills-width) +
+		var(--sidebar-primary-and-secondary-width)
+	);
+	--sidebar-width: calc(var(--sidebar-player-width) + var(--sidebar-player-focused-player-highlight-width));
+	--sidebar-team-grenades-width: var(--sidebar-player-width);
+	--sidebar-team-equipment-width: var(--sidebar-player-width);
+}
+
 .player.--left {
 	clip-path: polygon(0.7rem 0, 100% 0, calc(100% - 0.35rem) 100%, 0 100%);
 }
