@@ -125,17 +125,20 @@
 	display: flex;
 	align-items: center;
 	gap: 0.8rem;
+	white-space: nowrap;
 }
 
 .fp-health-value,
 .fp-armor-value {
 	display: flex;
+	flex: 0 0 auto;
 	align-items: center;
 	gap: 0.34rem;
 	color: var(--white);
 	font-size: 1.75rem;
 	font-weight: 800;
 	line-height: 1;
+	white-space: nowrap;
 }
 
 .fp-health-value.--low {
@@ -230,7 +233,7 @@
 }
 
 img.overlay-bottom {
-	grid-area: 2/2;
+	display: block;
 	width: calc(100% - var(--focused-player-overlay-bottom-horizontal-spacing) * 2);
 	margin: 0 var(--focused-player-overlay-bottom-horizontal-spacing);
 }
@@ -301,7 +304,7 @@ img.overlay-bottom {
 }
 
 .hud-viewport.--style-compact .fp-data {
-	grid-template-columns: minmax(6.8rem, 0.9fr) minmax(9rem, 1.1fr);
+	grid-template-columns: minmax(7.8rem, 0.9fr) minmax(8.2rem, 1.1fr);
 	grid-template-areas:
 		'vitals metrics'
 		'utility utility';
@@ -312,6 +315,7 @@ img.overlay-bottom {
 
 .hud-viewport.--style-compact .fp-vitals {
 	grid-area: vitals;
+	gap: 0.42rem;
 }
 
 .hud-viewport.--style-compact .fp-metrics {
@@ -325,7 +329,7 @@ img.overlay-bottom {
 
 .hud-viewport.--style-compact .fp-health-value,
 .hud-viewport.--style-compact .fp-armor-value {
-	font-size: 1.25rem;
+	font-size: 1.12rem;
 }
 
 .hud-viewport.--style-compact .fp-health-value img,
