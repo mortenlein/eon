@@ -263,14 +263,16 @@
 	--top-bar-score-font-size: 2.45rem;
 	--sidebar-player-row-height: 2.65rem;
 	--sidebar-vertical-spacing: 0.28rem;
-	--sidebar-health-width: 4.5rem;
-	--sidebar-money-width: 6.2rem;
+	--sidebar-health-width: 4.8rem;
+	--sidebar-money-width: 6.4rem;
 	--sidebar-start-and-end-width: 0.1rem;
 	--sidebar-observer-slot-width: 1.2rem;
-	--sidebar-kills-width: 3.8rem;
-	--sidebar-taser-width: 2.4rem;
-	--sidebar-grenades-half-width: 3.9rem;
-	--sidebar-primary-and-secondary-width: 4.4rem;
+	--sidebar-kills-width: 3.5rem;
+	--sidebar-deaths-width: 3.5rem;
+	--sidebar-taser-width: 1.15rem;
+	--sidebar-grenades-half-width: 2.4rem;
+	--sidebar-round-kills-width: 1rem;
+	--sidebar-primary-and-secondary-width: 3.05rem;
 	--sidebar-player-width: calc(
 		var(--sidebar-deaths-width) +
 		var(--sidebar-grenades-half-width) +
@@ -283,6 +285,9 @@
 		var(--sidebar-start-and-end-width) * 2 +
 		var(--sidebar-taser-width)
 	);
+	--sidebar-width: calc(var(--sidebar-player-width) + var(--sidebar-player-focused-player-highlight-width));
+	--sidebar-team-grenades-width: var(--sidebar-player-width);
+	--sidebar-team-equipment-width: var(--sidebar-player-width);
 }
 
 .hud-viewport.--style-compact {
@@ -318,14 +323,15 @@
 	--sidebar-player-row-height: 2.35rem;
 	--sidebar-vertical-spacing: 0.18rem;
 	--sidebar-health-width: 4rem;
-	--sidebar-money-width: 5.5rem;
-	--sidebar-kills-width: 3.4rem;
+	--sidebar-money-width: 6.15rem;
+	--sidebar-kills-width: 3.35rem;
+	--sidebar-deaths-width: 3.35rem;
 	--sidebar-start-and-end-width: 0.12rem;
 	--sidebar-observer-slot-width: 1.1rem;
-	--sidebar-taser-width: 1.45rem;
-	--sidebar-grenades-half-width: 2.7rem;
-	--sidebar-round-kills-width: 2.5rem;
-	--sidebar-primary-and-secondary-width: 3.25rem;
+	--sidebar-taser-width: 0.75rem;
+	--sidebar-grenades-half-width: 1.8rem;
+	--sidebar-round-kills-width: 0.7rem;
+	--sidebar-primary-and-secondary-width: 2.55rem;
 	--sidebar-player-focused-player-highlight-width: 0.25rem;
 	--sidebar-player-width: calc(
 		var(--sidebar-deaths-width) +
@@ -339,6 +345,9 @@
 		var(--sidebar-start-and-end-width) * 2 +
 		var(--sidebar-taser-width)
 	);
+	--sidebar-width: calc(var(--sidebar-player-width) + var(--sidebar-player-focused-player-highlight-width));
+	--sidebar-team-grenades-width: var(--sidebar-player-width);
+	--sidebar-team-equipment-width: var(--sidebar-player-width);
 }
 
 .hud-viewport.--style-diagonal {
@@ -394,6 +403,12 @@
 	top: 1.25% !important;
 }
 
+.hud-viewport.--style-rounded .hud-stage .top-bar {
+	width: 54% !important;
+	left: 23% !important;
+	top: 1.2% !important;
+}
+
 .hud-viewport.--style-classic .player,
 .hud-viewport.--style-compact .player {
 	background: var(--player-panel-fill);
@@ -419,6 +434,14 @@
 .hud-viewport.--style-compact .player-wrapper {
 	width: var(--sidebar-width);
 	max-width: var(--sidebar-width);
+}
+
+.hud-viewport.--style-compact .sidebar.--left {
+	left: 0;
+}
+
+.hud-viewport.--style-compact .sidebar.--right {
+	right: 0;
 }
 
 .hud-viewport.--style-compact .player {

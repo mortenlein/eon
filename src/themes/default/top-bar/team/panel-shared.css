@@ -3,6 +3,11 @@
 	grid-template-rows: 1fr;
 
 	overflow: visible clip;
+	border: 0.1rem solid rgba(255, 255, 255, 0.1);
+	background: rgba(var(--black-rgb), 0.54);
+	box-shadow:
+		inset 0 0.08rem 0 rgba(255, 255, 255, 0.07),
+		inset 0 -0.14rem 0 rgba(0, 0, 0, 0.18);
 	transition:
 		max-height var(--fade-default-duration) ease,
 		transform var(--fade-default-duration) ease;
@@ -22,11 +27,11 @@
 }
 
 .top-bar-team-panel-wrapper.--left {
-	grid-template-columns: 2rem 1fr;
+	grid-template-columns: 0.85rem 1fr;
 }
 
 .top-bar-team-panel-wrapper.--right {
-	grid-template-columns: 1fr 2rem;
+	grid-template-columns: 1fr 0.85rem;
 }
 
 .top-bar-team-panel-wrapper.--right::before {
@@ -38,14 +43,17 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding-top: 0.4rem; /* Optical adjustment: push team names down to center them */
-	line-height: 1; /* Enforce tight line-height to prevent text floating within its own box */
+	min-width: 0;
+	padding: 0.18rem 0.8rem 0;
+	line-height: 1;
 }
 
 .top-bar-team-panel {
 	display: flex;
 	height: 100%;
-	background: var(--black-50);
+	background:
+		linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.02) 48%, rgba(0, 0, 0, 0.2)),
+		var(--black-50);
 }
 
 .top-bar-team-panel.--left .inner {
@@ -56,6 +64,36 @@
 .top-bar-team-panel.--right .inner {
 	transform: skewX(var(--skew-20, 20deg));
 	border-radius: var(--ui-radius, 0);
+}
+
+.hud-viewport.--style-classic .top-bar-team-panel-wrapper,
+.hud-viewport.--style-compact .top-bar-team-panel-wrapper {
+	border-color: rgba(255, 255, 255, 0.08);
+}
+
+.hud-viewport.--style-classic .top-bar-team-panel.--left .inner,
+.hud-viewport.--style-classic .top-bar-team-panel.--right .inner,
+.hud-viewport.--style-compact .top-bar-team-panel.--left .inner,
+.hud-viewport.--style-compact .top-bar-team-panel.--right .inner {
+	transform: none;
+}
+
+.hud-viewport.--style-compact .top-bar-team-panel-wrapper {
+	border-width: 0.08rem;
+}
+
+.hud-viewport.--style-compact .top-bar-team-panel-wrapper .inner {
+	padding-left: 0.55rem;
+	padding-right: 0.55rem;
+}
+
+.hud-viewport.--style-diagonal .top-bar-team-panel-wrapper {
+	border-color: rgba(255, 255, 255, 0.16);
+}
+
+.hud-viewport.--style-rounded .top-bar-team-panel-wrapper {
+	border-radius: 0.65rem;
+	overflow: hidden;
 }
 
 .top-bar-team-panel-slide-enter-active .top-bar-team-panel,

@@ -1,8 +1,25 @@
 <div class="top-bar">
 	<SeriesName />
-	<Team :team="$teams[0]" position="left" />
-	<Center />
-	<Team :team="$teams[1]" position="right" />
+
+	<div class="top-bar-card">
+		<div :class="['top-bar-team-name', '--left', teamColorClass($teams[0])]">
+			<span>{{ $teams[0]?.name }}</span>
+		</div>
+		<div :class="['top-bar-score', '--left', teamColorClass($teams[0])]">
+			{{ $teams[0]?.score }}
+		</div>
+		<div class="top-bar-round-stack">
+			<CurrentRound />
+			<MatchPointRounds />
+		</div>
+		<div :class="['top-bar-score', '--right', teamColorClass($teams[1])]">
+			{{ $teams[1]?.score }}
+		</div>
+		<div :class="['top-bar-team-name', '--right', teamColorClass($teams[1])]">
+			<span>{{ $teams[1]?.name }}</span>
+		</div>
+	</div>
+
 </div>
 
 

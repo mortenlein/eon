@@ -37,6 +37,7 @@ const run = async () => {
 	app.use(bodyParser({
 		strict: true,
 		enableTypes: ['json'],
+		jsonLimit: '12mb',
 	}))
 
 	const websocket = new Websocket(server)

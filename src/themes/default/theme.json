@@ -296,10 +296,31 @@
                                              "label":  "T Custom Background (e.g. linear-gradient(90deg, #e1b43b, #b37e00)). Overrides the plain T fill color."
                                          },
                     "css.primary-font-family":  {
-                                                    "type":  "string",
+                                                    "type":  "select",
                                                     "section":  "Style Overrides",
-                                                    "label":  "Font"
+                                                    "label":  "HUD font",
+                                                    "value":  "'Quantico'",
+                                                    "options":  [
+                                                                    {
+                                                                        "value":  "'Quantico'",
+                                                                        "label":  "Quantico"
+                                                                    },
+                                                                    {
+                                                                        "value":  "'Noto Sans'",
+                                                                        "label":  "Noto Sans"
+                                                                    },
+                                                                    {
+                                                                        "value":  "'Arial Narrow'",
+                                                                        "label":  "Arial Narrow"
+                                                                    }
+                                                                ]
                                                 },
+                    "css.custom-font-url":  {
+                                                "type":  "string",
+                                                "section":  "Style Overrides",
+                                                "label":  "Uploaded HUD font URL",
+                                                "value":  ""
+                                            },
                     "series.name.left":  {
                                              "section":  "Event",
                                              "value":  "Selfors / Fossetangen"

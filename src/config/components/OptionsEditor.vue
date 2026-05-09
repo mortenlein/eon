@@ -93,6 +93,24 @@
 							</div>
 						</label>
 
+						<div class="font-card">
+							<div>
+								<strong>HUD font</strong>
+								<small>Choose a bundled font or upload a local broadcast font.</small>
+							</div>
+							<div class="segmented">
+								<button v-for="choice in fontChoices" :key="choice.value" :class="{ '--active': state.options['css.primary-font-family'] === choice.value }" @click="setFontPreset(choice.value)">
+									{{ choice.label }}
+								</button>
+							</div>
+							<div class="image-input-row">
+								<input v-model="state.options['css.primary-font-family']" type="text" placeholder="Custom Font Name" @change="saveOption('css.primary-font-family')">
+								<button class="btn-secondary" @click="triggerUpload('css.custom-font-url')">Upload font</button>
+								<input ref="upload-css.custom-font-url" type="file" accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf" class="hidden-file" @change="onFontSelected">
+							</div>
+							<small v-if="state.options['css.custom-font-url']">Using {{ state.options['css.custom-font-url'] }}</small>
+						</div>
+
 						<label v-for="item in styleTextControls" :key="item.key" class="field-row">
 							<span>{{ item.label }}</span>
 							<input v-model="state.options[item.key]" type="text" :placeholder="item.placeholder" @change="saveOption(item.key)">
@@ -220,7 +238,6 @@ const colorControls = [
 
 const styleTextControls = [
 	{ key: 'css.radar-width', label: 'Radar width', placeholder: '18% or 320px' },
-	{ key: 'css.primary-font-family', label: 'Primary font', placeholder: 'Inter, Arial, sans-serif' },
 	{ key: 'css.ct-background', label: 'CT custom background', placeholder: 'linear-gradient(...)' },
 	{ key: 'css.t-background', label: 'T custom background', placeholder: 'linear-gradient(...)' },
 ]
@@ -238,6 +255,8 @@ const handledKeys = new Set([
 	...colorControls.map((item) => item.key),
 	...styleTextControls.map((item) => item.key),
 	...brandingTextControls.map((item) => item.key),
+	'css.primary-font-family',
+	'css.custom-font-url',
 	'series.logoUrl',
 ])
 
@@ -262,6 +281,11 @@ export default {
 				{ value: 'compact', label: 'Compact' },
 				{ value: 'diagonal', label: 'Diagonal' },
 				{ value: 'rounded', label: 'Rounded' },
+			],
+			fontChoices: [
+				{ value: "'Quantico'", label: 'Quantico' },
+				{ value: "'Noto Sans'", label: 'Noto Sans' },
+				{ value: "'Arial Narrow'", label: 'Arial Narrow' },
 			],
 		}
 	},
@@ -347,6 +371,12 @@ export default {
 			state.options[key] = value
 			this.saveOption(key)
 		},
+		setFontPreset(value) {
+			state.options['css.custom-font-url'] = ''
+			actions.broadcast('css.custom-font-url', '')
+			actions.save({ 'css.custom-font-url': '' })
+			this.setOption('css.primary-font-family', value)
+		},
 		resetOption(key) {
 			state.options[key] = null
 			actions.broadcast(key, null)
@@ -381,6 +411,37 @@ export default {
 				} catch (err) {
 					console.error(err)
 					actions.addAlert('Failed to upload image', 'error')
+				}
+			}
+			reader.readAsDataURL(file)
+		},
+		async onFontSelected(event) {
+			const file = event.target.files[0]
+			if (!file) return
+
+			const reader = new FileReader()
+			reader.onload = async (e) => {
+				try {
+					const res = await fetch('/config/upload-font', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ filename: file.name, base64: e.target.result }),
+					})
+					const json = await res.json()
+					if (json.url && json.fontFamily) {
+						state.options['css.custom-font-url'] = json.url
+						state.options['css.primary-font-family'] = json.fontFamily
+						actions.broadcast('css.custom-font-url', json.url)
+						actions.broadcast('css.primary-font-family', json.fontFamily)
+						actions.save({
+							'css.custom-font-url': json.url,
+							'css.primary-font-family': json.fontFamily,
+						})
+						actions.addAlert('Font uploaded successfully', 'success')
+					}
+				} catch (err) {
+					console.error(err)
+					actions.addAlert('Failed to upload font', 'error')
 				}
 			}
 			reader.readAsDataURL(file)
@@ -552,6 +613,17 @@ small {
 	color: #adbac7;
 	font-size: 0.85rem;
 	text-transform: uppercase;
+}
+
+.font-card {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 14px;
+	padding: 12px;
+	background: #0d1117;
+	border: 1px solid #30363d;
+	border-radius: 8px;
 }
 
 .color-list {

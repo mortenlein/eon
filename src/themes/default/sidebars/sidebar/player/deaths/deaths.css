@@ -5,8 +5,10 @@
 	align-items: center;
 
 	padding: 0.5rem 0.45rem;
+	min-width: 0;
 	font-size: 1.5rem;
 	font-weight: 750;
+	white-space: nowrap;
 }
 
 .label {
@@ -28,6 +30,12 @@
 
 .v-enter-active {
 	transition-delay: var(--fade-fast-duration);
+}
+
+.hud-viewport.--style-compact .deaths {
+	padding-left: 0.22rem;
+	padding-right: 0.22rem;
+	font-size: 1.36rem;
 }
 
 

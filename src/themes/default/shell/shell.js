@@ -47,6 +47,7 @@ export default {
 
 	mounted() {
 		this.applyCssVariableOverrides()
+		this.applyCustomFontFace()
 		this.setScaleFactor()
 		this.setMapImageUrl()
 
@@ -57,6 +58,7 @@ export default {
 		'$opts': {
 			handler() {
 				this.applyCssVariableOverrides()
+				this.applyCustomFontFace()
 			},
 			deep: true,
 			immediate: true,
@@ -108,6 +110,30 @@ export default {
 				}
 			})
 			this.setScaleFactor()
+		},
+
+		applyCustomFontFace() {
+			const styleId = 'eon-custom-hud-font'
+			const existing = document.getElementById(styleId)
+			const fontUrl = this.$opts?.['css.custom-font-url']
+			const fontFamily = this.$opts?.['css.primary-font-family']
+
+			if (!fontUrl || !fontFamily || !String(fontUrl).startsWith('/hud/')) {
+				existing?.remove()
+				return
+			}
+
+			const safeFamily = String(fontFamily).replace(/[^a-z0-9 _-]/gi, '').trim()
+			const safeUrl = String(fontUrl).replace(/["'\\()]/g, '')
+			if (!safeFamily || !safeUrl) {
+				existing?.remove()
+				return
+			}
+
+			const style = existing || document.createElement('style')
+			style.id = styleId
+			style.textContent = `@font-face { font-family: "${safeFamily}"; src: url("${safeUrl}"); font-weight: 100 900; font-style: normal; font-display: swap; }`
+			if (!existing) document.head.appendChild(style)
 		},
 
 		getRgbValueFromHex(hex) {

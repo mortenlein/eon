@@ -1,5 +1,5 @@
 import send from 'koa-send'
-import { writeFile } from 'fs/promises'
+import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { getSettings } from './settings.js'
 import { readJson, writeJson } from './helpers/json-file.js'
@@ -108,6 +108,46 @@ export const registerConfigRoutes = (router, websocket) => {
 			console.error('Upload Error:', err)
 			context.status = 500
 			context.body = { error: 'Failed to save image' }
+		}
+	})
+
+	router.post('/config/upload-font', async (context) => {
+		const { filename, base64 } = context.request.body
+		if (!filename || !base64) {
+			context.status = 400
+			return
+		}
+
+		try {
+			const ext = String(filename).split('.').pop().toLowerCase()
+			if (!['woff2', 'woff', 'ttf', 'otf'].includes(ext)) {
+				context.status = 400
+				context.body = { error: 'Unsupported font type' }
+				return
+			}
+
+			const fontFamily = String(filename)
+				.replace(/\.[^.]+$/, '')
+				.replace(/[^a-z0-9_-]+/gi, '-')
+				.replace(/^-+|-+$/g, '')
+				.slice(0, 48) || 'uploaded-font'
+			const newName = `font-${Date.now()}-${fontFamily}.${ext}`
+			const fontsDirectory = join(userspaceDirectory, 'fonts')
+			const filepath = join(fontsDirectory, newName)
+
+			const base64Data = base64.split(',')[1] || base64
+			const buffer = Buffer.from(base64Data, 'base64')
+			await mkdir(fontsDirectory, { recursive: true })
+			await writeFile(filepath, buffer)
+
+			context.body = {
+				fontFamily,
+				url: `/hud/fonts/${newName}`,
+			}
+		} catch (err) {
+			console.error('Font Upload Error:', err)
+			context.status = 500
+			context.body = { error: 'Failed to save font' }
 		}
 	})
 

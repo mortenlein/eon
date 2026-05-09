@@ -40,25 +40,25 @@
     - [x] Consolidate `default` into `default` to make `default` a fully standalone, independent theme without relying on backend inheritance.
     - [x] Implement "UI Shape Styles" (Slanted, Squared, Rounded, Abstract) via dynamic CSS properties for the `default` theme.
 
-## Phase 5: Top Bar Redesign [ ]
-- [ ] **Top Bar as a Broadcast Card**
-    - [ ] Redesign the top bar so the series name, team names, scores, and round-state details feel like one integrated broadcast module instead of separate skewed blocks.
-    - [ ] Rework the team and score layout so it follows the same visual language as the focused player and sidebars: clearer hierarchy, stronger surfaces, and less empty space.
-- [ ] **Team Name and Score Treatment**
-    - [ ] Fold the team names and scores into a tighter card structure that visually matches the rest of the HUD presets.
-    - [ ] Reduce the sense of multiple disconnected components by redesigning the team panels, score core, and separators as one composited unit.
-- [ ] **Round-State Elements**
-    - [ ] Restyle match-point, timeout, round-winner, and clock-related elements so they read as part of the top bar card rather than floating labels.
-    - [ ] Keep the current broadcast data, but make the presentation more compact and intentional for each preset.
-- [ ] **Preset Variants**
-    - [ ] Define how Default, Classic, Compact, Diagonal, and Rounded should differ in the top bar, not just by margins, but by shape, density, and placement.
-    - [ ] Ensure Compact gets a tighter, more card-like 4:3 feel similar to the focused-player treatment.
-- [ ] **Grenade Bar Alignment**
-    - [ ] Include the grenade bar above the sidebars in the top-bar redesign pass so it matches the sidebar width and visual rhythm.
-    - [ ] Make the grenade bar feel connected to the roster cards instead of floating as a separate strip.
-- [ ] **Compact Sidebar Edge Alignment**
-    - [ ] Fix Compact style so the right roster sidebar sits against the right edge of the screen instead of drifting toward the middle.
-    - [ ] Audit Compact sidebar spacing and anchor calculations so the roster cards align flush with the viewport edges while keeping the tighter 4:3 look.
-- [ ] **Font Customization**
-    - [ ] Add support for changing HUD fonts through config, with a choice between built-in font presets and user-uploaded fonts.
-    - [ ] Decide how uploaded fonts are stored, validated, and loaded so the HUD can switch typography without breaking presets.
+## Phase 5: Top Bar Redesign [x]
+- [x] **Top Bar as a Broadcast Card**
+    - [x] Redesign the top bar so the series name, team names, scores, and round-state details feel like one integrated broadcast module instead of separate skewed blocks.
+    - [x] Rework the team and score layout so it follows the same visual language as the focused player and sidebars: clearer hierarchy, stronger surfaces, and less empty space.
+- [x] **Team Name and Score Treatment**
+    - [x] Fold the team names and scores into a tighter card structure that visually matches the rest of the HUD presets.
+    - [x] Reduce the sense of multiple disconnected components by redesigning the team panels, score core, and separators as one composited unit.
+- [x] **Round-State Elements**
+    - [x] Restyle match-point, timeout, round-winner, and clock-related elements so they read as part of the top bar card rather than floating labels.
+    - [x] Keep the current broadcast data, but make the presentation more compact and intentional for each preset.
+- [x] **Preset Variants**
+    - [x] Define how Default, Classic, Compact, Diagonal, and Rounded should differ in the top bar, not just by margins, but by shape, density, and placement.
+    - [x] Ensure Compact gets a tighter, more card-like 4:3 feel similar to the focused-player treatment.
+- [x] **Grenade Bar Alignment**
+    - [x] Include the grenade bar above the sidebars in the top-bar redesign pass so it matches the sidebar width and visual rhythm.
+    - [x] Make the grenade bar feel connected to the roster cards instead of floating as a separate strip.
+- [x] **Compact Sidebar Edge Alignment**
+    - [x] Fix Compact style so the right roster sidebar sits against the right edge of the screen instead of drifting toward the middle.
+    - [x] Audit Compact sidebar spacing and anchor calculations so the roster cards align flush with the viewport edges while keeping the tighter 4:3 look.
+- [x] **Font Customization**
+    - [x] Add support for changing HUD fonts through config, with a choice between built-in font presets and user-uploaded fonts.
+    - [x] Decide how uploaded fonts are stored, validated, and loaded so the HUD can switch typography without breaking presets.
