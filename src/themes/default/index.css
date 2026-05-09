@@ -272,7 +272,7 @@
 	--sidebar-taser-width: 1.15rem;
 	--sidebar-grenades-half-width: 2.4rem;
 	--sidebar-round-kills-width: 1rem;
-	--sidebar-primary-and-secondary-width: 3.05rem;
+	--sidebar-primary-and-secondary-width: 2.25rem;
 	--sidebar-player-width: calc(
 		var(--sidebar-deaths-width) +
 		var(--sidebar-grenades-half-width) +
@@ -331,7 +331,7 @@
 	--sidebar-taser-width: 0.75rem;
 	--sidebar-grenades-half-width: 1.8rem;
 	--sidebar-round-kills-width: 0.7rem;
-	--sidebar-primary-and-secondary-width: 2.55rem;
+	--sidebar-primary-and-secondary-width: 1.85rem;
 	--sidebar-player-focused-player-highlight-width: 0.25rem;
 	--sidebar-player-width: calc(
 		var(--sidebar-deaths-width) +
