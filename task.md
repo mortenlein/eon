@@ -62,3 +62,35 @@
 - [x] **Font Customization**
     - [x] Add support for changing HUD fonts through config, with a choice between built-in font presets and user-uploaded fonts.
     - [x] Decide how uploaded fonts are stored, validated, and loaded so the HUD can switch typography without breaking presets.
+
+## Phase 6: Komplettligaen Intermission Views [ ]
+- [ ] **Scraper Engine Integration**
+    - [ ] Import the scraper engine from `C:\repo\komplettligaen-scraper\komplettligaen-scraper\scraper.js` into `src/server/integrations/komplettligaen/`.
+    - [ ] Convert the scraper from CommonJS to ESM so it fits the Eon server codebase.
+    - [ ] Keep scraper logic isolated from HUD theme components.
+- [ ] **Komplettligaen API Routes**
+    - [ ] Add Eon backend routes for match, table, and team-games data.
+    - [ ] Store selected match configuration in a dedicated userspace file such as `src/themes/userspace/komplettligaen.json`.
+    - [ ] Avoid writing Komplettligaen configuration into `theme.json`.
+    - [ ] Add lightweight caching so intermission scenes do not repeatedly hammer GG Arena during broadcast.
+- [ ] **Config UI Control**
+    - [ ] Add a Config SPA section for Komplettligaen.
+    - [ ] Support setting and saving the GG Arena match id.
+    - [ ] Add a fetch/test action that previews selected match, division table, and team-games data.
+    - [ ] Add scene controls for selecting which Komplettligaen intermission view should be active.
+- [ ] **Replace Existing Non-Live Scenes**
+    - [ ] Replace the existing `intro` scene with a Komplettligaen match overview view.
+    - [ ] Replace the existing `halftime` scene with a Komplettligaen waiting/intermission view.
+    - [ ] Replace the existing `fulltime` scene with a Komplettligaen match result / map summary view.
+    - [ ] Replace the existing `analytics` scene with a Komplettligaen league table / team form view.
+    - [ ] Keep existing live HUD gameplay components untouched.
+- [ ] **Viewer-Facing Views**
+    - [ ] Rebuild the scraper `waiting` view as an Eon-native HUD scene using current HUD styling.
+    - [ ] Rebuild the scraper `match` view as an Eon-native match overview scene.
+    - [ ] Rebuild the scraper `team-games` view as an Eon-native fixture/form scene.
+    - [ ] Rebuild the scraper league table view as an Eon-native standings scene.
+    - [ ] Use Eon's existing visual language instead of directly copying the standalone scraper CSS.
+- [ ] **Offline Opponent Research**
+    - [ ] Keep opponent research out of OBS/HUD scenes for now.
+    - [ ] Preserve it as offline/operator-only tooling for a later phase.
+    - [ ] Do not expose opponent research in viewer-facing routes until explicitly requested.
