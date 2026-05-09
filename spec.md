@@ -1,47 +1,106 @@
-# Eon CS2 Broadcasting HUD - System Specification
+# Eon CS2 Broadcasting HUD - Current System Overview
 
-## 1. System Architecture
-Eon is a real-time broadcasting overlay system for Counter-Strike 2. It bridges the gap between CS2's Game State Integration (GSI) and a visual overlay captured by broadcasting software (OBS/vMix).
+## 1. Purpose
 
-### 1.1 Core Components
-*   **GSI Receiver (Node.js/Koa):** Listens for HTTP POST requests from the CS2 client.
-*   **State Engine:** Processes raw GSI data, calculates derived metrics (Win Probability, MVP, Economy), and maintains the current source of truth.
-*   **WebSocket Server:** Throttles and broadcasts state changes at a maximum of 20Hz (50ms) to connected frontend clients.
-*   **Overlay Renderer (Electron/Vue):** A transparent, click-through Chromium window that consumes the WebSocket feed and renders the HUD using DOM/CSS.
-*   **Config & Control Panel (Vue 3/Pinia):** A unified Single Page Application for broadcaster control, including scene management, layout editing, and telestrator board.
+Eon is a local broadcast operations stack for Counter-Strike 2. It turns CS2 GSI payloads into a realtime HUD, radar, and operator control surface for OBS/vMix capture, LAN production, and league intermission scenes.
 
-## 2. Technical Constraints & Rules
+The active product direction is the `default` theme: a standalone broadcast HUD built on top of the lower-level `raw` parser/theme foundation, with operator overrides stored in `userspace`.
 
-### 2.1 Backend (Node.js)
-*   **Single-Pass GSI Processing:** Logic iterating over `body.allplayers` must be consolidated into a single `O(n)` loop per tick to minimize event-loop blocking.
-*   **Throttled Broadcasts:** WebSocket state updates must be capped at 20Hz (50ms) using a debounce/throttle mechanism.
-*   **Enriched State:** The backend is responsible for maintaining historical metrics (e.g., probability swings) that the raw GSI does not provide.
+## 2. Runtime Architecture
 
-### 2.2 Frontend (Overlay)
-*   **Reactivity Hygiene:** Use `shallowRef` or `shallowReactive` for the raw GSI state object. Avoid deep-watching massive, nested GSI payloads to prevent performance degradation.
-*   **Dynamic Styling:** Visual overrides (colors, positions) must be applied via CSS Custom Properties on the `:root` element.
-*   **Scale Independence:** All layout calculations must respect the global `--scale-factor` variable, derived from the viewport height (`vh`) or width (`vw`).
+### 2.1 Server
 
-### 2.3 Theme System
-*   **De-coupled Components:** UI elements (Radar, FocusedPlayer, etc.) must be implemented as standalone components with clear boundaries.
-*   **Native Modules:** Future themes should avoid backend string-concatenation of `.append` files. Prefer standard native ES Module imports or a structured build step.
-*   **Schema Validation:** `theme.json` and `settings.json` must be validated against a strict JSON schema on startup.
+- Entry point: `src/server/index.js`
+- Framework: Node.js ESM, Koa, `@koa/router`, `ws`
+- Default bind: `127.0.0.1:31982`
+- Main responsibilities:
+  - serve `/hud`, `/config`, `/radar`, dependencies, licenses, and static theme assets
+  - receive CS2 GSI on `/gsi` and `/api/gsi`
+  - maintain enriched match state in `src/server/state.js`
+  - fan out websocket events to HUD, config, and radar clients
+  - persist operator settings into `src/themes/userspace`
+  - expose Komplettligaen config and preview/data routes
 
-## 3. UI/UX Standards (Config Dashboard)
-*   **Unified SPA:** All configuration and live control tools must exist within a single Vue 3 application.
-*   **Centralized State (Pinia):** Use Pinia to synchronize local state with the WebSocket server, ensuring that the Layout Editor and Options menus never overwrite each other with stale data.
-*   **Broadcaster Ergonomics:**
-    *   Optimistic UI updates for scene changes.
-    *   Fabric.js integration for a smooth, vector-based telestrator experience.
-    *   Clear visual feedback for "Unsaved Changes" and "Sync Status".
+### 2.2 GSI and State
 
-## 4. Security & Desktop Integration
-*   **Electron Hardening:** All renderer windows must use `contextIsolation: true`, `nodeIntegration: false`, and `sandbox: true`.
-*   **Preload Bridge:** Use Electron's `contextBridge` to expose only necessary IPC channels between the main and renderer processes.
-*   **GSI Authentication:** Strict validation of the GSI `auth.token` is mandatory.
+- GSI route logic lives in `src/server/gsi.js`.
+- Broadcast state is throttled to roughly 20Hz.
+- The backend tracks derived broadcast data such as win probability, probability swing highlights, caster alerts, economy/round metrics, and local highlight logging.
+- UI dev mode (`--ui-dev-mode`, `EON_UI_DEV_MODE=1`, or `UI_DEV_MODE=1`) serves a static state and ignores live GSI posts for layout work.
 
-## 5. Feature Bible
-*   **Win Probability:** CT-favoring probability based on player count, HP ratios, and bomb plant status.
-*   **Clutch King:** Calculated as the maximum positive probability swing between the lowest point in a round and the final win.
-*   **Telestrator:** Real-time synchronized drawing board for broadcasters to annotate gameplay.
-*   **Caster Action Alerts:** Real-time notifications for broadcasters/producers regarding critical game events (Planted, Defused, Multi-kills).
+### 2.3 Websocket Contract
+
+- Websocket implementation: `src/server/websocket.js`
+- Clients consume state through the raw theme core and config store.
+- Current important event types include state refreshes, config synchronization, caster alerts, and Komplettligaen refreshes.
+
+### 2.4 Config SPA
+
+- Config app root: `src/config/App.vue`
+- Store: `src/config/store.js`
+- Component areas:
+  - Live Control / dashboard
+  - Layout Editor
+  - Series Setup
+  - Match Rules
+  - Teams Setup
+  - Sponsors
+  - HUD Options
+- The SPA is served buildlessly through `vue3-sfc-loader`; `.vue` components are served as static text by the server fallback.
+- The dashboard includes telestrator controls, win-probability actions, scene selection, and Komplettligaen match setup/test controls.
+
+### 2.5 HUD and Themes
+
+- Active theme chain: `userspace -> default -> raw`
+- `raw` provides the GSI parser, websocket client, shell foundation, and shared helpers.
+- `default` provides the active visual HUD, style presets, top bar, sidebars, focused player, series graph, radar assets, and intermission scene templates.
+- Theme assets are served by recursively resolving files through the theme chain in `src/server/hud.js`.
+- Missing component `.vue` files can be generated dynamically from matching `.js`, `.css`, and `.html` files.
+- `.append.*` theme extension files are still supported.
+
+### 2.6 Electron
+
+- Launchers:
+  - `src/electron/hud.js`
+  - `src/electron/config.js`
+  - `src/electron/radar.js`
+- Windows load local server routes. Security posture should remain strict: no renderer Node integration, context isolation enabled, and only explicit preload bridges if IPC is later required.
+
+### 2.7 Komplettligaen Integration
+
+- Routes and cache: `src/server/komplettligaen.js`
+- Scraper adapter: `src/server/integrations/komplettligaen/scraper.js`
+- Operator config: `src/themes/userspace/komplettligaen.json`
+- HUD scene mapping:
+  - `intro` -> match overview
+  - `halftime` -> waiting/intermission
+  - `fulltime` / `over` -> result/map summary
+  - `analytics` -> league table/team fixtures
+- Viewer-facing scenes are implemented in the default theme shell rather than as standalone scraper pages.
+
+## 3. Architecture Constraints
+
+- Keep gameplay HUD components independent and theme-local unless shared behavior belongs in `raw`.
+- Keep operator-specific state in `src/themes/userspace`; do not write runtime config into built-in theme files.
+- Avoid deep Vue reactivity on full GSI payloads; the raw state path should remain shallow and websocket-driven.
+- GSI processing should stay bounded per tick and avoid repeated expensive full-player passes where practical.
+- Preserve the local-first model: no remote services are required for normal HUD operation, except optional Komplettligaen data fetches.
+- Treat `tmp` images as visual references, not production assets.
+
+## 4. Current Known Risks
+
+- The theme engine remains buildless and string/file-composition based. It is flexible for local theme iteration but harder to debug than a bundled build with sourcemaps.
+- Theme schema validation is minimal; current startup checks are warnings, not a strict JSON Schema gate.
+- Config currently imports Vue SFCs directly through runtime loading, so runtime browser errors can still break whole config views.
+- Compact and Classic sidebar spacing still need a dedicated visual pass.
+- Several spectator-state screenshots in `tmp` indicate HUD state/layout issues that need verification across all presets.
+
+## 5. Verification Baseline
+
+Before changing behavior, verify:
+
+- `npm start` serves `/hud`, `/config`, `/radar`, and `/api/gsi/status`
+- `npm run start:ui-dev` shows stable HUD/config/radar state without CS2
+- Config can save userspace settings and receives websocket updates
+- Scene switching works for default gameplay plus `intro`, `halftime`, `fulltime`/`over`, and `analytics`
+- Compact, Classic, Default/Slanted, Diagonal, and Rounded presets render without text overlap or detached HUD elements
