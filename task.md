@@ -1,96 +1,115 @@
-# Eon CS2 HUD - Refactor & Feature Master Tasklist
+# Eon CS2 HUD - Current Task List
 
-## Phase 1: Security & Stability [x]
-- [x] **Electron Security Hardening**
-    - [x] Update `src/electron/hud.js` with `contextIsolation: true` and `nodeIntegration: false`.
-    - [x] Update `src/electron/radar.js` and `src/electron/config.js` with the same settings.
-- [x] **Backend GSI Optimization**
-    - [x] Refactor `src/server/gsi.js` to use a single loop for `allplayers` processing.
-- [x] **Frontend Performance Tuning**
-    - [x] Implement `shallowRef` for GSI state in `src/themes/raw/core/state.js`.
+## Documentation Snapshot
 
-## Phase 2: Unified Config SPA Rewrite [x]
-- [x] **SPA Scaffolding**
-    - [x] Initialize Vue 3 + Pinia environment in `src/config`.
-    - [x] Setup logical component directory structure.
-- [x] **Layout Editor Componentization**
-    - [x] Port `src/config/layout.js` logic into modular Vue components.
-    - [x] Implement robust drag-and-drop using a modern library (e.g., VueDraggable or native).
-- [x] **Unified WebSocket State**
-    - [x] Implement Pinia store for synchronization with `src/server/websocket.js`.
-- [x] **UX Overhaul**
-    - [x] Build the new sidebar navigation.
-    - [x] Implement live preview thumbnails for components.
+- Updated: 2026-05-09
+- Current code state: clean worktree at inspection time
+- No code changes have been made as part of this documentation refresh
+- Main active theme: `default`
+- Theme chain: `userspace -> default -> raw`
 
-## Phase 3: Theme System Hardening [x]
-- [x] **Theme Engine Refactor**
-    - [x] Update `src/server/hud.js` to remove string-stitched SFCs.
-    - [x] Implement JSON Schema validation for themes.
+## Completed Work
 
-## Phase 4: New Broadcasting Features [x]
-- [x] **Advanced Telestrator**
-    - [x] Integrate Fabric.js for drawing. (Simulated with robust custom Vue canvas to avoid breaking dependency installs)
-    - [x] Add vector shapes and undo/redo support.
-- [x] **Automated Highlight Logger**
-    - [x] Implement backend file writer for probability swing timestamps.
-- [x] **Caster Alerts**
-    - [x] Build visual notification system in Config SPA.
-- [x] **Advanced Customization**
-    - [x] Support CSS background gradients for CT and T theme colors.
-    - [x] Consolidate `default` into `default` to make `default` a fully standalone, independent theme without relying on backend inheritance.
-    - [x] Implement "UI Shape Styles" (Slanted, Squared, Rounded, Abstract) via dynamic CSS properties for the `default` theme.
+### Phase 1: Security & Stability
 
-## Phase 5: Top Bar Redesign [x]
-- [x] **Top Bar as a Broadcast Card**
-    - [x] Redesign the top bar so the series name, team names, scores, and round-state details feel like one integrated broadcast module instead of separate skewed blocks.
-    - [x] Rework the team and score layout so it follows the same visual language as the focused player and sidebars: clearer hierarchy, stronger surfaces, and less empty space.
-- [x] **Team Name and Score Treatment**
-    - [x] Fold the team names and scores into a tighter card structure that visually matches the rest of the HUD presets.
-    - [x] Reduce the sense of multiple disconnected components by redesigning the team panels, score core, and separators as one composited unit.
-- [x] **Round-State Elements**
-    - [x] Restyle match-point, timeout, round-winner, and clock-related elements so they read as part of the top bar card rather than floating labels.
-    - [x] Keep the current broadcast data, but make the presentation more compact and intentional for each preset.
-- [x] **Preset Variants**
-    - [x] Define how Default, Classic, Compact, Diagonal, and Rounded should differ in the top bar, not just by margins, but by shape, density, and placement.
-    - [x] Ensure Compact gets a tighter, more card-like 4:3 feel similar to the focused-player treatment.
-- [x] **Grenade Bar Alignment**
-    - [x] Include the grenade bar above the sidebars in the top-bar redesign pass so it matches the sidebar width and visual rhythm.
-    - [x] Make the grenade bar feel connected to the roster cards instead of floating as a separate strip.
-- [x] **Compact Sidebar Edge Alignment**
-    - [x] Fix Compact style so the right roster sidebar sits against the right edge of the screen instead of drifting toward the middle.
-    - [x] Audit Compact sidebar spacing and anchor calculations so the roster cards align flush with the viewport edges while keeping the tighter 4:3 look.
-- [x] **Font Customization**
-    - [x] Add support for changing HUD fonts through config, with a choice between built-in font presets and user-uploaded fonts.
-    - [x] Decide how uploaded fonts are stored, validated, and loaded so the HUD can switch typography without breaking presets.
+- [x] Harden Electron launcher defaults for HUD, config, and radar windows.
+- [x] Refactor GSI processing away from avoidable repeated player loops where practical.
+- [x] Keep frontend raw GSI state on a shallow websocket-driven path.
 
-## Phase 6: Komplettligaen Intermission Views [x]
-- [x] **Scraper Engine Integration**
-    - [x] Import the scraper engine from `C:\repo\komplettligaen-scraper\komplettligaen-scraper\scraper.js` into `src/server/integrations/komplettligaen/`.
-    - [x] Convert the scraper from CommonJS to ESM so it fits the Eon server codebase.
-    - [x] Keep scraper logic isolated from HUD theme components.
-- [x] **Komplettligaen API Routes**
-    - [x] Add Eon backend routes for match, table, and team-games data.
-    - [x] Store selected match configuration in a dedicated userspace file such as `src/themes/userspace/komplettligaen.json`.
-    - [x] Avoid writing Komplettligaen configuration into `theme.json`.
-    - [x] Add lightweight caching so intermission scenes do not repeatedly hammer GG Arena during broadcast.
-- [x] **Config UI Control**
-    - [x] Add a Config SPA section for Komplettligaen.
-    - [x] Support setting and saving the GG Arena match id.
-    - [x] Add a fetch/test action that previews selected match, division table, and team-games data.
-    - [x] Add scene controls for selecting which Komplettligaen intermission view should be active.
-- [x] **Replace Existing Non-Live Scenes**
-    - [x] Replace the existing `intro` scene with a Komplettligaen match overview view.
-    - [x] Replace the existing `halftime` scene with a Komplettligaen waiting/intermission view.
-    - [x] Replace the existing `fulltime` scene with a Komplettligaen match result / map summary view.
-    - [x] Replace the existing `analytics` scene with a Komplettligaen league table / team form view.
-    - [x] Keep existing live HUD gameplay components untouched.
-- [x] **Viewer-Facing Views**
-    - [x] Rebuild the scraper `waiting` view as an Eon-native HUD scene using current HUD styling.
-    - [x] Rebuild the scraper `match` view as an Eon-native match overview scene.
-    - [x] Rebuild the scraper `team-games` view as an Eon-native fixture/form scene.
-    - [x] Rebuild the scraper league table view as an Eon-native standings scene.
-    - [x] Use Eon's existing visual language instead of directly copying the standalone scraper CSS.
-- [x] **Offline Opponent Research**
-    - [x] Keep opponent research out of OBS/HUD scenes for now.
-    - [x] Preserve it as offline/operator-only tooling for a later phase.
-    - [x] Do not expose opponent research in viewer-facing routes until explicitly requested.
+### Phase 2: Unified Config SPA
+
+- [x] Move config into a Vue 3 SPA under `src/config`.
+- [x] Add centralized config store and websocket synchronization.
+- [x] Add sidebar navigation and focused operator workflows.
+- [x] Add purpose-built editors for dashboard/live control, layout, series, rules, teams, sponsors, and HUD options.
+
+### Phase 3: Broadcast Feature Expansion
+
+- [x] Add telestrator controls in the config dashboard.
+- [x] Add caster alerts for critical events.
+- [x] Add local highlight logging for major probability swing outcomes.
+- [x] Add win-probability controls and HUD/config display support.
+- [x] Add HUD font selection and uploaded font support.
+- [x] Add CT/T custom background gradient options.
+
+### Phase 4: Default Theme Direction
+
+- [x] Consolidate active custom HUD direction into `src/themes/default`.
+- [x] Keep `raw` as the parser/base foundation.
+- [x] Add style presets: Slanted, Classic, Compact, Diagonal, Rounded.
+- [x] Rebuild focused player as a single intentional broadcast component.
+- [x] Apply the newer broadcast-card treatment to sidebars and roster rows.
+- [x] Restrict side K/D/A/ADR panel visibility to freezetime.
+- [x] Redesign the top bar into a more integrated broadcast card.
+- [x] Align team names, scores, clock, timeout, match-point, and round-winner elements with the newer visual system.
+- [x] Include team grenade bar alignment in the top-bar/sidebar redesign pass.
+- [x] Fix Compact right sidebar edge anchoring.
+
+### Phase 5: Komplettligaen Intermission Views
+
+- [x] Import and adapt the Komplettligaen scraper into `src/server/integrations/komplettligaen/`.
+- [x] Add config and API routes in `src/server/komplettligaen.js`.
+- [x] Store selected GG Arena match configuration in `src/themes/userspace/komplettligaen.json`.
+- [x] Add config dashboard controls to save and test the selected match id.
+- [x] Replace non-live scenes with Eon-native Komplettligaen views:
+  - [x] `intro` match overview
+  - [x] `halftime` waiting/intermission
+  - [x] `fulltime` / `over` result/map summary
+  - [x] `analytics` league table/team fixtures
+- [x] Keep opponent research out of viewer-facing scenes.
+
+## Active Open Work
+
+### 1. Compact and Classic Sidebar Whitespace
+
+- [ ] Reproduce the current whitespace issue using `tmp/whitespace-sidebars.png` and `tmp/compact-issue-2.png`.
+- [ ] Inspect actual outer card width, internal grid tracks, weapon-side reserved space, and spectator/dead-player states.
+- [ ] Fix Compact and Classic roster rows so the visual footprint matches the content density.
+- [ ] Verify both left and right sidebars at 16:9 and 4:3 capture sizes.
+
+### 2. Spectator-State HUD Issues
+
+Reference screenshots:
+
+- `tmp/Classic-specator-issue.png`
+- `tmp/compact-spectator-issues.png`
+- `tmp/default-issues-spectator.png`
+- `tmp/diagonal-specator-issues.png`
+- `tmp/rounded-specator-issues.png`
+
+Tasks:
+
+- [ ] Identify whether each issue is caused by focused-player visibility, sidebar player state, top-bar state, or spectator/freecam handling.
+- [ ] Verify behavior during first-person spectating, third-person/freecam, dead-player follow, and no-focused-player states.
+- [ ] Ensure each preset has a deliberate fallback state instead of collapsed or floating partial UI.
+
+### 3. Theme Engine Hardening
+
+- [ ] Decide whether to keep the buildless `vue3-sfc-loader` theme model for the next milestone or introduce a bundled build step.
+- [ ] Replace the current minimal theme warnings with strict validation for `theme.json` and `settings.json`.
+- [ ] Improve error reporting for dynamically generated component `.vue` files and `.append.*` composition failures.
+- [ ] Document the supported theme extension contract after the decision.
+
+### 4. Config SPA Hardening
+
+- [ ] Audit save behavior to ensure each editor writes only its intended userspace values.
+- [ ] Add clearer dirty/saved/error states per editor, not just global save status.
+- [ ] Verify font upload validation and deletion/replacement workflow.
+- [ ] Review config layout at smaller laptop resolutions and OBS-side operator displays.
+
+### 5. Komplettligaen Reliability
+
+- [ ] Add clearer operator-facing errors for unavailable GG Arena data.
+- [ ] Verify cached data invalidation when match id or active view changes.
+- [ ] Confirm all intermission scenes render acceptable fallback content when no match is configured.
+- [ ] Add a non-viewer offline research workflow only when explicitly requested.
+
+## Verification Checklist For Next Code Change
+
+- [ ] `npm start`
+- [ ] `npm run start:ui-dev`
+- [ ] Open `/hud`, `/config`, `/radar`, and `/api/gsi/status`
+- [ ] Exercise all HUD presets: Slanted, Classic, Compact, Diagonal, Rounded
+- [ ] Exercise scenes: default gameplay, `intro`, `halftime`, `fulltime`/`over`, `analytics`
+- [ ] Check spectator/freecam/no-focused-player states
+- [ ] Check userspace settings are written only under `src/themes/userspace`
