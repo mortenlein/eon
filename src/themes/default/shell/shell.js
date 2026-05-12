@@ -95,17 +95,24 @@ export default {
 		},
 
 		showObserverDataWarning() {
+			const scene = this.$opts?.['match.activeScene']
+			if (['intro', 'halftime', 'fulltime', 'over', 'analytics', 'radar'].includes(scene)) return false
 			return !!(
 				this.$map?.name
 				&& this.$gsiState?.player
 				&& ! this.hasObserverData
 			)
 		},
+
+		_vantaEffectKey() {
+			return this.$opts['css.vanta-effect'] || 'net'
+		},
 	},
 
 	data() {
 		return {
 			komplettligaen: null,
+			isLoadingKomplettligaen: true,
 		}
 	},
 
@@ -117,6 +124,7 @@ export default {
 
 		window.addEventListener('resize', this.setScaleFactor)
 		this.loadKomplettligaen()
+		this.initVanta()
 	},
 
 	watch: {
@@ -133,21 +141,35 @@ export default {
 				this.setMapImageUrl()
 			},
 			immediate: true,
-		}
+		},
+		'$opts.match\.activeScene': {
+			handler(scene) {
+				const isIntermission = ['intro', 'halftime', 'fulltime', 'over', 'analytics', 'radar'].includes(scene)
+				if (isIntermission && !this._vantaEffect) this.initVanta()
+				else if (!isIntermission && this._vantaEffect) this.destroyVanta()
+			},
+		},
+		_vantaEffectKey() {
+			this.initVanta()
+		},
 	},
 
 	beforeUnmount() {
 		window.removeEventListener('resize', this.setScaleFactor)
+		this.destroyVanta()
 	},
 
 	methods: {
 		async loadKomplettligaen() {
+			this.isLoadingKomplettligaen = true
 			try {
 				const response = await fetch('/api/komplettligaen')
 				this.komplettligaen = await response.json()
 				this.setMapImageUrl()
 			} catch (err) {
 				this.komplettligaen = null
+			} finally {
+				this.isLoadingKomplettligaen = false
 			}
 		},
 
@@ -287,7 +309,55 @@ export default {
 				`url("/hud/img/maps/${this.$map.sanitizedName}.png")`
 			)
 		},
+
+		// ── Vanta.js Background ──
+		initVanta() {
+			if (!window.VANTA) return
+			this.destroyVanta()
+
+			const el = this.$refs.vantaContainer
+			if (!el) return
+
+			const effect = (this.$opts?.['css.vanta-effect'] || 'net').toUpperCase()
+			const factory = window.VANTA[effect]
+			if (!factory) return
+
+			const base = {
+				el,
+				THREE: window.THREE,
+				mouseControls: false,
+				touchControls: false,
+				gyroControls: false,
+				minHeight: 200,
+				minWidth: 200,
+				scale: 1.0,
+				scaleMobile: 1.0,
+				backgroundColor: 0x020305,
+				forceAnimate: true,
+			}
+
+			const presets = {
+				NET: { color: 0x3498db, points: 12, maxDistance: 22, spacing: 18, showDots: true },
+				CELLS: { color1: 0x0a2540, color2: 0x134e7a, size: 2.0, speed: 0.8 },
+				WAVES: { color: 0x0a1628, shininess: 35, waveHeight: 15, waveSpeed: 0.8 },
+				BIRDS: { color1: 0x3498db, color2: 0x0a2540, colorMode: 'lerpGradient', quantity: 3, birdSize: 1.2, speedLimit: 4, separation: 30 },
+				CLOUDS: { skyColor: 0x0a1628, cloudColor: 0x1a3a5c, cloudShadowColor: 0x050d18, sunColor: 0x3498db, sunGlareColor: 0x134e7a, sunlightColor: 0x1a5276, speed: 0.8 },
+				TOPOLOGY: { color: 0x3498db, backgroundColor: 0x020305 },
+				DOTS: { color: 0x3498db, color2: 0x0a2540, backgroundColor: 0x020305, size: 2.5, spacing: 30, showLines: true },
+				HALO: { color: 0x3498db, backgroundColor: 0x020305, size: 1.5 },
+			}
+
+			this._vantaEffect = factory({ ...base, ...(presets[effect] || {}) })
+		},
+
+		destroyVanta() {
+			if (this._vantaEffect) {
+				this._vantaEffect.destroy()
+				this._vantaEffect = null
+			}
+		},
 	},
 }
+
 
 

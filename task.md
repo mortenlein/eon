@@ -99,10 +99,11 @@ Tasks:
 
 ### 5. Komplettligaen Reliability
 
-- [ ] Add clearer operator-facing errors for unavailable GG Arena data.
-- [ ] Verify cached data invalidation when match id or active view changes.
-- [ ] Confirm all intermission scenes render acceptable fallback content when no match is configured.
-- [ ] Add a non-viewer offline research workflow only when explicitly requested.
+- [x] Add clearer operator-facing errors for unavailable GG Arena data.
+- [x] Verify cached data invalidation when match id or active view changes.
+- [x] Confirm all intermission scenes render acceptable fallback content when no match is configured.
+- [x] Add a non-viewer offline research workflow only when explicitly requested.
+- [x] Remove glowing background blur and center scene content.
 
 ## Verification Checklist For Next Code Change
 

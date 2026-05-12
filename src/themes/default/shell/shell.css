@@ -1,3 +1,11 @@
+* {
+	outline: none !important;
+}
+
+body {
+	margin: 0;
+	overflow: hidden;
+}
 
 
 .event-badge {
@@ -196,12 +204,12 @@
 .hud-scene-background {
 	position: absolute;
 	inset: 0;
-	background-size: cover;
-	background-position: center;
-	filter: blur(4rem) brightness(0.3);
-	opacity: 0;
-	transition: opacity 0.6s ease;
 	z-index: 0;
+	opacity: 0;
+	transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+	background-color: #020305;
+	overflow: hidden;
+	pointer-events: none;
 }
 
 /* ── Scene: Full Radar ── */
@@ -212,7 +220,6 @@
 .--scene-over .hud-scene-background,
 .--scene-analytics .hud-scene-background {
 	opacity: 1;
-	background-image: var(--map-image-url, url("/hud/img/maps/random.webp"));
 }
 
 .--scene-radar .sidebars,
@@ -262,16 +269,16 @@
 }
 
 /* Hide standard HUD elements in these scenes */
-.--scene-intro .sidebars, .--scene-intro .top-bar, .--scene-intro .focused-player,
-.--scene-halftime .sidebars, .--scene-halftime .top-bar, .--scene-halftime .focused-player,
-.--scene-over .sidebars, .--scene-over .top-bar, .--scene-over .focused-player,
-.--scene-fulltime .sidebars, .--scene-fulltime .top-bar, .--scene-fulltime .focused-player,
-.--scene-analytics .sidebars, .--scene-analytics .top-bar, .--scene-analytics .focused-player,
-.--scene-intro .players-alive, .--scene-intro .series-graph, .--scene-intro .current-map,
-.--scene-halftime .players-alive, .--scene-halftime .series-graph, .--scene-halftime .current-map,
-.--scene-over .players-alive, .--scene-over .series-graph, .--scene-over .current-map,
-.--scene-fulltime .players-alive, .--scene-fulltime .series-graph, .--scene-fulltime .current-map,
-.--scene-analytics .players-alive, .--scene-analytics .series-graph, .--scene-analytics .current-map {
+.--scene-intro .sidebars, .--scene-intro .top-bar, .--scene-intro .focused-player, .--scene-intro .radar,
+.--scene-halftime .sidebars, .--scene-halftime .top-bar, .--scene-halftime .focused-player, .--scene-halftime .radar,
+.--scene-over .sidebars, .--scene-over .top-bar, .--scene-over .focused-player, .--scene-over .radar,
+.--scene-fulltime .sidebars, .--scene-fulltime .top-bar, .--scene-fulltime .focused-player, .--scene-fulltime .radar,
+.--scene-analytics .sidebars, .--scene-analytics .top-bar, .--scene-analytics .focused-player, .--scene-analytics .radar,
+.--scene-intro .players-alive, .--scene-intro .series-graph, .--scene-intro .current-map, .--scene-intro .event-badge, .--scene-intro .analysis-overlay, .--scene-intro .promotion-panel, .--scene-intro .mvp-card, .--scene-intro .map-winner-overlay,
+.--scene-halftime .players-alive, .--scene-halftime .series-graph, .--scene-halftime .current-map, .--scene-halftime .event-badge, .--scene-halftime .analysis-overlay, .--scene-halftime .promotion-panel, .--scene-halftime .mvp-card, .--scene-halftime .map-winner-overlay,
+.--scene-over .players-alive, .--scene-over .series-graph, .--scene-over .current-map, .--scene-over .event-badge, .--scene-over .analysis-overlay, .--scene-over .promotion-panel, .--scene-over .mvp-card, .--scene-over .map-winner-overlay,
+.--scene-fulltime .players-alive, .--scene-fulltime .series-graph, .--scene-fulltime .current-map, .--scene-fulltime .event-badge, .--scene-fulltime .analysis-overlay, .--scene-fulltime .promotion-panel, .--scene-fulltime .mvp-card, .--scene-fulltime .map-winner-overlay,
+.--scene-analytics .players-alive, .--scene-analytics .series-graph, .--scene-analytics .current-map, .--scene-analytics .event-badge, .--scene-analytics .analysis-overlay, .--scene-analytics .promotion-panel, .--scene-analytics .mvp-card, .--scene-analytics .map-winner-overlay {
 	opacity: 0;
 	pointer-events: none;
 }
@@ -287,6 +294,45 @@
 
 .kl-empty {
 	text-align: center;
+}
+
+.kl-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2rem;
+	text-align: center;
+}
+
+.kl-spinner {
+	width: 4rem;
+	height: 4rem;
+	border: 0.3rem solid rgba(255, 255, 255, 0.1);
+	border-top-color: var(--accent);
+	border-radius: 50%;
+	animation: kl-spin 1s linear infinite;
+	filter: drop-shadow(0 0 1rem rgba(var(--accent-rgb), 0.5));
+}
+
+@keyframes kl-spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+.kl-loading-text {
+	color: #fff;
+	font-size: 1.5rem;
+	font-weight: 800;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	opacity: 0.8;
+	animation: kl-pulse 2s ease-in-out infinite;
+}
+
+@keyframes kl-pulse {
+	0%, 100% { opacity: 0.6; }
+	50% { opacity: 1; }
 }
 
 /* Intro Scene Details */
@@ -481,6 +527,9 @@
 	height: min(1080px, calc(100vh - 6rem));
 	box-sizing: border-box;
 	padding: clamp(18px, 2.1vh, 30px) clamp(24px, 2vw, 40px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .kl-match-card {
@@ -798,9 +847,6 @@
 
 .kl-tableform-bottom {
 	min-height: 0;
-	display: grid;
-	grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-	gap: 12px;
 }
 
 .kl-panel-head {
@@ -1061,7 +1107,7 @@
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 14px;
-	height: 48%;
+	margin-bottom: 48px;
 }
 
 .kl-fixture-teams.single {
@@ -1101,12 +1147,17 @@
 	text-transform: uppercase;
 }
 
+.kl-team-blocks {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+}
+
 .kl-team-panel .block {
 	padding: 11px 16px 13px;
 }
 
 .kl-team-panel .block + .block {
-	border-top: 1px solid rgba(255, 255, 255, 0.15);
+	border-left: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .kl-team-panel h3 {
@@ -1122,8 +1173,7 @@
 	gap: 7px;
 }
 
-.kl-tableform-bottom .kl-standings,
-.kl-tableform-bottom .kl-form-panel {
+.kl-tableform-bottom .kl-standings {
 	height: 100%;
 }
 
@@ -1188,4 +1238,53 @@
 	transform: translateY(0);
 }
 
+.kl-player-stats {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+	margin: 8px auto 0;
+	max-width: 760px;
+}
 
+.kl-stats-team {
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 8px;
+	overflow: hidden;
+	background: linear-gradient(180deg, rgba(14, 24, 38, 0.96), rgba(7, 13, 23, 0.94));
+}
+
+.kl-stats-team table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.kl-stats-team th,
+.kl-stats-team td {
+	height: 32px;
+	padding: 0 12px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	font-size: 13px;
+	font-weight: 850;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.kl-stats-team th {
+	color: #aeb9c8;
+	font-size: 10px;
+	font-weight: 950;
+	text-transform: uppercase;
+}
+
+.kl-stats-team .player-cell {
+	width: 50%;
+	overflow: hidden;
+	text-align: left;
+	text-overflow: ellipsis;
+}
+
+.kl-stats-team .rating {
+	color: #f6c85f;
+	font-weight: 950;
+}

@@ -5,6 +5,7 @@ export default {
 		},
 
 		isActive() {
+			if (this.forceWinner === 'hidden') return false
 			if (this.forceWinner !== 'none') return true
 			return this.$map && (this.$map.phase === 'results' || this.$map.phase === 'gameover')
 		},

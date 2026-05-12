@@ -76,9 +76,10 @@
 				<div class="override-group">
 					<label>Force Win Celebration</label>
 					<div class="button-row">
-						<button class="btn-win --ct" @click="setWinner('team2')">CT Win</button>
-						<button class="btn-win --t" @click="setWinner('team1')">T Win</button>
-						<button class="btn-win --clear" @click="setWinner('none')">Clear</button>
+						<button :class="['btn-win', '--ct', { '--active': state.options['preferences.celebration.forceWinner'] === 'team2' }]" @click="setWinner('team2')">CT Win</button>
+						<button :class="['btn-win', '--t', { '--active': state.options['preferences.celebration.forceWinner'] === 'team1' }]" @click="setWinner('team1')">T Win</button>
+						<button :class="['btn-win', '--clear', { '--active': state.options['preferences.celebration.forceWinner'] === 'none' }]" @click="setWinner('none')">Auto</button>
+						<button :class="['btn-win', '--hidden', { '--active': state.options['preferences.celebration.forceWinner'] === 'hidden' }]" @click="setWinner('hidden')">Hide</button>
 					</div>
 				</div>
 				<div class="override-group" style="margin-top: 24px;">
@@ -114,6 +115,17 @@
 						>
 							{{ style.label }}
 						</button>
+					</div>
+				</div>
+				<div class="override-group" style="margin-top: 20px;">
+					<label>Background Effect</label>
+					<div class="style-pill-grid">
+						<button 
+							v-for="fx in vantaEffects" 
+							:key="fx.value"
+							:class="['btn-style', { '--active': (state.options['css.vanta-effect'] || 'net') === fx.value }]"
+							@click="previewOption('css.vanta-effect', fx.value)"
+						>{{ fx.label }}</button>
 					</div>
 				</div>
 			</div>
@@ -154,6 +166,16 @@ export default {
 				{ value: 'compact', label: 'Compact' },
 				{ value: 'diagonal', label: 'Diagonal' },
 				{ value: 'rounded', label: 'Rounded' },
+			],
+			vantaEffects: [
+				{ value: 'net', label: 'Net' },
+				{ value: 'cells', label: 'Cells' },
+				{ value: 'waves', label: 'Waves' },
+				{ value: 'birds', label: 'Birds' },
+				{ value: 'clouds', label: 'Clouds' },
+				{ value: 'topology', label: 'Topology' },
+				{ value: 'dots', label: 'Dots' },
+				{ value: 'halo', label: 'Halo' },
 			],
 		}
 	},
@@ -266,7 +288,16 @@ export default {
 			state.options['css.ui-style'] = s
 			actions.broadcast('css.ui-style', s)
 			actions.save({ 'css.ui-style': s })
-		}
+		},
+		setOption(key, value) {
+			state.options[key] = value
+			actions.broadcast(key, value)
+			actions.save({ [key]: value })
+		},
+		previewOption(key, value) {
+			state.options[key] = value
+			actions.broadcast(key, value)
+		},
 	},
 	mounted() {
 		const canvas = this.$refs.canvas
@@ -354,10 +385,14 @@ canvas {
 .override-group label { display: block; font-size: 0.8rem; color: #8b949e; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
 
 .button-row { display: flex; gap: 8px; }
-.btn-win { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
-.btn-win.--ct { background: #3498db; color: #fff; }
-.btn-win.--t { background: #e67e22; color: #fff; }
-.btn-win.--clear { background: #2d333b; color: #adbac7; }
+.btn-win { flex: 1; padding: 10px; border: 1px solid #30363d; border-radius: 6px; font-weight: 600; cursor: pointer; background: #2d333b; color: #adbac7; transition: all 0.2s; }
+
+.btn-win.--ct.--active { background: #3498db; color: #fff; border-color: transparent; }
+.btn-win.--t.--active { background: #e67e22; color: #fff; border-color: transparent; }
+.btn-win.--clear.--active { background: #444c56; color: #fff; border-color: #539bf5; }
+.btn-win.--hidden.--active { background: #e74c3c; color: #fff; border-color: transparent; }
+
+.btn-win:hover:not(.--active) { background: #3e444d; color: #fff; }
 
 .btn-promo { width: 100%; padding: 12px; background: #2d333b; border: 1px solid #3498db; color: #3498db; border-radius: 6px; font-weight: 600; cursor: pointer; }
 .btn-promo.--active { background: #3498db; color: #fff; }

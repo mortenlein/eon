@@ -734,7 +734,46 @@ async function scrapeMatch(matchId) {
     maps = [];
   }
 
-  return simplifyMatch(page, maps);
+  const match = simplifyMatch(page, maps);
+
+  let rawStats = [];
+  try {
+    const response = await getJson(`https://www.ggarena.no/api/paradise/matchup/${matchId}/stats`);
+    rawStats = Array.isArray(response.data) ? response.data : [];
+  } catch {
+    rawStats = [];
+  }
+
+  if (rawStats.length > 0) {
+    const homeMembers = await getTeamMembers(match.home.id);
+    const awayMembers = await getTeamMembers(match.away.id);
+    const homeUserIds = new Set(homeMembers.map((m) => String(m.id)));
+    const awayUserIds = new Set(awayMembers.map((m) => String(m.id)));
+
+    const parsedStats = rawStats.map((s) => ({
+      userId: String(s.user?.id || s.paradise_user_id),
+      name: text(s.player_name || s.user?.user_name || "Unknown"),
+      kills: s.kills || 0,
+      assists: s.assists || 0,
+      deaths: s.deaths || 0,
+      kdRatio: s.kd_ratio || "0",
+      rating: s.rating || "0",
+      headshotRatio: s.headshot_ratio || "0",
+    }));
+
+    match.home.stats = parsedStats
+      .filter((s) => homeUserIds.has(s.userId))
+      .sort((a, b) => Number(b.rating) - Number(a.rating));
+
+    match.away.stats = parsedStats
+      .filter((s) => awayUserIds.has(s.userId))
+      .sort((a, b) => Number(b.rating) - Number(a.rating));
+  } else {
+    match.home.stats = [];
+    match.away.stats = [];
+  }
+
+  return match;
 }
 
 async function scrapeTeamGames(matchId, teamId = null) {
