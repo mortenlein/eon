@@ -135,16 +135,33 @@
 
 			<main v-if="!isLoadingKomplettligaen && komplettligaenMatch && komplettligaenView === 'result'" class="kl-scene-frame">
 				<div class="kl-scene-gutter">
-					<section class="kl-match-overlay">
-					<section class="kl-match-card">
-					<header class="kl-match-meta"><span>{{ komplettligaenMatch.division || 'Komplettligaen' }}</span><strong>{{ komplettligaenMatch.round }}</strong></header>
-					<div class="kl-scoreboard">
-						<article :class="['kl-team', 'home', { featured: isFeaturedKomplettligaenTeam(komplettligaenMatch.home), 'match-winner': komplettligaenMatch.matchWinner === 'home' }]"><img :src="komplettligaenMatch.home.logo" alt=""><h2>{{ komplettligaenMatch.home.name }}</h2></article>
-						<div class="kl-score is-final"><small>Series</small><div class="kl-series-score"><span>{{ komplettligaenMatch.series?.home ?? 0 }}</span><b>-</b><span>{{ komplettligaenMatch.series?.away ?? 0 }}</span></div><strong>BO{{ komplettligaenMatch.bestOf || 3 }}</strong><em>{{ komplettligaenMatch.matchWinner ? komplettligaenMatchDetail.label : 'Match result' }}</em></div>
-						<article :class="['kl-team', 'away', { featured: isFeaturedKomplettligaenTeam(komplettligaenMatch.away), 'match-winner': komplettligaenMatch.matchWinner === 'away' }]"><img :src="komplettligaenMatch.away.logo" alt=""><h2>{{ komplettligaenMatch.away.name }}</h2></article>
+					<section class="kl-waiting-scene">
+					<section class="kl-waiting-match">
+					<header class="kl-match-meta">
+						<span>{{ komplettligaenMatch.division || 'Komplettligaen' }}</span>
+						<strong>{{ komplettligaenMatch.round }}</strong>
+					</header>
+					<div class="kl-waiting-scoreboard">
+						<article :class="['kl-waiting-team', { 'kl-winner': komplettligaenMatch.matchWinner === 'home' }]">
+							<img :src="komplettligaenMatch.home.logo" alt="">
+							<h1>{{ komplettligaenMatch.home.name }}</h1>
+						</article>
+						<div class="kl-waiting-score">
+							<small>BO{{ komplettligaenMatch.bestOf || 3 }}</small>
+							<div class="kl-waiting-series">
+								<span :class="{ 'kl-winner-score': komplettligaenMatch.matchWinner === 'home' }">{{ komplettligaenMatch.series?.home ?? 0 }}</span>
+								<b>-</b>
+								<span :class="{ 'kl-winner-score': komplettligaenMatch.matchWinner === 'away' }">{{ komplettligaenMatch.series?.away ?? 0 }}</span>
+							</div>
+							<strong v-if="komplettligaenMatch.matchWinner" class="kl-winner-label">🏆 {{ komplettligaenMatch.matchWinner === 'home' ? komplettligaenMatch.home.name : komplettligaenMatch.away.name }} wins</strong>
+							<strong v-else>Match result</strong>
+						</div>
+						<article :class="['kl-waiting-team', { 'kl-winner': komplettligaenMatch.matchWinner === 'away' }]">
+							<img :src="komplettligaenMatch.away.logo" alt="">
+							<h1>{{ komplettligaenMatch.away.name }}</h1>
+						</article>
 					</div>
-					
-					<div class="kl-maps-exact" style="margin-top: 8px;">
+					<div class="kl-maps-exact">
 						<article v-for="map in komplettligaenMatch.maps" :key="map.number" :class="['kl-map-exact', { finished: map.finished }]" :style="mapBackgroundStyle(map)">
 							<span class="map-number">Map {{ map.number }}</span>
 							<b>{{ map.name || 'TBD' }}</b>
@@ -154,10 +171,10 @@
 						</article>
 					</div>
 					</section>
-					
-					<section v-if="komplettligaenMatch.home.stats?.length || komplettligaenMatch.away.stats?.length" class="kl-player-stats">
+
+					<section class="kl-waiting-bottom kl-result-bottom">
 						<article class="kl-stats-team">
-							<header class="kl-panel-head"><h2>{{ komplettligaenMatch.home.name }}</h2><span>Rating</span></header>
+							<header class="kl-panel-head"><h2>{{ komplettligaenMatch.home.name }}</h2><span>Player stats</span></header>
 							<table>
 								<thead><tr><th class="player-cell">Player</th><th>K</th><th>A</th><th>D</th><th class="rating">Rtg</th></tr></thead>
 								<tbody>
@@ -165,11 +182,12 @@
 										<td class="player-cell">{{ p.name }}</td>
 										<td>{{ p.kills }}</td><td>{{ p.assists }}</td><td>{{ p.deaths }}</td><td class="rating">{{ p.rating }}</td>
 									</tr>
+									<tr v-if="!komplettligaenMatch.home.stats?.length"><td colspan="5" class="empty">No stats available</td></tr>
 								</tbody>
 							</table>
 						</article>
 						<article class="kl-stats-team">
-							<header class="kl-panel-head"><h2>{{ komplettligaenMatch.away.name }}</h2><span>Rating</span></header>
+							<header class="kl-panel-head"><h2>{{ komplettligaenMatch.away.name }}</h2><span>Player stats</span></header>
 							<table>
 								<thead><tr><th class="player-cell">Player</th><th>K</th><th>A</th><th>D</th><th class="rating">Rtg</th></tr></thead>
 								<tbody>
@@ -177,6 +195,7 @@
 										<td class="player-cell">{{ p.name }}</td>
 										<td>{{ p.kills }}</td><td>{{ p.assists }}</td><td>{{ p.deaths }}</td><td class="rating">{{ p.rating }}</td>
 									</tr>
+									<tr v-if="!komplettligaenMatch.away.stats?.length"><td colspan="5" class="empty">No stats available</td></tr>
 								</tbody>
 							</table>
 						</article>
