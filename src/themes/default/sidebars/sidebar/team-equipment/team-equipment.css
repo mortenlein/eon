@@ -83,4 +83,43 @@
 	background: var(--white);
 }
 
+/* ── Style Overrides: Classic & Compact ── */
+.hud-viewport.--style-classic .team-equipment,
+.hud-viewport.--style-compact .team-equipment {
+	padding: 0.4rem 0.6rem;
+}
+
+.hud-viewport.--style-classic .loss-bonus .label,
+.hud-viewport.--style-classic .team-money .label,
+.hud-viewport.--style-classic .equipment-value .label,
+.hud-viewport.--style-compact .loss-bonus .label,
+.hud-viewport.--style-compact .team-money .label,
+.hud-viewport.--style-compact .equipment-value .label {
+	font-size: 0.8rem;
+	margin-bottom: 0.15rem;
+}
+
+.hud-viewport.--style-classic .loss-bonus .value,
+.hud-viewport.--style-classic .team-money .value,
+.hud-viewport.--style-classic .equipment-value .value,
+.hud-viewport.--style-compact .loss-bonus .value,
+.hud-viewport.--style-compact .team-money .value,
+.hud-viewport.--style-compact .equipment-value .value {
+	font-size: 1.2rem;
+}
+
+.hud-viewport.--style-classic .loss-bonus .pips-and-value,
+.hud-viewport.--style-compact .loss-bonus .pips-and-value {
+	grid-template-columns: repeat(2, auto);
+	grid-gap: 0.4rem;
+}
+
+.hud-viewport.--style-classic .loss-bonus .pips .pip,
+.hud-viewport.--style-compact .loss-bonus .pips .pip {
+	width: 0.45rem;
+	height: 0.45rem;
+	margin: 0.15rem;
+}
+
+
 

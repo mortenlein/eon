@@ -32,7 +32,7 @@
 					
 					<!-- Draggable Elements -->
 					<div 
-						v-for="el in elements" 
+						v-for="el in sortedElements" 
 						:key="el.def.id"
 						:class="['hud-el', { '--active': selectedId === el.def.id, '--hidden': !el.visible }]"
 						:style="{
@@ -71,6 +71,7 @@
 			<aside class="properties-sidebar">
 				<div class="sidebar-header">
 					<h3>Elements</h3>
+					<p class="sidebar-tip">Select items here if they are overlapping on the canvas.</p>
 				</div>
 				
 				<div class="element-list">
@@ -194,6 +195,22 @@ const DEFS = [
 		anchor: { v: 'bottom', h: 'right' },
 		props: [ { key: 'css.lan66-current-map-bottom', edge: 'bottom' }, { key: 'css.lan66-current-map-right', edge: 'right' } ],
 		resizable: true, sizeKey: 'css.lan66-current-map-width', sizeUnit: 'rem',
+	},
+	{
+		id: 'maps-sleek', label: 'Sleek Maps',
+		color: 'rgba(79,227,193,0.18)', border: 'rgba(79,227,193,0.5)',
+		baseW: 210, baseH: 20,
+		anchor: { v: 'top', h: 'center' },
+		props: [ { key: 'css.lan66-maps-sleek-top', edge: 'top' }, { key: 'css.lan66-maps-sleek-left', edge: 'left' } ],
+		resizable: true, sizeKey: 'css.lan66-maps-sleek-scale', sizeUnit: '', 
+	},
+	{
+		id: 'event-badge', label: 'Event Badge',
+		color: 'rgba(231,76,60,0.22)', border: 'rgba(231,76,60,0.55)',
+		baseW: 240, baseH: 45,
+		anchor: { v: 'top', h: 'left' },
+		props: [ { key: 'css.lan66-event-badge-top', edge: 'top' }, { key: 'css.lan66-event-badge-left', edge: 'left' } ],
+		resizable: true, sizeKey: 'css.lan66-event-badge-width', sizeUnit: 'rem',
 	}
 ]
 
@@ -214,7 +231,14 @@ export default {
 		}
 	},
 	computed: {
-		selectedElement() { return this.elements.find(e => e.def.id === this.selectedId) }
+		selectedElement() { return this.elements.find(e => e.def.id === this.selectedId) },
+		sortedElements() {
+			return [...this.elements].sort((a, b) => {
+				if (a.def.id === this.selectedId) return 1
+				if (b.def.id === this.selectedId) return -1
+				return 0
+			})
+		}
 	},
 	mounted() {
 		this.computeRemPx()
@@ -528,10 +552,13 @@ export default {
 	border: 2px solid transparent;
 	box-sizing: border-box;
 	cursor: move;
+	opacity: 0.7;
+	transition: opacity 0.2s;
 }
 
-.hud-el.--hidden { opacity: 0.3; }
-.hud-el.--active { border-style: dashed; z-index: 10; background: rgba(255,255,255,0.05); }
+.hud-el:hover { opacity: 0.9; }
+.hud-el.--hidden { opacity: 0.15; pointer-events: none; }
+.hud-el.--active { border-style: dashed; z-index: 100; background: rgba(255,255,255,0.05); opacity: 1; }
 
 .mock-content {
 	width: 100%;
@@ -574,7 +601,8 @@ export default {
 }
 
 .sidebar-header { padding: 16px; border-bottom: 1px solid #30363d; }
-.sidebar-header h3 { margin: 0; font-size: 1rem; color: #fff; }
+.sidebar-header h3 { margin: 0 0 4px 0; font-size: 1rem; color: #fff; }
+.sidebar-tip { margin: 0; font-size: 0.75rem; color: #8b949e; line-height: 1.3; }
 
 .element-list {
 	flex: 1;

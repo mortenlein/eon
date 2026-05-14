@@ -94,6 +94,26 @@ body {
 	z-index: 40;
 }
 
+.maps {
+	position: absolute;
+	display: var(--lan66-maps-display, flex);
+	top: var(--lan66-maps-top, 2.5rem);
+	left: var(--lan66-maps-left, 50%);
+	transform: translateX(-50%) scale(var(--lan66-maps-scale, 1));
+	pointer-events: none;
+	z-index: 50;
+}
+
+.maps-sleek-container {
+	position: absolute;
+	display: flex;
+	top: var(--lan66-maps-sleek-top, 7.5rem);
+	left: var(--lan66-maps-sleek-left, 50%);
+	transform: translateX(-50%) scale(var(--lan66-maps-sleek-scale, 1));
+	pointer-events: none;
+	z-index: 50;
+}
+
 .current-map__label {
 	font-size: 0.65rem;
 	font-weight: 700;
@@ -228,11 +248,22 @@ body {
 .--scene-radar .players-alive,
 .--scene-radar .event-badge,
 .--scene-radar .series-graph,
-.--scene-radar .current-map {
+.--scene-radar .current-map,
+.--scene-radar .maps {
 	opacity: 0;
 	transform: scale(0.95);
 	pointer-events: none;
 	transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.maps {
+	position: absolute;
+	display: var(--lan66-maps-display, flex);
+	top: var(--lan66-maps-top, 2.5rem);
+	left: var(--lan66-maps-left, 50%);
+	transform: translateX(-50%) scale(var(--lan66-maps-scale, 1));
+	pointer-events: none;
+	z-index: 50;
 }
 
 .--scene-radar .radar {

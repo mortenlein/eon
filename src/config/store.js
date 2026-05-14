@@ -91,6 +91,15 @@ export const actions = {
 		}
 	},
 
+	async forceRefresh() {
+		try {
+			await fetch('/config/force-hud-refresh', { method: 'POST' })
+			this.addAlert('HUD Refresh Triggered', 'success')
+		} catch (err) {
+			this.addAlert('Refresh failed', 'error')
+		}
+	},
+
 	broadcast(key, value) {
 		if (state.socket && state.socket.readyState === WebSocket.OPEN) {
 			if (key.includes(':')) {

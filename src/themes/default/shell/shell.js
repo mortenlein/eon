@@ -12,6 +12,8 @@ import Telestrator from '/hud/telestrator/telestrator.vue'
 import PromotionPanel from '/hud/promotion-panel/promotion-panel.vue'
 import TopBar from '/hud/top-bar/top-bar.vue'
 import WinProbGraph from '/hud/win-prob-graph/win-prob-graph.vue'
+import Maps from '/hud/maps/maps.vue'
+import MapsSleek from '/hud/maps-sleek/maps-sleek.vue'
 
 export default {
 	components: {
@@ -29,6 +31,8 @@ export default {
 		PromotionPanel,
 		TopBar,
 		WinProbGraph,
+		Maps,
+		MapsSleek,
 	},
 
 	computed: {
@@ -124,6 +128,7 @@ export default {
 
 		window.addEventListener('resize', this.setScaleFactor)
 		this.loadKomplettligaen()
+		this._komplettligaenInterval = setInterval(() => this.loadKomplettligaen(), 60000)
 		this.initVanta()
 	},
 
@@ -156,6 +161,7 @@ export default {
 
 	beforeUnmount() {
 		window.removeEventListener('resize', this.setScaleFactor)
+		if (this._komplettligaenInterval) clearInterval(this._komplettligaenInterval)
 		this.destroyVanta()
 	},
 
@@ -225,6 +231,8 @@ export default {
 						if (value === 'none') el.classList.add('--layout-hidden');
 						else el.classList.remove('--layout-hidden');
 					}
+					// Also set the CSS variable so 'display: var(...)' works
+					document.documentElement.style.setProperty(prop, value);
 					return;
 				}
 
@@ -341,7 +349,7 @@ export default {
 				CELLS: { color1: 0x0a2540, color2: 0x134e7a, size: 2.0, speed: 0.8 },
 				WAVES: { color: 0x0a1628, shininess: 35, waveHeight: 15, waveSpeed: 0.8 },
 				BIRDS: { color1: 0x3498db, color2: 0x0a2540, colorMode: 'lerpGradient', quantity: 3, birdSize: 1.2, speedLimit: 4, separation: 30 },
-				CLOUDS: { skyColor: 0x0a1628, cloudColor: 0x1a3a5c, cloudShadowColor: 0x050d18, sunColor: 0x3498db, sunGlareColor: 0x134e7a, sunlightColor: 0x1a5276, speed: 0.8 },
+				CLOUDS: { skyColor: 0x080f1a, cloudColor: 0x243b5e, cloudShadowColor: 0x040912, sunColor: 0x3a92c9, sunGlareColor: 0x1a4670, sunlightColor: 0x2a6891, speed: 1.0 },
 				TOPOLOGY: { color: 0x3498db, backgroundColor: 0x020305 },
 				DOTS: { color: 0x3498db, color2: 0x0a2540, backgroundColor: 0x020305, size: 2.5, spacing: 30, showLines: true },
 				HALO: { color: 0x3498db, backgroundColor: 0x020305, size: 1.5 },

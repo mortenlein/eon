@@ -310,11 +310,11 @@ export const getDevGsiState = () => {
 			},
 		},
 		round: {
-			phase: 'live',
+			phase: 'freezetime',
 		},
 		phase_countdowns: {
-			phase: 'live',
-			phase_ends_in: '54.2',
+			phase: 'freezetime',
+			phase_ends_in: '15.0',
 		},
 		player: {
 			steamid: '76561198000000008',

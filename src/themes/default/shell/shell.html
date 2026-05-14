@@ -48,13 +48,7 @@
 					</div>
 
 					<div class="kl-maps-exact">
-						<article v-for="map in komplettligaenMatch.maps" :key="map.number" :class="['kl-map-exact', { finished: map.finished }]" :style="mapBackgroundStyle(map)">
-							<span class="map-number">Map {{ map.number }}</span>
-							<b>{{ map.name || `Map ${map.number}` }}</b>
-							<strong>{{ map.homeScore ?? '-' }} : {{ map.awayScore ?? '-' }}</strong>
-							<img v-if="map.winner === 'home' || map.winner === 'away'" class="map-winner" :src="map.winner === 'home' ? komplettligaenMatch.home.logo : komplettligaenMatch.away.logo" alt="">
-							<span v-else class="map-placeholder">TBD</span>
-						</article>
+						<Maps />
 					</div>
 					</section>
 					</section>
@@ -93,13 +87,7 @@
 						</article>
 					</div>
 					<div class="kl-maps-exact">
-						<article v-for="map in komplettligaenMatch.maps" :key="map.number" :class="['kl-map-exact', { finished: map.finished }]" :style="mapBackgroundStyle(map)">
-							<span class="map-number">Map {{ map.number }}</span>
-							<b>{{ map.name || 'TBD' }}</b>
-							<strong>{{ map.homeScore ?? '-' }} : {{ map.awayScore ?? '-' }}</strong>
-							<img v-if="map.winner === 'home' || map.winner === 'away'" class="map-winner" :src="map.winner === 'home' ? komplettligaenMatch.home.logo : komplettligaenMatch.away.logo" alt="">
-							<span v-else class="map-placeholder">TBD</span>
-						</article>
+						<Maps />
 					</div>
 					</section>
 
@@ -264,7 +252,7 @@
 		<Radar v-if="$map.name" />
 		<MapWinner v-if="$map.name" />
 		<!-- MVP Card Temporarily hidden: <MvpCard v-if="$map.name" /> -->
-		<TopBar v-if="$map.name" />
+		<TopBar v-if="$map.name" :match="komplettligaenMatch" />
 		<PlayersAlive v-if="$map.name" />
 
 		<div v-if="showObserverDataWarning" class="observer-warning">
@@ -294,6 +282,14 @@
 			</div>
 		</div>
 
+		<div class="maps" v-if="$map.name && !$opts['preferences.maps.sleek']">
+			<Maps />
+		</div>
+
+		<div class="maps-sleek-container" v-if="$map.name && komplettligaenMatch && $opts['preferences.maps.sleek']">
+			<MapsSleek :match="komplettligaenMatch" />
+		</div>
+
 		<SeriesGraph v-if="$map.name" />
 
 		<div v-if="$map.name" class="current-map">
@@ -318,6 +314,9 @@
 				<div class="standby-copy">The HUD server is running, but no live spectator map data has been received yet.</div>
 				<div class="standby-copy">Open CS2, load the GSI config, then spectate a match, GOTV, or demo.</div>
 			</div>
+		</div>
+		<div class="maps">
+			<Maps />
 		</div>
 	</template>
 </div>

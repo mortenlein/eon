@@ -148,17 +148,17 @@
                                                  "label":  "Right sponsor label"
                                              },
                     "cvars.cash_team_loser_bonus":  {
-                                                        "type":  "number",
-                                                        "fallback":  1400,
-                                                        "section":  "Cvars",
-                                                        "label":  "Value of cash_team_loser_bonus, i.e. the initial loss bonus amount"
-                                                    },
+                                                         "type":  "number",
+                                                         "fallback":  1400,
+                                                         "section":  "Cvars",
+                                                         "label":  "Value of cash_team_loser_bonus, i.e. the initial loss bonus amount"
+                                                     },
                     "cvars.cash_team_loser_bonus_consecutive_rounds":  {
-                                                                           "type":  "number",
-                                                                           "fallback":  500,
-                                                                           "section":  "Cvars",
-                                                                           "label":  "Value of cash_team_loser_bonus_consecutive_rounds, i.e. the additional loss bonus amount per consecutive round lost"
-                                                                       },
+                                                                            "type":  "number",
+                                                                            "fallback":  500,
+                                                                            "section":  "Cvars",
+                                                                            "label":  "Value of cash_team_loser_bonus_consecutive_rounds, i.e. the additional loss bonus amount per consecutive round lost"
+                                                                        },
                     "cvars.mp_c4timer":  {
                                              "type":  "number",
                                              "fallback":  40,
@@ -219,6 +219,18 @@
                                                                         "section":  "Preferences",
                                                                         "label":  "Show map name and screenshot in the Series Graph, even if there is only a single match in the series"
                                                                     },
+                    "preferences.maps.sleek":  {
+                                                   "type":  "boolean",
+                                                   "section":  "Preferences",
+                                                   "label":  "Use minimalistic sleek maps on the HUD (requires Komplettligaen scraper match)",
+                                                   "value":  true
+                                               },
+                    "preferences.topBar.teamLogos":  {
+                                                        "type":  "boolean",
+                                                        "section":  "Preferences",
+                                                        "label":  "Show team logos in the Top Bar (requires Komplettligaen scraper match)",
+                                                        "value":  false
+                                                    },
                     "preferences.topBar.clock.tenSecondsRedInFreezetime":  {
                                                                                "type":  "boolean",
                                                                                "section":  "Preferences",
@@ -330,9 +342,9 @@
                                                "value":  "LAN66NORD"
                                            },
                     "series.name.right":  {
-                                              "section":  "Event",
-                                              "value":  "17-19 APRIL 2026"
-                                          },
+                                               "section":  "Event",
+                                               "value":  "17-19 APRIL 2026"
+                                           },
                     "series.logoUrl":  {
                                            "section":  "Event",
                                            "label":  "Event Logo URL",
@@ -607,11 +619,11 @@
                                                            "value":  "2.8rem"
                                                        },
                     "css.promotion-panel-subtitle-size":  {
-                                                              "type":  "text",
-                                                              "section":  "Promotion",
-                                                              "label":  "Subtitle Font Size (e.g. 1.2rem)",
-                                                              "value":  "1.2rem"
-                                                          },
+                                                               "type":  "text",
+                                                               "section":  "Promotion",
+                                                               "label":  "Subtitle Font Size (e.g. 1.2rem)",
+                                                               "value":  "1.2rem"
+                                                           },
                     "match.mode":  {
                                        "type":  "select",
                                        "section":  "Match Rules",
@@ -693,44 +705,112 @@
                                                       },
                     "css.lan66-radar-display":  {
                                                     "type":  "boolean",
-                                                    "label":  "Show Radar"
+                                                    "section":  "HUD Layout",
+                                                    "label":  "Show Radar",
+                                                    "value":  true
                                                 },
                     "css.lan66-top-bar-display":  {
                                                       "type":  "boolean",
-                                                      "label":  "Show Top Bar"
+                                                      "section":  "HUD Layout",
+                                                      "label":  "Show Top Bar",
+                                                      "value":  true
                                                   },
                     "css.lan66-players-alive-display":  {
                                                             "type":  "boolean",
-                                                            "label":  "Show Players Alive"
+                                                            "section":  "HUD Layout",
+                                                            "label":  "Show Players Alive",
+                                                            "value":  true
                                                         },
                     "css.lan66-sidebar-left-display":  {
                                                            "type":  "boolean",
-                                                           "label":  "Show Left Sidebar"
+                                                           "section":  "HUD Layout",
+                                                           "label":  "Show Left Sidebar",
+                                                           "value":  true
                                                        },
                     "css.lan66-sidebar-right-display":  {
                                                             "type":  "boolean",
-                                                            "label":  "Show Right Sidebar"
+                                                            "section":  "HUD Layout",
+                                                            "label":  "Show Right Sidebar",
+                                                            "value":  true
                                                         },
                     "css.lan66-focused-player-display":  {
                                                              "type":  "boolean",
-                                                             "label":  "Show Focused Player"
+                                                             "section":  "HUD Layout",
+                                                             "label":  "Show Focused Player",
+                                                             "value":  true
                                                          },
                     "css.lan66-event-badge-display":  {
                                                           "type":  "boolean",
-                                                          "label":  "Show Event Badge"
+                                                          "section":  "HUD Layout",
+                                                          "label":  "Show Event Badge",
+                                                          "value":  true
                                                       },
                     "css.lan66-current-map-display":  {
                                                           "type":  "boolean",
-                                                          "label":  "Show Current Map"
+                                                          "section":  "HUD Layout",
+                                                          "label":  "Show Current Map",
+                                                          "value":  true
                                                       },
                     "css.lan66-sponsor-left-display":  {
                                                            "type":  "boolean",
-                                                           "label":  "Show Left Sponsor"
+                                                           "section":  "HUD Layout",
+                                                           "label":  "Show Left Sponsor",
+                                                           "value":  true
                                                        },
                     "css.lan66-sponsor-right-display":  {
                                                             "type":  "boolean",
-                                                            "label":  "Show Right Sponsor"
-                                                        }
+                                                            "section":  "HUD Layout",
+                                                            "label":  "Show Right Sponsor",
+                                                            "value":  true
+                                                        },
+                    "css.lan66-maps-display":  {
+                                                   "type":  "boolean",
+                                                   "section":  "HUD Layout",
+                                                   "label":  "Show Series Maps",
+                                                   "value":  true
+                                               },
+                    "css.lan66-maps-top":  {
+                                               "type":  "string",
+                                               "section":  "HUD Layout",
+                                               "label":  "Maps Top Position",
+                                               "value":  "2.5rem"
+                                           },
+                    "css.lan66-maps-left":  {
+                                                "type":  "string",
+                                                "section":  "HUD Layout",
+                                                "label":  "Maps Left Position",
+                                                "value":  "50%"
+                                            },
+                    "css.lan66-maps-scale":  {
+                                                 "type":  "string",
+                                                 "section":  "HUD Layout",
+                                                 "label":  "Maps Scale Factor",
+                                                 "value":  "1"
+                                             },
+                    "css.lan66-maps-sleek-top":  {
+                                                     "type":  "string",
+                                                     "section":  "HUD Layout",
+                                                     "label":  "Sleek Maps Top Position",
+                                                     "value":  "7.5rem"
+                                                 },
+                    "css.lan66-maps-sleek-left":  {
+                                                      "type":  "string",
+                                                      "section":  "HUD Layout",
+                                                      "label":  "Sleek Maps Left Position",
+                                                      "value":  "50%"
+                                                  },
+                    "css.lan66-maps-sleek-scale":  {
+                                                       "type":  "string",
+                                                       "section":  "HUD Layout",
+                                                       "label":  "Sleek Maps Scale Factor",
+                                                       "value":  "1"
+                                                   },
+                    "css.lan66-maps-sleek-display":  {
+                                                         "type":  "string",
+                                                         "section":  "HUD Layout",
+                                                         "label":  "Sleek Maps Visibility",
+                                                         "value":  "flex"
+                                                     }
                 },
     "optionSectionDescriptions":  {
                                       "Style Overrides":  "NB: To apply changes, click Save, then Force HUD Refresh."

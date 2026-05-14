@@ -27,7 +27,7 @@ const run = async () => {
 	await initSettings()
 	const { settings } = await getSettings()
 
-	const host = process.env.HOST || settings.host || '127.0.0.1'
+	const host = process.env.HOST || settings.host || '0.0.0.0'
 	const port = process.env.PORT || settings.port || 31982
 
 	const app = new Koa()

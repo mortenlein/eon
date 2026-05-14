@@ -201,4 +201,32 @@ export const registerConfigRoutes = (router, websocket) => {
 	})
 
 
+
+	/* ── Setup Import/Export ── */
+	router.get('/config/export', async (context) => {
+		const theme = await readJson(userspaceSettingsPath).catch(() => ({}))
+		const presets = await loadPresets()
+		
+		context.body = {
+			theme,
+			presets,
+			exportedAt: new Date().toISOString()
+		}
+		context.set('Content-Disposition', `attachment; filename="eon-setup-${Date.now()}.json"`)
+	})
+
+	router.post('/config/import', async (context) => {
+		const { theme, presets } = context.request.body
+		if (!theme && !presets) {
+			context.status = 400
+			context.body = { error: 'Invalid setup file' }
+			return
+		}
+
+		if (theme) await writeJson(userspaceSettingsPath, theme)
+		if (presets) await writeJson(presetsPath, presets)
+
+		websocket.broadcastRefresh()
+		context.status = 204
+	})
 }

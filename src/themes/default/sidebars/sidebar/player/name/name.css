@@ -39,7 +39,7 @@
 
 .name.--right {
 	text-align: right;
-	justify-content: flex-end;
+	align-items: flex-end;
 	background:
 		linear-gradient(270deg, rgba(255, 255, 255, 0.04), transparent),
 		rgba(var(--black-rgb), 0.12);
@@ -51,7 +51,7 @@
 }
 
 .hud-viewport.--style-compact .name .primary {
-	font-size: 0.92em;
+	font-size: 0.82em;
 }
 
 .hud-viewport.--style-diagonal .name {

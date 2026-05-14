@@ -208,6 +208,7 @@ const displayControls = [
 	{ key: 'css.lan66-current-map-display', label: 'Current map', description: 'Current map panel.' },
 	{ key: 'css.lan66-sponsor-left-display', label: 'Left sponsor', description: 'Left sponsor slot.' },
 	{ key: 'css.lan66-sponsor-right-display', label: 'Right sponsor', description: 'Right sponsor slot.' },
+	{ key: 'css.lan66-maps-display', label: 'Series maps', description: 'Displays the match maps from Komplettligaen.' },
 ]
 
 const behaviorSwitches = [
@@ -218,6 +219,7 @@ const behaviorSwitches = [
 	{ key: 'preferences.topBar.clock.tenSecondsRedInTacticalTimeout', label: 'Red clock under 10s in timeout', description: 'Highlights expiring tactical timeouts.' },
 	{ key: 'preferences.topBar.clock.tenSecondsRedInRoundRestartDelay', label: 'Red clock after round end', description: 'Highlights short transition time.' },
 	{ key: 'preferences.topBar.matchPointRounds.showDuringRound', label: 'Show first-to panel during round', description: 'Keeps overtime target information visible mid-round.' },
+	{ key: 'preferences.topBar.teamLogos', label: 'Show team logos in Top Bar', description: 'Displays Komplettligaen team logos next to the names.' },
 ]
 
 const behaviorNumbers = [

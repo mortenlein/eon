@@ -63,6 +63,7 @@
 				</div>
 				<div class="button-row" style="margin-top: 12px;">
 					<button class="btn-promo" @click="saveKomplettligaen" :disabled="komplettligaenLoading">Save Match</button>
+					<button class="btn-win --clear" @click="refreshKomplettligaen" :disabled="komplettligaenLoading">Refresh Data</button>
 					<button class="btn-win --clear" @click="testKomplettligaen" :disabled="komplettligaenLoading || !komplettligaen.matchId">Test</button>
 				</div>
 				<div class="kl-status" :class="{ '--error': komplettligaenError }">{{ komplettligaenStatus }}</div>
@@ -208,6 +209,21 @@ export default {
 				this.komplettligaenStatus = 'Saved. HUD scenes will refresh.'
 			} catch (err) {
 				this.komplettligaenStatus = 'Save failed'
+				this.komplettligaenError = true
+			} finally {
+				this.komplettligaenLoading = false
+			}
+		},
+		async refreshKomplettligaen() {
+			this.komplettligaenLoading = true
+			this.komplettligaenError = false
+			this.komplettligaenStatus = 'Refreshing cache...'
+			try {
+				await fetch('/config/komplettligaen/refresh', { method: 'POST' })
+				this.komplettligaenStatus = 'Cache cleared. Re-fetching data...'
+				await this.testKomplettligaen()
+			} catch (err) {
+				this.komplettligaenStatus = 'Refresh failed'
 				this.komplettligaenError = true
 			} finally {
 				this.komplettligaenLoading = false
@@ -418,6 +434,7 @@ canvas {
 	border-radius: 6px;
 	color: #c9d1d9;
 }
+
 
 .kl-status {
 	min-height: 20px;

@@ -34,6 +34,7 @@
 					<span class="save-indicator" :class="`--${state.saveState}`">
 						{{ saveMessage }}
 					</span>
+					<button class="btn-secondary" @click="actions.forceRefresh()" style="margin-right: 8px;">Force HUD Refresh</button>
 					<button class="btn-primary" @click="actions.save()">Save All Changes</button>
 				</div>
 			</header>
@@ -65,6 +66,7 @@ import TeamsEditor from '/config/components/TeamsEditor.vue'
 import SeriesEditor from '/config/components/SeriesEditor.vue'
 import MatchRulesEditor from '/config/components/MatchRulesEditor.vue'
 import SponsorsEditor from '/config/components/SponsorsEditor.vue'
+import PortabilityEditor from '/config/components/PortabilityEditor.vue'
 
 const iconPaths = {
 	live: ['M6 12h12', 'M12 6v12', 'M8.5 8.5h7v7h-7z'],
@@ -74,6 +76,7 @@ const iconPaths = {
 	teams: ['M8 11a4 4 0 1 1 8 0', 'M3 20a7 7 0 0 1 14 0', 'M18 14a5 5 0 0 1 3 5'],
 	sponsors: ['M5 7h14v10H5z', 'M8 10h8', 'M8 14h5'],
 	options: ['M12 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8', 'M12 2v3', 'M12 19v3', 'M4.93 4.93l2.12 2.12', 'M16.95 16.95l2.12 2.12', 'M2 12h3', 'M19 12h3', 'M4.93 19.07l2.12-2.12', 'M16.95 7.05l2.12-2.12'],
+	portability: ['M16 3l4 4l-4 4', 'M20 7h-9', 'M8 21l-4 -4l4 -4', 'M4 17h9'],
 }
 
 const NavIcon = {
@@ -107,6 +110,7 @@ export default {
 				{ id: 'teams', label: 'Teams Setup', icon: 'teams', component: TeamsEditor },
 				{ id: 'sponsors', label: 'Sponsors', icon: 'sponsors', component: SponsorsEditor },
 				{ id: 'options', label: 'HUD Options', icon: 'options', component: OptionsEditor },
+				{ id: 'portability', label: 'Import / Export', icon: 'portability', component: PortabilityEditor },
 			]
 		}
 	},
@@ -252,6 +256,18 @@ export default {
 }
 
 .btn-primary:hover { background: #2980b9; }
+
+.btn-secondary {
+	background: #21262d;
+	border: 1px solid #30363d;
+	color: #c9d1d9;
+	padding: 8px 16px;
+	border-radius: 6px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.btn-secondary:hover { background: #30363d; color: #fff; }
 
 .caster-alerts {
 	position: fixed;

@@ -93,4 +93,32 @@
 	margin-right: 0.75rem;
 }
 
+/* ── Style Overrides: Classic & Compact ── */
+.hud-viewport.--style-classic .total,
+.hud-viewport.--style-classic .smokegrenade,
+.hud-viewport.--style-classic .molotov,
+.hud-viewport.--style-classic .flashbang,
+.hud-viewport.--style-classic .hegrenade,
+.hud-viewport.--style-compact .total,
+.hud-viewport.--style-compact .smokegrenade,
+.hud-viewport.--style-compact .molotov,
+.hud-viewport.--style-compact .flashbang,
+.hud-viewport.--style-compact .hegrenade {
+	padding: 0.4rem 0.6rem;
+	font-size: 1.1rem;
+}
+
+.hud-viewport.--style-classic .smokegrenade img.label,
+.hud-viewport.--style-classic .molotov img.label,
+.hud-viewport.--style-classic .flashbang img.label,
+.hud-viewport.--style-classic .hegrenade img.label,
+.hud-viewport.--style-compact .smokegrenade img.label,
+.hud-viewport.--style-compact .molotov img.label,
+.hud-viewport.--style-compact .flashbang img.label,
+.hud-viewport.--style-compact .hegrenade img.label {
+	height: 1.1rem;
+	margin-right: 0.4rem;
+}
+
+
 
