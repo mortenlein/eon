@@ -220,6 +220,7 @@ const behaviorSwitches = [
 	{ key: 'preferences.topBar.clock.tenSecondsRedInRoundRestartDelay', label: 'Red clock after round end', description: 'Highlights short transition time.' },
 	{ key: 'preferences.topBar.matchPointRounds.showDuringRound', label: 'Show first-to panel during round', description: 'Keeps overtime target information visible mid-round.' },
 	{ key: 'preferences.topBar.teamLogos', label: 'Show team logos in Top Bar', description: 'Displays Komplettligaen team logos next to the names.' },
+	{ key: 'preferences.topBar.swapScrapedTeams', label: 'Swap Home/Away branding', description: 'Manually swap the scraper mapping if team sides are flipped.' },
 ]
 
 const behaviorNumbers = [

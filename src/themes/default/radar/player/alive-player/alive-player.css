@@ -9,7 +9,11 @@
 
 	aspect-ratio: 1;
 	transform: translate(-50%, -50%);
-	transition: opacity var(--fade-fast-duration) ease;
+	transition: 
+		left 0.15s linear, 
+		top 0.15s linear, 
+		transform 0.15s linear,
+		opacity var(--fade-fast-duration) ease;
 }
 
 .alive-player.--focused {

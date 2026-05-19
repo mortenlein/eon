@@ -17,16 +17,28 @@ export default {
 
 		getTeamName(teamIndex) {
 			const team = this.$teams[teamIndex];
-			const match = this.match;
+			if (!team) return '';
 
-			// If in demo mode (or just whenever a match is loaded and names mismatch),
-			// force the HUD to display the scraped names so the user can verify the integration.
+			// 1. Manual override in config takes priority
+			const override = teamIndex === 0 ? this.$opts['teams.leftTeamName'] : this.$opts['teams.rightTeamName'];
+			if (override?.trim()) return override;
+
+			const match = this.match;
 			if (match) {
-				if (teamIndex === 0 && match.home?.name) return match.home.name;
-				if (teamIndex === 1 && match.away?.name) return match.away.name;
+				const isSwapped = this.$opts['preferences.topBar.swapScrapedTeams'];
+				const homeName = match.home?.name;
+				const awayName = match.away?.name;
+
+				// Try to match by current GSI name (handles side swaps automatically if names match)
+				if (team.name === homeName) return homeName;
+				if (team.name === awayName) return awayName;
+
+				// Fallback to index-based assignment if no name match (e.g. demo mode or name mismatch)
+				if (teamIndex === 0) return isSwapped ? awayName : homeName;
+				if (teamIndex === 1) return isSwapped ? homeName : awayName;
 			}
 
-			return team?.name || '';
+			return team.name || '';
 		},
 
 		getTeamLogo(teamIndex) {
@@ -34,13 +46,19 @@ export default {
 			const match = this.match;
 			if (!team || !match) return null;
 
-			if (team.name === match.home?.name) return match.home?.logo;
-			if (team.name === match.away?.name) return match.away?.logo;
+			const isSwapped = this.$opts['preferences.topBar.swapScrapedTeams'];
+			const homeName = match.home?.name;
+			const awayName = match.away?.name;
+			const homeLogo = match.home?.logo;
+			const awayLogo = match.away?.logo;
 
-			// Fallback logic if names don't exactly match (e.g., GSI name slightly different than Komplettligaen name)
-			// Assume home is left (0) and away is right (1)
-			if (teamIndex === 0 && match.home?.logo) return match.home.logo;
-			if (teamIndex === 1 && match.away?.logo) return match.away.logo;
+			// Try to match by current name
+			if (team.name === homeName) return homeLogo;
+			if (team.name === awayName) return awayLogo;
+
+			// Fallback to index-based if no name match
+			if (teamIndex === 0) return isSwapped ? awayLogo : homeLogo;
+			if (teamIndex === 1) return isSwapped ? homeLogo : awayLogo;
 
 			return null;
 		}

@@ -231,6 +231,12 @@
                                                         "label":  "Show team logos in the Top Bar (requires Komplettligaen scraper match)",
                                                         "value":  false
                                                     },
+                    "preferences.topBar.swapScrapedTeams":  {
+                                                                "type":  "boolean",
+                                                                "section":  "Preferences",
+                                                                "label":  "Swap Home/Away logos and names in the Top Bar",
+                                                                "value":  false
+                                                            },
                     "preferences.topBar.clock.tenSecondsRedInFreezetime":  {
                                                                                "type":  "boolean",
                                                                                "section":  "Preferences",

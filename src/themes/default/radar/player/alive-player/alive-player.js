@@ -24,9 +24,6 @@ export default {
 		},
 
 		coordinates() {
-			const angle = this.getAngle()
-			this.rememberPositionAndAngle(angle)
-
 			const [x, y, z, a] = this.averagePreviousPositionsAndAngles()
 
 			return {
@@ -48,13 +45,23 @@ export default {
 		},
 	},
 
+	watch: {
+		'player.position': {
+			handler() {
+				this.rememberPositionAndAngle(this.getAngle())
+			},
+			deep: true,
+			immediate: true
+		}
+	},
+
 	methods: {
 		getLevel,
 		offsetX,
 		offsetY,
 
 		getAngle() {
-			const [x, y] = this.player.forward
+			const [x, y] = this.player.forward || [0, 1]
 
 			const radians = Math.atan2(x, y)
 			const degrees = 180 * radians / Math.PI
@@ -64,6 +71,10 @@ export default {
 
 		// see src/themes/default/radar/helpers/previous-positions.js for an explanation of this
 		averagePreviousPositionsAndAngles() {
+			if (this.previousPositionsAndAngles.length === 0) {
+				return [...(this.player.position || [0,0,0]), this.getAngle()]
+			}
+
 			let sumX = 0
 			let sumY = 0
 			let sumZ = 0
@@ -86,19 +97,20 @@ export default {
 				sumA -= anglesBetween270And360 * 360
 			}
 
+			const count = this.previousPositionsAndAngles.length
 			return [
-				sumX / this.previousPositionsAndAngles.length,
-				sumY / this.previousPositionsAndAngles.length,
-				sumZ / this.previousPositionsAndAngles.length,
-				sumA / this.previousPositionsAndAngles.length,
+				sumX / count,
+				sumY / count,
+				sumZ / count,
+				sumA / count,
 			]
 		},
 
 		rememberPositionAndAngle(angle) {
-			const [x, y, z] = this.player.position
+			const [x, y, z] = this.player.position || [0,0,0]
 
 			// if players teleport across the map (e.g. at the beginning of a freezetime), clear the previous positions array first
-			if (this.previousPositionsAndAngles.length > 1) {
+			if (this.previousPositionsAndAngles.length > 0) {
 				const distance = vectorDistance(this.previousPositionsAndAngles[this.previousPositionsAndAngles.length - 1], [x, y, z])
 
 				if (distance > 128) {
@@ -108,7 +120,8 @@ export default {
 
 			this.previousPositionsAndAngles.push([x, y, z, angle])
 
-			if (this.previousPositionsAndAngles.length > 16) {
+			// Reduced from 16 to 8 for better responsiveness with CSS transitions
+			if (this.previousPositionsAndAngles.length > 8) {
 				this.previousPositionsAndAngles.shift()
 			}
 		},

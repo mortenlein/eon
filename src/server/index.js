@@ -105,6 +105,12 @@ const run = async () => {
 					context.status = 200
 				}
 			}
+			else {
+				// Fallback to serving from the public directory
+				const root = join(builtinRootDirectory, 'public')
+				await send(context, urlPath.replace(/^\//, ''), { root })
+				if (context.body) context.status = 200
+			}
 		} catch (err) {
 			// Silent 404
 		}

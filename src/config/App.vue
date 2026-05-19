@@ -1,9 +1,12 @@
 <template>
-	<div class="eon-config-spa">
+	<div :class="['eon-config-spa', { '--sidebar-collapsed': isSidebarCollapsed }]">
 		<aside class="sidebar">
 			<div class="sidebar-brand">
 				<img src="/favicon.svg" class="logo" />
-				<span>Eon Suite</span>
+				<span v-if="!isSidebarCollapsed">Eon Suite</span>
+				<button class="btn-collapse" @click="isSidebarCollapsed = !isSidebarCollapsed">
+					<NavIcon :name="isSidebarCollapsed ? 'portability' : 'layout'" />
+				</button>
 			</div>
 			
 			<nav class="nav-links">
@@ -102,6 +105,7 @@ export default {
 	},
 	data() {
 		return {
+			isSidebarCollapsed: false,
 			categories: [
 				{ id: 'dashboard', label: 'Live Control', icon: 'live', component: Dashboard },
 				{ id: 'layout', label: 'Layout Editor', icon: 'layout', component: LayoutEditor },
@@ -143,6 +147,11 @@ export default {
 	height: 100vh;
 	background: #121418;
 	color: #eee;
+	transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.eon-config-spa.--sidebar-collapsed {
+	grid-template-columns: 72px 1fr;
 }
 
 .sidebar {
@@ -156,10 +165,38 @@ export default {
 	padding: 24px;
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 12px;
 	font-weight: 700;
 	font-size: 1.2rem;
 	color: #fff;
+}
+
+.--sidebar-collapsed .sidebar-brand {
+	padding: 20px 0;
+	flex-direction: column;
+}
+
+.btn-collapse {
+	background: none;
+	border: none;
+	color: #8b949e;
+	padding: 4px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+}
+
+.btn-collapse:hover {
+	background: #2d333b;
+	color: #fff;
+}
+
+.btn-collapse svg {
+	width: 18px;
+	height: 18px;
 }
 
 .logo { width: 32px; height: 32px; }
@@ -187,6 +224,15 @@ export default {
 .nav-item:hover { background: #2d333b; color: #fff; }
 .nav-item.--active { background: #3498db; color: #fff; font-weight: 600; }
 
+.--sidebar-collapsed .nav-item {
+	padding: 12px 0;
+	justify-content: center;
+}
+
+.--sidebar-collapsed .nav-label {
+	display: none;
+}
+
 .nav-icon {
 	width: 20px;
 	height: 20px;
@@ -213,12 +259,23 @@ export default {
 }
 
 .content-header {
-	padding: 16px 32px;
+	padding: 16px 24px;
 	background: #1a1d23;
 	border-bottom: 1px solid #2d333b;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+}
+
+@media (max-width: 768px) {
+	.eon-config-spa {
+		grid-template-columns: 64px 1fr;
+	}
+	.nav-label { display: none; }
+	.sidebar-brand span { display: none; }
+	.content-header { padding: 12px 16px; }
+	.content-header h1 { font-size: 1.2rem; }
+	.header-actions .btn-secondary { display: none; }
 }
 
 .header-actions {
