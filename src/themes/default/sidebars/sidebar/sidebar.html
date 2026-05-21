@@ -1,4 +1,4 @@
-<div :class="['sidebar', positionClass]">
+<div v-if="team" :class="['sidebar', positionClass]">
 	<img v-if="overlayImageUrl" :class="['overlay', positionClass]" :src="overlayImageUrl" alt="">
 
 	<TeamEquipment :team="team" :position="position" />

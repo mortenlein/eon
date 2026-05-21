@@ -15,6 +15,7 @@ export default {
 		},
 
 		isActive() {
+			if (!this.team) return false
 			return ! this.$opts['preferences.sidebar.teamGrenades.hideDuringRound']
 				|| this.$round.isFreezetime
 				|| (this.$round.phase === 'live' && this.$round.phaseEndsInSec >= (this.$opts['cvars.mp_roundtime'] * 60 - this.$opts['preferences.sidebar.teamGrenades.activeIntoRoundSec']))
@@ -26,6 +27,7 @@ export default {
 		},
 
 		molotovIconUrl() {
+			if (!this.team) return null
 			switch (this.team.side) {
 				case 2: return '/hud/img/weapons/molotov.svg'
 				case 3: return '/hud/img/weapons/incgrenade.svg'
@@ -42,8 +44,10 @@ export default {
 				total: 0,
 			}
 
+			if (!this.team?.players) return grenades
+
 			for (const player of this.team.players) {
-				for (const grenade of player.grenades) {
+				for (const grenade of player.grenades || []) {
 					const name = this.getGrenadeName(grenade)
 
 					grenades[name]++

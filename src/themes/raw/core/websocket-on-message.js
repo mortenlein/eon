@@ -19,29 +19,50 @@ const processWsQueue = (timestamp) => {
 	const messages = [...wsQueue];
 	wsQueue = [];
 
-	messages.forEach(msg => {
+	// Parse messages once
+	const parsed = [];
+	let latestStateIdx = -1;
+
+	messages.forEach((msg) => {
 		try {
-			const { event, body } = JSON.parse(msg.data);
-
-			// Dispatch a global event for components to listen to
-			window.dispatchEvent(new CustomEvent(`socket:${event}`, { detail: body }));
-
-			switch (event) {
-				case 'refresh': return handleRefresh(body);
-				case 'state': return handleState(body);
-				case 'gsi_update': return handleState(body);
-				case 'static_data': return handleState(body);
-				case 'config:update': 
-					if (body.key) {
-						if (body.value !== undefined && body.value !== null && body.value !== '') {
-							options[body.key] = body.value;
-						} else {
-							delete options[body.key];
-						}
-					}
-					break;
+			const parsedMsg = JSON.parse(msg.data);
+			parsed.push(parsedMsg);
+			if (parsedMsg.event === 'state' || parsedMsg.event === 'gsi_update') {
+				latestStateIdx = parsed.length - 1;
 			}
-		} catch (err) {}
+		} catch (err) {
+			parsed.push(null);
+		}
+	});
+
+	parsed.forEach((msg, idx) => {
+		if (!msg) return;
+
+		// Dispatch a global event for components to listen to
+		window.dispatchEvent(new CustomEvent(`socket:${msg.event}`, { detail: msg.body }));
+
+		// Only process the latest state or gsi_update event in this batch
+		if (msg.event === 'state' || msg.event === 'gsi_update') {
+			if (idx !== latestStateIdx) {
+				return; // Skip intermediate outdated state updates
+			}
+		}
+
+		switch (msg.event) {
+			case 'refresh': return handleRefresh(msg.body);
+			case 'state': return handleState(msg.body);
+			case 'gsi_update': return handleState(msg.body);
+			case 'static_data': return handleState(msg.body);
+			case 'config:update': 
+				if (msg.body.key) {
+					if (msg.body.value !== undefined && msg.body.value !== null && msg.body.value !== '') {
+						options[msg.body.key] = msg.body.value;
+					} else {
+						delete options[msg.body.key];
+					}
+				}
+				break;
+		}
 	});
 };
 

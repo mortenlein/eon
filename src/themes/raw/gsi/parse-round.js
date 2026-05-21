@@ -2,15 +2,15 @@ import { gsiState, options } from '/hud/core/state.js'
 
 const getWinningSide = () => {
 	switch (gsiState.round?.win_team) {
-		case 'T': return 2
-		case 'CT': return 3
+		case 'T': return 'T'
+		case 'CT': return 'CT'
 		default: return undefined
 	}
 }
 
 export const parseRound = () => {
-	const maxrounds = Number(options['cvars.mp_maxrounds'] || 24)
-	const overtimeMaxrounds = Number(options['cvars.mp_overtime_maxrounds'] || 6)
+	const maxrounds = Number(options?.['cvars.mp_maxrounds'] || 24)
+	const overtimeMaxrounds = Number(options?.['cvars.mp_overtime_maxrounds'] || 6)
 	const phase = gsiState.phase_countdowns?.phase || gsiState.round?.phase
 	const phaseEndsInSec = getPhaseEndsInSec(phase)
 	const roundNumber = (gsiState.map?.round || 0) + 1 - Number(phase === 'over')
@@ -40,14 +40,14 @@ const getPhaseEndsInSec = (phase) => {
 
 	switch (phase) {
 		case 'freezetime':
-			return Number(options['cvars.mp_freezetime'] || 20)
+			return Number(options?.['cvars.mp_freezetime'] || 20)
 		case 'live':
-			return Number(options['cvars.mp_roundtime'] || 1.92) * 60
+			return Number(options?.['cvars.mp_roundtime'] || 1.92) * 60
 		case 'timeout_ct':
 		case 'timeout_t':
-			return Number(options['cvars.mp_team_timeout_time'] || 30)
+			return Number(options?.['cvars.mp_team_timeout_time'] || 30)
 		case 'bomb':
-			return Number(options['cvars.mp_c4timer'] || 40)
+			return Number(options?.['cvars.mp_c4timer'] || 40)
 		default:
 			return 0
 	}

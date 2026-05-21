@@ -58,6 +58,21 @@
   - [x] `analytics` league table/team fixtures
 - [x] Keep opponent research out of viewer-facing scenes.
 
+### Phase 6: Slanted Preset 1920x1080 Hardening
+
+- [x] Scoped Slanted radar width to 21% inside `index.css`.
+- [x] Scoped Slanted top bar width to 52% and left position to 24% inside `index.css`.
+- [x] Confirmed zero visual regression or changes in Classic, Compact, focused player, and victory poster components.
+
+### Phase 7: Broadcast-Safe Config SPA Constraints
+
+- [x] Converted `css.radar-width` from free-form text to constrained select (18%/20%/21%/22%) in `theme.json`.
+- [x] Converted `css.lan66-sidebar-scale-y` to number with min/max/step bounds (0.8–1.05, step 0.05) in `theme.json`.
+- [x] Added select dropdown and numeric input rendering with validation in `OptionsEditor.vue`.
+- [x] Added load-time sanitization and save-time clamping for bounded numeric options.
+- [x] Added drag-time clamping for sidebar scale-y in `LayoutEditor.vue`.
+- [x] Audited remaining unconstrained variables; `css.lan66-event-badge-top` flagged as medium risk for future pass.
+
 ## Active Open Work
 
 ### 1. Compact and Classic Sidebar Whitespace

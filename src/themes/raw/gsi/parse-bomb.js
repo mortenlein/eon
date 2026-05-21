@@ -3,7 +3,17 @@ import { findBombsite } from '/hud/gsi/helpers/find-bomb-site.js'
 import { parsePosition } from '/hud/gsi/parse-position.js'
 
 export const parseBomb = () => {
-	if (! gsiState.bomb) return {}
+	if (! gsiState.bomb) {
+		return {
+			countdownSec: null,
+			isPlanted: false,
+			position: null,
+			bombsite: false,
+			plantedCountdownSec: null,
+			player: undefined,
+			state: null,
+		}
+	}
 
 	const countdownSec = getCountdownSec()
 	const isPlanted = ['defusing', 'planted'].includes(gsiState.bomb.state)

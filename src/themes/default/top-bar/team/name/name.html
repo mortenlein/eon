@@ -4,7 +4,7 @@
 			<img
 				v-if="team.name"
 				:class="['logo', positionClass, { '--active': logoImageLoaded }]"
-				:src="`/hud/team-logos/${team.name}.png`"
+				:src="getTeamLogoPath(team.name)"
 				alt=""
 				@error="logoImageLoaded = false"
 				@load="logoImageLoaded = true"

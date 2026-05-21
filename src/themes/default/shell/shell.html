@@ -8,7 +8,7 @@
 
 		<!-- Scene: Match Intro -->
 		<div class="scene-board --intro">
-			<main v-if="!isLoadingKomplettligaen && komplettligaenMatch" class="kl-scene-frame">
+			<main v-if="komplettligaenMatch" class="kl-scene-frame">
 				<div class="kl-scene-gutter">
 					<section class="kl-match-overlay">
 					<section class="kl-match-card">
@@ -54,12 +54,12 @@
 					</section>
 				</div>
 			</main>
-			<div v-else-if="!isLoadingKomplettligaen && !komplettligaenMatch" class="kl-empty"><div class="kl-eyebrow">Komplettligaen</div><div class="intro-map">Set a GG Arena match ID in Live Control</div></div>
+			<div v-else-if="!komplettligaenMatch" class="kl-empty"><div class="kl-eyebrow">Komplettligaen</div><div class="intro-map">Set a GG Arena match ID in Live Control</div></div>
 		</div>
 
 		<!-- Scene: Halftime / Over Scoreboard -->
 		<div class="scene-board --halftime">
-			<main v-if="!isLoadingKomplettligaen && komplettligaenMatch && komplettligaenView === 'waiting'" class="kl-scene-frame">
+			<main v-if="komplettligaenMatch && komplettligaenView === 'waiting'" class="kl-scene-frame">
 				<div class="kl-scene-gutter">
 					<section class="kl-waiting-scene">
 					<section class="kl-waiting-match">
@@ -121,7 +121,7 @@
 					</div>
 			</main>
 
-			<main v-if="!isLoadingKomplettligaen && komplettligaenMatch && komplettligaenView === 'result'" class="kl-scene-frame">
+			<main v-if="komplettligaenMatch && komplettligaenView === 'result'" class="kl-scene-frame">
 				<div class="kl-scene-gutter">
 					<section class="kl-waiting-scene">
 					<section class="kl-waiting-match">
@@ -164,26 +164,26 @@
 						<article class="kl-stats-team">
 							<header class="kl-panel-head"><h2>{{ komplettligaenMatch.home.name }}</h2><span>Player stats</span></header>
 							<table>
-								<thead><tr><th class="player-cell">Player</th><th>K</th><th>A</th><th>D</th><th class="rating">Rtg</th></tr></thead>
+								<thead><tr><th class="player-cell">Player</th><th>K</th><th>A</th><th>D</th><th>K/D</th><th class="rating">Rating</th></tr></thead>
 								<tbody>
 									<tr v-for="p in komplettligaenMatch.home.stats" :key="p.userId">
-										<td class="player-cell">{{ p.name }}</td>
-										<td>{{ p.kills }}</td><td>{{ p.assists }}</td><td>{{ p.deaths }}</td><td class="rating">{{ p.rating }}</td>
+										<td class="player-cell">{{ getPlayerName(p) }}</td>
+										<td>{{ p.kills }}</td><td>{{ p.assists }}</td><td>{{ p.deaths }}</td><td>{{ calculateKD(p.kills, p.deaths) }}</td><td class="rating">{{ p.rating }}</td>
 									</tr>
-									<tr v-if="!komplettligaenMatch.home.stats?.length"><td colspan="5" class="empty">No stats available</td></tr>
+									<tr v-if="!komplettligaenMatch.home.stats?.length"><td colspan="6" class="empty">No stats available</td></tr>
 								</tbody>
 							</table>
 						</article>
 						<article class="kl-stats-team">
 							<header class="kl-panel-head"><h2>{{ komplettligaenMatch.away.name }}</h2><span>Player stats</span></header>
 							<table>
-								<thead><tr><th class="player-cell">Player</th><th>K</th><th>A</th><th>D</th><th class="rating">Rtg</th></tr></thead>
+								<thead><tr><th class="player-cell">Player</th><th>K</th><th>A</th><th>D</th><th>K/D</th><th class="rating">Rating</th></tr></thead>
 								<tbody>
 									<tr v-for="p in komplettligaenMatch.away.stats" :key="p.userId">
-										<td class="player-cell">{{ p.name }}</td>
-										<td>{{ p.kills }}</td><td>{{ p.assists }}</td><td>{{ p.deaths }}</td><td class="rating">{{ p.rating }}</td>
+										<td class="player-cell">{{ getPlayerName(p) }}</td>
+										<td>{{ p.kills }}</td><td>{{ p.assists }}</td><td>{{ p.deaths }}</td><td>{{ calculateKD(p.kills, p.deaths) }}</td><td class="rating">{{ p.rating }}</td>
 									</tr>
-									<tr v-if="!komplettligaenMatch.away.stats?.length"><td colspan="5" class="empty">No stats available</td></tr>
+									<tr v-if="!komplettligaenMatch.away.stats?.length"><td colspan="6" class="empty">No stats available</td></tr>
 								</tbody>
 							</table>
 						</article>
@@ -192,7 +192,7 @@
 				</div>
 			</main>
 
-			<main v-if="!isLoadingKomplettligaen && komplettligaenView === 'table'" class="kl-scene-frame">
+			<main v-if="komplettligaenView === 'table'" class="kl-scene-frame">
 				<div class="kl-scene-gutter">
 					<section class="kl-games-overlay">
 					<section class="kl-games-shell">
@@ -231,9 +231,13 @@
 				</div>
 			</main>
 
-			<div v-if="isLoadingKomplettligaen" class="kl-loading">
+			<div v-if="isLoadingKomplettligaen && !komplettligaenMatch" class="kl-loading">
 				<div class="kl-spinner"></div>
 				<div class="kl-loading-text">Fetching live data...</div>
+			</div>
+			<div v-if="isLoadingKomplettligaen && komplettligaenMatch" class="kl-subtle-loader">
+				<div class="kl-spinner --subtle"></div>
+				<span>Refreshing...</span>
 			</div>
 			<div v-else-if="!komplettligaenMatch && komplettligaenView !== 'table'" class="kl-empty">
 				<div class="scoreboard-meta">KOMPLETTLIGAEN</div>
@@ -245,6 +249,30 @@
 		<div v-if="false" class="analysis-overlay">
 			<WinProbGraph />
 		</div>
+		
+		<!-- Round Won Poster Overlay -->
+		<Transition name="kl-fade">
+			<div v-if="$round.phase === 'over' && $round.winningSide" class="round-won-poster-overlay">
+				<div :class="['round-won-poster-card', $round.winningSide === 'CT' ? '--ct' : '--t']">
+					<div class="glow-effect"></div>
+					<div class="poster-content">
+						<img
+							v-if="winningTeamName"
+							:src="getTeamLogoPath(winningTeamName)"
+							class="poster-team-logo"
+							alt=""
+							@error="posterLogoFailed = true"
+							@load="posterLogoFailed = false"
+							v-show="!posterLogoFailed"
+						>
+						<div class="poster-text">
+							<h1 class="poster-title">{{ winningTeamName }}</h1>
+							<p class="poster-subtitle">Wins the Round</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</Transition>
 		
 		<SvgFilters />
 		<Sponsors />

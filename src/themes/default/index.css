@@ -231,7 +231,14 @@
 	--skew-20: 20deg;
 	--skew-160: 160deg;
 	--ui-radius: 0;
+	--radar-width: 21%;
 }
+
+.hud-viewport.--style-slanted .hud-stage .top-bar {
+	width: 52% !important;
+	left: 24% !important;
+}
+
 
 .hud-viewport.--style-classic {
 	--skew-20: 0deg;
@@ -263,16 +270,16 @@
 	--top-bar-score-font-size: 2.45rem;
 	--sidebar-player-row-height: 2.65rem;
 	--sidebar-vertical-spacing: 0.28rem;
-	--sidebar-health-width: 4.8rem;
-	--sidebar-money-width: 6.4rem;
+	--sidebar-health-width: 4.2rem;
+	--sidebar-money-width: 5.8rem;
 	--sidebar-start-and-end-width: 0.1rem;
 	--sidebar-observer-slot-width: 1.2rem;
-	--sidebar-kills-width: 3.5rem;
-	--sidebar-deaths-width: 3.5rem;
-	--sidebar-taser-width: 1.15rem;
-	--sidebar-grenades-half-width: 2.4rem;
-	--sidebar-round-kills-width: 1rem;
-	--sidebar-primary-and-secondary-width: 2.25rem;
+	--sidebar-kills-width: 3.0rem;
+	--sidebar-deaths-width: 3.0rem;
+	--sidebar-taser-width: 1.2rem;
+	--sidebar-grenades-half-width: 4.0rem;
+	--sidebar-round-kills-width: 1.2rem;
+	--sidebar-primary-and-secondary-width: 6.0rem;
 	--sidebar-player-width: calc(
 		var(--sidebar-deaths-width) +
 		var(--sidebar-grenades-half-width) +
@@ -322,16 +329,16 @@
 	--top-bar-score-font-size: 2.25rem;
 	--sidebar-player-row-height: 2.35rem;
 	--sidebar-vertical-spacing: 0.18rem;
-	--sidebar-health-width: 4rem;
-	--sidebar-money-width: 6.15rem;
-	--sidebar-kills-width: 3.35rem;
-	--sidebar-deaths-width: 3.35rem;
-	--sidebar-start-and-end-width: 0.12rem;
+	--sidebar-health-width: 3.6rem;
+	--sidebar-money-width: 5.2rem;
+	--sidebar-kills-width: 2.8rem;
+	--sidebar-deaths-width: 2.8rem;
+	--sidebar-start-and-end-width: 0rem;
 	--sidebar-observer-slot-width: 1.1rem;
-	--sidebar-taser-width: 0.75rem;
-	--sidebar-grenades-half-width: 1.8rem;
-	--sidebar-round-kills-width: 0.7rem;
-	--sidebar-primary-and-secondary-width: 1.85rem;
+	--sidebar-taser-width: 0.8rem;
+	--sidebar-grenades-half-width: 3.0rem;
+	--sidebar-round-kills-width: 0.9rem;
+	--sidebar-primary-and-secondary-width: 4.5rem;
 	--sidebar-player-focused-player-highlight-width: 0.25rem;
 	--sidebar-player-width: calc(
 		var(--sidebar-deaths-width) +
@@ -415,21 +422,25 @@
 }
 
 .hud-viewport.--style-classic .sidebar,
-.hud-viewport.--style-classic .player-wrapper,
-.hud-viewport.--style-compact .sidebar,
-.hud-viewport.--style-compact .player-wrapper {
+.hud-viewport.--style-compact .sidebar {
 	width: var(--sidebar-width);
 	max-width: var(--sidebar-width);
 }
 
+.hud-viewport.--style-classic .player-wrapper,
+.hud-viewport.--style-compact .player-wrapper {
+	width: calc(var(--player-card-width) + var(--sidebar-player-focused-player-highlight-width));
+	max-width: calc(var(--player-card-width) + var(--sidebar-player-focused-player-highlight-width));
+}
+
 .hud-viewport.--style-classic .player,
 .hud-viewport.--style-compact .player {
-	width: var(--sidebar-player-width);
+	width: var(--player-card-width);
 }
 
 .hud-viewport.--style-classic .player.--left {
 	grid-template-columns:
-		0.1rem
+		var(--sidebar-start-and-end-width)
 		var(--sidebar-health-width)
 		var(--sidebar-observer-slot-width)
 		var(--sidebar-money-width)
@@ -439,12 +450,12 @@
 		var(--sidebar-grenades-half-width)
 		var(--sidebar-round-kills-width)
 		var(--sidebar-primary-and-secondary-width)
-		0.1rem;
+		var(--sidebar-start-and-end-width);
 }
 
 .hud-viewport.--style-classic .player.--right {
 	grid-template-columns:
-		0.1rem
+		var(--sidebar-start-and-end-width)
 		var(--sidebar-primary-and-secondary-width)
 		var(--sidebar-round-kills-width)
 		var(--sidebar-grenades-half-width)
@@ -454,12 +465,12 @@
 		var(--sidebar-money-width)
 		var(--sidebar-observer-slot-width)
 		var(--sidebar-health-width)
-		0.1rem;
+		var(--sidebar-start-and-end-width);
 }
 
 .hud-viewport.--style-compact .player.--left {
 	grid-template-columns:
-		0
+		var(--sidebar-start-and-end-width)
 		var(--sidebar-health-width)
 		var(--sidebar-observer-slot-width)
 		var(--sidebar-money-width)
@@ -469,12 +480,12 @@
 		var(--sidebar-grenades-half-width)
 		var(--sidebar-round-kills-width)
 		var(--sidebar-primary-and-secondary-width)
-		0;
+		var(--sidebar-start-and-end-width);
 }
 
 .hud-viewport.--style-compact .player.--right {
 	grid-template-columns:
-		0
+		var(--sidebar-start-and-end-width)
 		var(--sidebar-primary-and-secondary-width)
 		var(--sidebar-round-kills-width)
 		var(--sidebar-grenades-half-width)
@@ -484,7 +495,94 @@
 		var(--sidebar-money-width)
 		var(--sidebar-observer-slot-width)
 		var(--sidebar-health-width)
-		0;
+		var(--sidebar-start-and-end-width);
+}
+
+/* Dead player card shrinkage styles */
+.hud-viewport.--style-classic .player-wrapper.is-dead {
+	--player-card-width: calc(
+		var(--sidebar-start-and-end-width) * 2 +
+		var(--sidebar-health-width) +
+		var(--sidebar-observer-slot-width) +
+		var(--sidebar-money-width) +
+		var(--sidebar-kills-width) +
+		var(--sidebar-deaths-width) +
+		var(--sidebar-taser-width) +
+		var(--sidebar-grenades-half-width)
+	);
+}
+
+.hud-viewport.--style-classic .player.is-dead.--left {
+	grid-template-columns:
+		var(--sidebar-start-and-end-width)
+		var(--sidebar-health-width)
+		var(--sidebar-observer-slot-width)
+		var(--sidebar-money-width)
+		var(--sidebar-kills-width)
+		var(--sidebar-deaths-width)
+		var(--sidebar-taser-width)
+		var(--sidebar-grenades-half-width)
+		0
+		0
+		var(--sidebar-start-and-end-width);
+}
+
+.hud-viewport.--style-classic .player.is-dead.--right {
+	grid-template-columns:
+		var(--sidebar-start-and-end-width)
+		0
+		0
+		var(--sidebar-grenades-half-width)
+		var(--sidebar-taser-width)
+		var(--sidebar-kills-width)
+		var(--sidebar-deaths-width)
+		var(--sidebar-money-width)
+		var(--sidebar-observer-slot-width)
+		var(--sidebar-health-width)
+		var(--sidebar-start-and-end-width);
+}
+
+.hud-viewport.--style-compact .player-wrapper.is-dead {
+	--player-card-width: calc(
+		var(--sidebar-start-and-end-width) * 2 +
+		var(--sidebar-health-width) +
+		var(--sidebar-observer-slot-width) +
+		var(--sidebar-money-width) +
+		var(--sidebar-kills-width) +
+		var(--sidebar-deaths-width) +
+		var(--sidebar-taser-width) +
+		var(--sidebar-grenades-half-width)
+	);
+}
+
+.hud-viewport.--style-compact .player.is-dead.--left {
+	grid-template-columns:
+		var(--sidebar-start-and-end-width)
+		var(--sidebar-health-width)
+		var(--sidebar-observer-slot-width)
+		var(--sidebar-money-width)
+		var(--sidebar-kills-width)
+		var(--sidebar-deaths-width)
+		var(--sidebar-taser-width)
+		var(--sidebar-grenades-half-width)
+		0
+		0
+		var(--sidebar-start-and-end-width);
+}
+
+.hud-viewport.--style-compact .player.is-dead.--right {
+	grid-template-columns:
+		var(--sidebar-start-and-end-width)
+		0
+		0
+		var(--sidebar-grenades-half-width)
+		var(--sidebar-taser-width)
+		var(--sidebar-kills-width)
+		var(--sidebar-deaths-width)
+		var(--sidebar-money-width)
+		var(--sidebar-observer-slot-width)
+		var(--sidebar-health-width)
+		var(--sidebar-start-and-end-width);
 }
 
 .hud-viewport.--style-classic .current-round,
@@ -582,4 +680,8 @@
 	--skew-20: 10deg;
 	--skew-160: 170deg;
 	--ui-radius: 1rem 0 1rem 0;
+}
+
+.layout-hidden, .--layout-hidden {
+	display: none !important;
 }

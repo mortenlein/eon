@@ -3,6 +3,8 @@
 <div v-else-if="$bomb.isPlanted" class="bomb">
 	<img class="planted-bomb-icon" src="/hud/img/icons/planted-bomb.svg" alt="">
 
+	<div class="bomb-countdown">{{ bombCountdown }}</div>
+
 	<img v-if="$bomb.bombsite === 'a'" class="bombsite-icon --a" src="/hud/img/icons/bombsite-a.svg" alt="">
 	<img v-else-if="$bomb.bombsite === 'b'" class="bombsite-icon --b" src="/hud/img/icons/bombsite-b.svg" alt="">
 </div>

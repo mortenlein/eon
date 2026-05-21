@@ -269,9 +269,16 @@
                                                                              "label":  "Maximum HP that will be highlighted in red (e.g. 20)"
                                                                          },
                     "css.radar-width":  {
-                                            "type":  "text",
+                                            "type":  "select",
                                             "section":  "Style Overrides",
-                                            "label":  "Radar width; e.g. `18%` or `320px`"
+                                            "label":  "Radar width",
+                                            "value":  "21%",
+                                            "options":  [
+                                                            "18%",
+                                                            "20%",
+                                                            "21%",
+                                                            "22%"
+                                                        ]
                                         },
                     "css.counter-terrorists-fill-rgb":  {
                                                             "type":  "color",
@@ -450,10 +457,13 @@
                                                       "value":  "0.5"
                                                   },
                     "css.lan66-sidebar-scale-y":  {
-                                                      "type":  "text",
-                                                      "section":  "HUD Layout",
-                                                      "label":  "Roster sidebar height scale; e.g. `0.9`",
-                                                      "value":  "1"
+                                                      "type":  "number",
+                                                      "section":  "Style Overrides",
+                                                      "label":  "Roster sidebar height scale",
+                                                      "value":  1.0,
+                                                      "min":  0.8,
+                                                      "max":  1.05,
+                                                      "step":  0.05
                                                   },
                     "css.lan66-event-badge-top":  {
                                                       "type":  "text",

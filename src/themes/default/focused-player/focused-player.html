@@ -3,8 +3,19 @@
 		<div class="focused-player-card">
 			<div class="fp-main">
 				<div class="fp-identity">
-					<div class="fp-name">{{ player.name }}</div>
-					<div v-if="player.subtitle" class="fp-subtitle">{{ player.subtitle }}</div>
+					<img
+						v-if="player.team?.name"
+						:src="getTeamLogoPath(player.team.name)"
+						class="fp-team-logo"
+						alt=""
+						@error="logoFailed = true"
+						@load="logoFailed = false"
+						v-show="!logoFailed"
+					>
+					<div class="fp-identity-text">
+						<div class="fp-name">{{ player.name }}</div>
+						<div v-if="player.subtitle" class="fp-subtitle">{{ player.subtitle }}</div>
+					</div>
 				</div>
 
 				<div class="fp-health-strip">

@@ -113,7 +113,12 @@
 
 						<label v-for="item in styleTextControls" :key="item.key" class="field-row">
 							<span>{{ item.label }}</span>
-							<input v-model="state.options[item.key]" type="text" :placeholder="item.placeholder" @change="saveOption(item.key)">
+							<select v-if="settingsIndex[item.key] && settingsIndex[item.key].type === 'select'" v-model="state.options[item.key]" @change="saveOption(item.key)">
+								<option v-for="choice in settingsIndex[item.key].options" :key="choiceValue(choice)" :value="choiceValue(choice)">
+									{{ choiceLabel(choice) }}
+								</option>
+							</select>
+							<input v-else v-model="state.options[item.key]" type="text" :placeholder="item.placeholder" @change="saveOption(item.key)">
 						</label>
 					</div>
 				</div>
@@ -181,6 +186,7 @@
 									<span class="slider"></span>
 								</label>
 								<textarea v-else-if="inputType(opt) === 'textarea'" v-model="state.options[opt.key]" @change="saveOption(opt.key)"></textarea>
+								<input v-else-if="inputType(opt) === 'number'" type="number" v-model.number="state.options[opt.key]" :min="opt.min" :max="opt.max" :step="opt.step" @change="saveOption(opt.key)">
 								<input v-else :type="inputType(opt)" v-model="state.options[opt.key]" @change="saveOption(opt.key)">
 							</div>
 							<button class="btn-ghost" @click="resetOption(opt.key)">Reset</button>
@@ -321,9 +327,21 @@ export default {
 
 				for (const opt of json) {
 					index[opt.key] = opt
-					if (!(opt.key in state.options)) {
-						state.options[opt.key] = opt.value ?? opt.fallback ?? null
+					let val = state.options[opt.key] ?? opt.value ?? opt.fallback ?? null
+					if (opt.type === 'number' && val !== null) {
+						let num = parseFloat(val)
+						if (isNaN(num)) {
+							num = opt.fallback ?? opt.value ?? 1.0
+						}
+						if (opt.min != null && num < opt.min) num = opt.min
+						if (opt.max != null && num > opt.max) num = opt.max
+						if (opt.step != null) {
+							const precision = (opt.step.toString().split('.')[1] || '').length
+							num = parseFloat((Math.round(num / opt.step) * opt.step).toFixed(precision))
+						}
+						val = num
 					}
+					state.options[opt.key] = val
 				}
 
 				this.settingsIndex = index
@@ -386,6 +404,20 @@ export default {
 			actions.save({ [key]: null })
 		},
 		saveOption(key) {
+			const opt = this.settingsIndex[key]
+			if (opt && opt.type === 'number') {
+				let val = parseFloat(state.options[key])
+				if (isNaN(val)) {
+					val = opt.fallback ?? opt.value ?? 1.0
+				}
+				if (opt.min != null && val < opt.min) val = opt.min
+				if (opt.max != null && val > opt.max) val = opt.max
+				if (opt.step != null) {
+					const precision = (opt.step.toString().split('.')[1] || '').length
+					val = parseFloat((Math.round(val / opt.step) * opt.step).toFixed(precision))
+				}
+				state.options[key] = val
+			}
 			actions.broadcast(key, state.options[key])
 			actions.save({ [key]: state.options[key] })
 		},

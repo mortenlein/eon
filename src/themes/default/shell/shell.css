@@ -1346,3 +1346,144 @@ body {
 	opacity: 1;
 	transform: translateY(0);
 }
+
+/* ── Subtle Background Refresh Loader ── */
+.kl-subtle-loader {
+	position: fixed;
+	top: 1.5rem;
+	right: 1.5rem;
+	z-index: 9999;
+	pointer-events: none;
+	display: flex;
+	align-items: center;
+	gap: 0.8rem;
+	background: rgba(8, 9, 12, 0.75);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: 2rem;
+	padding: 0.4rem 1rem 0.4rem 0.8rem;
+	backdrop-filter: blur(8px);
+	box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.5);
+	animation: kl-fade-in 0.3s ease;
+}
+
+@keyframes kl-fade-in {
+	from { opacity: 0; transform: translateY(-0.5rem); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+.kl-subtle-loader .kl-spinner.--subtle {
+	width: 1.4rem;
+	height: 1.4rem;
+	border: 0.15rem solid rgba(255, 255, 255, 0.1);
+	border-top-color: var(--accent);
+	border-radius: 50%;
+	animation: kl-spin 1s linear infinite;
+	filter: none;
+}
+
+.kl-subtle-loader span {
+	font-size: 0.95rem;
+	font-weight: 800;
+	color: rgba(255, 255, 255, 0.85);
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+/* ── Round Won Poster Overlay ── */
+.round-won-poster-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(4, 5, 8, 0.45);
+	backdrop-filter: blur(10px);
+	pointer-events: none;
+}
+
+.round-won-poster-card {
+	position: relative;
+	width: 48rem;
+	height: 18rem;
+	border-radius: 12px;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.7);
+	border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.round-won-poster-card.--ct {
+	background: linear-gradient(135deg, rgba(29, 158, 222, 0.95), rgba(0, 80, 128, 0.98));
+	box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.7), 0 0 3rem rgba(29, 158, 222, 0.45);
+	border-color: rgba(91, 166, 255, 0.45);
+}
+
+.round-won-poster-card.--t {
+	background: linear-gradient(135deg, rgba(225, 180, 59, 0.95), rgba(179, 126, 0, 0.98));
+	box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.7), 0 0 3rem rgba(225, 180, 59, 0.4);
+	border-color: rgba(255, 181, 71, 0.45);
+}
+
+.glow-effect {
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+	pointer-events: none;
+}
+
+.poster-content {
+	display: flex;
+	align-items: center;
+	gap: 2.2rem;
+	z-index: 10;
+}
+
+.poster-team-logo {
+	width: 8rem;
+	height: 8rem;
+	object-fit: contain;
+	filter: drop-shadow(0 0.5rem 1.5rem rgba(0,0,0,0.5));
+	animation: poster-logo-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.poster-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.poster-title {
+	font-size: 3.2rem;
+	font-weight: 950;
+	color: #fff;
+	text-transform: uppercase;
+	line-height: 1.1;
+	letter-spacing: 0.02em;
+	text-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.4);
+	margin: 0;
+}
+
+.poster-subtitle {
+	font-size: 1.5rem;
+	font-weight: 800;
+	color: rgba(255, 255, 255, 0.9);
+	text-transform: uppercase;
+	letter-spacing: 0.15em;
+	margin: 0.35rem 0 0;
+	text-shadow: 0 0.1rem 0.4rem rgba(0, 0, 0, 0.3);
+}
+
+@keyframes poster-logo-pop {
+	0% { transform: scale(0.6); opacity: 0; }
+	100% { transform: scale(1); opacity: 1; }
+}
+
+.kl-fade-enter-active, .kl-fade-leave-active {
+	transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.kl-fade-enter-from, .kl-fade-leave-to {
+	opacity: 0;
+	transform: scale(0.95);
+}

@@ -392,7 +392,14 @@ export default {
 						el.scaleX = Math.max(0.1, this.drag.initScaleX + (dx * sign / el.baseW))
 						el.w = el.baseW * el.scaleX
 					} else {
-						el.scaleY = Math.max(0.1, this.drag.initScaleY - (dy / el.baseH))
+						let newScaleY = this.drag.initScaleY - (dy / el.baseH)
+						if (el.def.scaleKeys.y === 'css.lan66-sidebar-scale-y') {
+							newScaleY = Math.max(0.8, Math.min(1.05, newScaleY))
+							newScaleY = Math.round(newScaleY / 0.05) * 0.05
+						} else {
+							newScaleY = Math.max(0.1, newScaleY)
+						}
+						el.scaleY = newScaleY
 						el.h = el.baseH * el.scaleY
 					}
 				} else {

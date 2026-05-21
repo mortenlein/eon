@@ -5,6 +5,7 @@ export default {
 		isActive() {
 			if (! this.$teams?.[0] || ! this.$teams?.[1]) return false
 			if (! this.$teams[0]?.players?.length || ! this.$teams[1]?.players?.length) return false
+			if (this.$opts['css.lan66-players-alive-display'] === false) return false
 
 			if (this.$opts['preferences.playersAlive.showDuringFreezetime']) {
 				return true

@@ -6,7 +6,7 @@
 
 .map-card {
 	flex: 1;
-	min-width: 15rem;
+	min-width: 17.5rem;
 	background: rgba(8, 12, 20, 0.85);
 	backdrop-filter: blur(0.8rem);
 	border: 0.1rem solid rgba(255, 255, 255, 0.12);
@@ -73,7 +73,11 @@
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
-	color: var(--white-90);
+	color: rgba(255, 255, 255, 0.9);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 9.5rem;
 }
 
 .map-score {
@@ -85,7 +89,9 @@
 }
 
 .map-score .--winner {
-	color: var(--counter-terrorists-fill);
+	color: #f6c85f;
+	font-weight: 900;
+	text-shadow: 0 0 0.8rem rgba(246, 200, 95, 0.35);
 }
 
 .score-sep {

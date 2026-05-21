@@ -1,9 +1,11 @@
 import { teamColorClass } from '/hud/helpers/team-color-class.js'
+import { getTeamLogoPath } from '/hud/helpers/player-resolver.js'
 
 export default {
 	data() {
 		return {
 			overlayBottomImageUrl: null,
+			logoFailed: false,
 		}
 	},
 
@@ -72,7 +74,17 @@ export default {
 		},
 	},
 
+	watch: {
+		'player.team.name': {
+			handler() {
+				this.logoFailed = false
+			}
+		}
+	},
+
 	methods: {
+		getTeamLogoPath,
+
 		async setOverlayBottomImageUrl() {
 			let fetchResponse = await fetch('/hud/overlay-images/focused-player-bottom.webp').catch(() => null)
 

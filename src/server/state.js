@@ -17,6 +17,7 @@ const getInitialState = () => {
 export const gsiState = getInitialState()
 
 export const additionalState = {
+	gsiActive: isUiDevMode,
 	lastKnownBombPlantedCountdown: {},
 	lastKnownMapName: null,
 	lastKnownPlayerObserverSlot: {},

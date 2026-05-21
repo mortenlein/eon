@@ -33,4 +33,16 @@
 	height: 1.2rem;
 }
 
+.hud-viewport.--style-classic .grenades {
+	padding-right: 0.15rem;
+}
+
+.hud-viewport.--style-classic .grenades .grenade {
+	margin: 0 0.12rem;
+}
+
+.hud-viewport.--style-classic .grenades .grenade img {
+	height: 1.2rem;
+}
+
 

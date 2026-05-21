@@ -24,6 +24,12 @@ export default {
 	},
 
 	computed: {
+		bombCountdown() {
+			const countdown = this.$bomb?.countdownSec
+			if (! Number.isFinite(countdown)) return 0
+			return Math.max(0, Math.ceil(countdown))
+		},
+
 		roundEndsInSec() {
 			const syncedAt = additionalState.unixTimestamp
 			const phaseEndsInSec = Number(this.$round?.phaseEndsInSec)

@@ -1,6 +1,6 @@
-<div :class="['player-wrapper', positionClass]">
+<div :class="['player-wrapper', positionClass, player.isAlive ? 'is-alive' : 'is-dead']">
 	<!-- TODO configurable: take up less width for dead players -->
-	<div :class="['player', positionClass]">
+	<div :class="['player', positionClass, player.isAlive ? 'is-alive' : 'is-dead']">
 		<HealthBar :player="player" :position="position" />
 
 		<DeadIcon :player="player" :position="position" />

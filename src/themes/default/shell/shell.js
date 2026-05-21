@@ -14,6 +14,7 @@ import TopBar from '/hud/top-bar/top-bar.vue'
 import WinProbGraph from '/hud/win-prob-graph/win-prob-graph.vue'
 import Maps from '/hud/maps/maps.vue'
 import MapsSleek from '/hud/maps-sleek/maps-sleek.vue'
+import { getPlayerDisplayName, getTeamLogoPath } from '/hud/helpers/player-resolver.js'
 
 export default {
 	components: {
@@ -43,6 +44,13 @@ export default {
 			if (scene === 'fulltime' || scene === 'over') return 'result'
 			if (scene === 'analytics') return 'table'
 			return this.komplettligaen?.config?.activeView || 'match'
+		},
+
+		winningTeamName() {
+			if (!this.$round?.winningSide) return null
+			const side = this.$round.winningSide // 'CT' or 'T'
+			const teamObj = this.$teams?.find(t => t.side === (side === 'CT' ? 3 : 2))
+			return teamObj?.name || (side === 'CT' ? 'Counter-Terrorists' : 'Terrorists')
 		},
 
 		komplettligaenMatch() {
@@ -117,6 +125,7 @@ export default {
 		return {
 			komplettligaen: null,
 			isLoadingKomplettligaen: true,
+			posterLogoFailed: false,
 		}
 	},
 
@@ -133,6 +142,11 @@ export default {
 	},
 
 	watch: {
+		'$round.winningSide': {
+			handler() {
+				this.posterLogoFailed = false
+			}
+		},
 		'$opts': {
 			handler() {
 				this.applyCssVariableOverrides()
@@ -173,10 +187,24 @@ export default {
 				this.komplettligaen = await response.json()
 				this.setMapImageUrl()
 			} catch (err) {
-				this.komplettligaen = null
+				console.error('Error loading Komplettligaen data:', err)
 			} finally {
 				this.isLoadingKomplettligaen = false
 			}
+		},
+
+		calculateKD(kills, deaths) {
+			const k = Number(kills) || 0
+			const d = Number(deaths) || 0
+			if (d === 0) return k.toFixed(2)
+			return (k / d).toFixed(2)
+		},
+
+		getTeamLogoPath,
+
+		getPlayerName(p) {
+			if (!p) return ''
+			return getPlayerDisplayName(p.steamId, p.name, this.$opts?.['teams.playerNameOverrides'])
 		},
 
 		formatKomplettligaenDate(value) {
