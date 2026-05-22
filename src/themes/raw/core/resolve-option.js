@@ -1,173 +1,53 @@
 import { options } from '/hud/core/state.js'
 
-export const LEGACY_OPTION_ALIASES = {
-	'layout.radar.top': ['css.lan66-radar-top'],
-	'layout.radar.left': ['css.lan66-radar-left'],
-	'layout.radar.width': ['css.radar-width'],
-	'layout.radar.visible': ['css.lan66-radar-display'],
+import { RADAR_OPTION_DEFINITIONS } from '/hud/core/option-slices/radar.js'
+import { TOPBAR_OPTION_DEFINITIONS } from '/hud/core/option-slices/topbar.js'
+import { SIDEBAR_POSITION_OPTION_DEFINITIONS, SIDEBAR_VISIBILITY_OPTION_DEFINITIONS } from '/hud/core/option-slices/sidebar.js'
+import { PLAYERS_ALIVE_OPTION_DEFINITIONS } from '/hud/core/option-slices/players-alive.js'
+import { FOCUSED_PLAYER_OPTION_DEFINITIONS } from '/hud/core/option-slices/focused-player.js'
+import { CURRENT_MAP_OPTION_DEFINITIONS } from '/hud/core/option-slices/current-map.js'
+import { EVENT_BADGE_OPTION_DEFINITIONS } from '/hud/core/option-slices/event-badge.js'
+import { SPONSOR_OPTION_DEFINITIONS } from '/hud/core/option-slices/sponsors.js'
+import { MAPS_OPTION_DEFINITIONS } from '/hud/core/option-slices/maps.js'
 
-	'layout.topbar.top': ['css.lan66-top-bar-top'],
-	'layout.topbar.visible': ['css.lan66-top-bar-display'],
-
-	'layout.sidebar.left': ['css.lan66-sidebar-left'],
-	'layout.sidebar.right': ['css.lan66-sidebar-right'],
-	'layout.sidebar.bottom': ['css.lan66-sidebar-bottom'],
-	'layout.sidebar.leftVisible': ['css.lan66-sidebar-left-display'],
-	'layout.sidebar.rightVisible': ['css.lan66-sidebar-right-display'],
-
-	'layout.playersAlive.top': ['css.lan66-players-alive-top'],
-	'layout.playersAlive.right': ['css.lan66-players-alive-right'],
-	'layout.playersAlive.visible': ['css.lan66-players-alive-display'],
-
-	'layout.focusedPlayer.bottom': ['css.lan66-focused-player-bottom'],
-	'layout.focusedPlayer.visible': ['css.lan66-focused-player-display'],
-
-	'layout.currentMap.bottom': ['css.lan66-current-map-bottom'],
-	'layout.currentMap.right': ['css.lan66-current-map-right'],
-	'style.currentMap.width': ['css.lan66-current-map-width'],
-	'layout.currentMap.visible': ['css.lan66-current-map-display']
+// Re-export option definitions for seamless backwards compatibility
+export {
+	RADAR_OPTION_DEFINITIONS,
+	TOPBAR_OPTION_DEFINITIONS,
+	SIDEBAR_POSITION_OPTION_DEFINITIONS,
+	SIDEBAR_VISIBILITY_OPTION_DEFINITIONS,
+	PLAYERS_ALIVE_OPTION_DEFINITIONS,
+	FOCUSED_PLAYER_OPTION_DEFINITIONS,
+	CURRENT_MAP_OPTION_DEFINITIONS,
+	EVENT_BADGE_OPTION_DEFINITIONS,
+	SPONSOR_OPTION_DEFINITIONS,
+	MAPS_OPTION_DEFINITIONS
 }
 
-export const RADAR_OPTION_DEFINITIONS = [
-	{
-		canonical: 'layout.radar.top',
-		aliases: ['css.lan66-radar-top'],
-		cssVars: ['--lan66-radar-top', '--layout-radar-top'],
-		fallback: '1.5rem'
-	},
-	{
-		canonical: 'layout.radar.left',
-		aliases: ['css.lan66-radar-left'],
-		cssVars: ['--lan66-radar-left', '--layout-radar-left'],
-		fallback: '2.5rem'
-	},
-	{
-		canonical: 'layout.radar.width',
-		aliases: ['css.radar-width'],
-		cssVars: ['--radar-width', '--layout-radar-width'],
-		fallback: '21%'
-	},
-	{
-		canonical: 'layout.radar.visible',
-		aliases: ['css.lan66-radar-display'],
-		cssVars: ['--lan66-radar-display', '--layout-radar-display'],
-		fallback: 'flex'
-	}
+// Build LEGACY_OPTION_ALIASES dynamically at runtime from imported definitions
+export const LEGACY_OPTION_ALIASES = {}
+
+const allDefinitionsLists = [
+	RADAR_OPTION_DEFINITIONS,
+	TOPBAR_OPTION_DEFINITIONS,
+	SIDEBAR_POSITION_OPTION_DEFINITIONS,
+	SIDEBAR_VISIBILITY_OPTION_DEFINITIONS,
+	PLAYERS_ALIVE_OPTION_DEFINITIONS,
+	FOCUSED_PLAYER_OPTION_DEFINITIONS,
+	CURRENT_MAP_OPTION_DEFINITIONS,
+	EVENT_BADGE_OPTION_DEFINITIONS,
+	SPONSOR_OPTION_DEFINITIONS,
+	MAPS_OPTION_DEFINITIONS
 ]
 
-export const TOPBAR_OPTION_DEFINITIONS = [
-	{
-		canonical: 'layout.topbar.top',
-		aliases: ['css.lan66-top-bar-top'],
-		cssVars: ['--lan66-top-bar-top', '--layout-topbar-top'],
-		fallback: 'var(--viewport-margin-top)'
-	},
-	{
-		canonical: 'layout.topbar.visible',
-		aliases: ['css.lan66-top-bar-display'],
-		cssVars: ['--lan66-top-bar-display', '--layout-topbar-display'],
-		fallback: 'flex'
-	}
-]
+allDefinitionsLists.forEach(definitionsList => {
+	definitionsList.forEach(def => {
+		if (def.canonical && def.aliases) {
+			LEGACY_OPTION_ALIASES[def.canonical] = def.aliases
+		}
+	})
+})
 
-export const SIDEBAR_POSITION_OPTION_DEFINITIONS = [
-	{
-		canonical: 'layout.sidebar.left',
-		aliases: ['css.lan66-sidebar-left'],
-		cssVars: ['--lan66-sidebar-left', '--layout-sidebar-left'],
-		fallback: 'var(--viewport-margin-left)'
-	},
-	{
-		canonical: 'layout.sidebar.right',
-		aliases: ['css.lan66-sidebar-right'],
-		cssVars: ['--lan66-sidebar-right', '--layout-sidebar-right'],
-		fallback: 'var(--viewport-margin-right)'
-	},
-	{
-		canonical: 'layout.sidebar.bottom',
-		aliases: ['css.lan66-sidebar-bottom'],
-		cssVars: ['--lan66-sidebar-bottom', '--layout-sidebar-bottom'],
-		fallback: 'var(--viewport-margin-bottom)'
-	}
-]
-
-export const SIDEBAR_VISIBILITY_OPTION_DEFINITIONS = [
-	{
-		canonical: 'layout.sidebar.leftVisible',
-		aliases: ['css.lan66-sidebar-left-display'],
-		cssVars: ['--lan66-sidebar-left-display', '--layout-sidebar-left-display'],
-		fallback: 'flex'
-	},
-	{
-		canonical: 'layout.sidebar.rightVisible',
-		aliases: ['css.lan66-sidebar-right-display'],
-		cssVars: ['--lan66-sidebar-right-display', '--layout-sidebar-right-display'],
-		fallback: 'flex'
-	}
-]
-
-export const PLAYERS_ALIVE_OPTION_DEFINITIONS = [
-	{
-		canonical: 'layout.playersAlive.top',
-		aliases: ['css.lan66-players-alive-top'],
-		cssVars: ['--lan66-players-alive-top', '--layout-players-alive-top'],
-		fallback: 'var(--viewport-margin-top)'
-	},
-	{
-		canonical: 'layout.playersAlive.right',
-		aliases: ['css.lan66-players-alive-right'],
-		cssVars: ['--lan66-players-alive-right', '--layout-players-alive-right'],
-		fallback: 'var(--viewport-margin-right)'
-	},
-	{
-		canonical: 'layout.playersAlive.visible',
-		aliases: ['css.lan66-players-alive-display'],
-		cssVars: ['--lan66-players-alive-display', '--layout-players-alive-display'],
-		fallback: 'flex'
-	}
-]
-
-export const FOCUSED_PLAYER_OPTION_DEFINITIONS = [
-	{
-		canonical: 'layout.focusedPlayer.bottom',
-		aliases: ['css.lan66-focused-player-bottom'],
-		cssVars: ['--lan66-focused-player-bottom', '--layout-focused-player-bottom'],
-		fallback: 'var(--viewport-margin-bottom)'
-	},
-	{
-		canonical: 'layout.focusedPlayer.visible',
-		aliases: ['css.lan66-focused-player-display'],
-		cssVars: ['--lan66-focused-player-display', '--layout-focused-player-display'],
-		fallback: 'flex'
-	}
-]
-
-export const CURRENT_MAP_OPTION_DEFINITIONS = [
-	{
-		canonical: 'layout.currentMap.bottom',
-		aliases: ['css.lan66-current-map-bottom'],
-		cssVars: ['--lan66-current-map-bottom', '--layout-current-map-bottom'],
-		fallback: 'var(--viewport-margin-bottom)'
-	},
-	{
-		canonical: 'layout.currentMap.right',
-		aliases: ['css.lan66-current-map-right'],
-		cssVars: ['--lan66-current-map-right', '--layout-current-map-right'],
-		fallback: 'var(--viewport-margin-right)'
-	},
-	{
-		canonical: 'style.currentMap.width',
-		aliases: ['css.lan66-current-map-width'],
-		cssVars: ['--lan66-current-map-width', '--style-current-map-width'],
-		fallback: '16rem'
-	},
-	{
-		canonical: 'layout.currentMap.visible',
-		aliases: ['css.lan66-current-map-display'],
-		cssVars: ['--lan66-current-map-display', '--layout-current-map-display'],
-		fallback: 'flex'
-	}
-]
 
 
 
