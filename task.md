@@ -151,6 +151,7 @@ Tasks:
 - [x] Migrate Current Map option slice (`layout.currentMap.bottom`, `layout.currentMap.right`, `style.currentMap.width`, `layout.currentMap.visible`) using centralized resolve-option.js.
 - [x] Migrate Event Badge option slice (`layout.eventBadge.top`, `layout.eventBadge.left`, `style.eventBadge.width`, `style.eventBadge.logoHeight`, `style.eventBadge.titleSize`, `style.eventBadge.metaSize`, `layout.eventBadge.visible`) using centralized resolve-option.js.
 - [x] Migrate Sponsor Slots option slice (`layout.sponsorLeft.top`, `layout.sponsorLeft.left`, `layout.sponsorLeft.visible`, `layout.sponsorRight.top`, `layout.sponsorRight.right`, `layout.sponsorRight.visible`, `style.sponsors.width`, `style.sponsors.height`) using centralized resolve-option.js.
+- [x] Migrate Maps option slice (`layout.maps.top`, `layout.maps.left`, `style.maps.scale`, `layout.maps.visible`, `layout.mapsSleek.top`, `layout.mapsSleek.left`, `style.mapsSleek.scale`) using centralized resolve-option.js.
 
 ## Verification Checklist For Next Code Change
 
