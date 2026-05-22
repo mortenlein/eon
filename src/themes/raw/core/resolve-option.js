@@ -9,6 +9,10 @@ import { CURRENT_MAP_OPTION_DEFINITIONS } from '/hud/core/option-slices/current-
 import { EVENT_BADGE_OPTION_DEFINITIONS } from '/hud/core/option-slices/event-badge.js'
 import { SPONSOR_OPTION_DEFINITIONS } from '/hud/core/option-slices/sponsors.js'
 import { MAPS_OPTION_DEFINITIONS } from '/hud/core/option-slices/maps.js'
+import { THEME_MATERIALS_OPTION_DEFINITIONS } from '/hud/core/option-slices/theme-materials.js'
+import { THEME_COLORS_OPTION_DEFINITIONS } from '/hud/core/option-slices/theme-colors.js'
+import { THEME_SHAPES_OPTION_DEFINITIONS } from '/hud/core/option-slices/theme-shapes.js'
+import { THEME_TYPOGRAPHY_OPTION_DEFINITIONS } from '/hud/core/option-slices/theme-typography.js'
 
 // Re-export option definitions for seamless backwards compatibility
 export {
@@ -21,7 +25,11 @@ export {
 	CURRENT_MAP_OPTION_DEFINITIONS,
 	EVENT_BADGE_OPTION_DEFINITIONS,
 	SPONSOR_OPTION_DEFINITIONS,
-	MAPS_OPTION_DEFINITIONS
+	MAPS_OPTION_DEFINITIONS,
+	THEME_MATERIALS_OPTION_DEFINITIONS,
+	THEME_COLORS_OPTION_DEFINITIONS,
+	THEME_SHAPES_OPTION_DEFINITIONS,
+	THEME_TYPOGRAPHY_OPTION_DEFINITIONS
 }
 
 // Build LEGACY_OPTION_ALIASES dynamically at runtime from imported definitions
@@ -37,7 +45,11 @@ const allDefinitionsLists = [
 	CURRENT_MAP_OPTION_DEFINITIONS,
 	EVENT_BADGE_OPTION_DEFINITIONS,
 	SPONSOR_OPTION_DEFINITIONS,
-	MAPS_OPTION_DEFINITIONS
+	MAPS_OPTION_DEFINITIONS,
+	THEME_MATERIALS_OPTION_DEFINITIONS,
+	THEME_COLORS_OPTION_DEFINITIONS,
+	THEME_SHAPES_OPTION_DEFINITIONS,
+	THEME_TYPOGRAPHY_OPTION_DEFINITIONS
 ]
 
 allDefinitionsLists.forEach(definitionsList => {

@@ -9,14 +9,23 @@
 :root {
 	--black-rgb: 8, 9, 12;
 	--white-rgb: 248, 248, 246;
-	--red-rgb: 240, 49, 37;
-	--green-rgb: 56, 148, 107;
-	--counter-terrorists-fill-rgb: 25, 106, 232;
-	--counter-terrorists-border-rgb: 91, 166, 255;
-	--counter-terrorists-text-rgb: 156, 204, 255;
-	--terrorists-fill-rgb: 232, 137, 22;
-	--terrorists-border-rgb: 255, 181, 71;
-	--terrorists-text-rgb: 255, 214, 138;
+	--theme-colors-red: 240, 49, 37;
+	--theme-colors-green: 56, 148, 107;
+	--theme-colors-ct-fill: 25, 106, 232;
+	--theme-colors-ct-border: 91, 166, 255;
+	--theme-colors-ct-text: 156, 204, 255;
+	--theme-colors-t-fill: 232, 137, 22;
+	--theme-colors-t-border: 255, 181, 71;
+	--theme-colors-t-text: 255, 214, 138;
+
+	--red-rgb: var(--theme-colors-red);
+	--green-rgb: var(--theme-colors-green);
+	--counter-terrorists-fill-rgb: var(--theme-colors-ct-fill);
+	--counter-terrorists-border-rgb: var(--theme-colors-ct-border);
+	--counter-terrorists-text-rgb: var(--theme-colors-ct-text);
+	--terrorists-fill-rgb: var(--theme-colors-t-fill);
+	--terrorists-border-rgb: var(--theme-colors-t-border);
+	--terrorists-text-rgb: var(--theme-colors-t-text);
 	--ct-background:
 		linear-gradient(135deg, rgba(53, 154, 255, 0.96) 0%, rgba(24, 91, 214, 0.96) 48%, rgba(10, 42, 118, 0.98) 100%);
 	--t-background:
@@ -38,9 +47,13 @@
 	--viewport-margin-top: 1.15rem;
 	--viewport-margin-bottom: 1.5rem;
 	--base-scale-factor: 0.925925926vh;
-	--ui-radius: 0;
-	--skew-20: 20deg;
-	--skew-160: 160deg;
+	--theme-shapes-radius: 0;
+	--theme-shapes-skew-angle: 20deg;
+	--theme-shapes-skew-complement: 160deg;
+
+	--ui-radius: var(--theme-shapes-radius);
+	--skew-20: var(--theme-shapes-skew-angle);
+	--skew-160: var(--theme-shapes-skew-complement);
 
 	/* Refine margins specifically for the 16:9 Stage centering */
 	--lan66-event-badge-left: 2%;
@@ -53,8 +66,10 @@
 	--lan66-current-map-right: var(--viewport-margin-right);
 	--lan66-current-map-width: 16rem;
 
-	--lan66-panel-fill: rgba(10, 12, 18, 0.88);
-	--lan66-panel-border: rgba(255, 255, 255, 0.18);
+	--theme-materials-panel-fill: rgba(10, 12, 18, 0.88);
+	--theme-materials-panel-border: rgba(255, 255, 255, 0.18);
+	--lan66-panel-fill: var(--theme-materials-panel-fill);
+	--lan66-panel-border: var(--theme-materials-panel-border);
 	--lan66-accent: rgba(var(--red-rgb), 0.92);
 	--lan66-accent-soft: rgba(var(--red-rgb), 0.2);
 	--lan66-green-soft: rgba(var(--green-rgb), 0.22);
@@ -228,9 +243,12 @@
 
 /* UI Style Presets */
 .hud-viewport.--style-slanted {
-	--skew-20: 20deg;
-	--skew-160: 160deg;
-	--ui-radius: 0;
+	--theme-shapes-skew-angle: 20deg;
+	--theme-shapes-skew-complement: 160deg;
+	--theme-shapes-radius: 0;
+	--skew-20: var(--theme-shapes-skew-angle);
+	--skew-160: var(--theme-shapes-skew-complement);
+	--ui-radius: var(--theme-shapes-radius);
 	--radar-width: 21%;
 }
 
@@ -241,11 +259,16 @@
 
 
 .hud-viewport.--style-classic {
-	--skew-20: 0deg;
-	--skew-160: 0deg;
-	--ui-radius: 0.12rem;
-	--counter-terrorists-fill-rgb: 18, 83, 185;
-	--terrorists-fill-rgb: 206, 129, 20;
+	--theme-shapes-skew-angle: 0deg;
+	--theme-shapes-skew-complement: 0deg;
+	--theme-shapes-radius: 0.12rem;
+	--skew-20: var(--theme-shapes-skew-angle);
+	--skew-160: var(--theme-shapes-skew-complement);
+	--ui-radius: var(--theme-shapes-radius);
+	--theme-colors-ct-fill: 18, 83, 185;
+	--theme-colors-t-fill: 206, 129, 20;
+	--counter-terrorists-fill-rgb: var(--theme-colors-ct-fill);
+	--terrorists-fill-rgb: var(--theme-colors-t-fill);
 	--ct-background:
 		linear-gradient(180deg, #2c86ff 0%, #1356bf 52%, #08265f 100%);
 	--t-background:
@@ -263,8 +286,10 @@
 	--player-panel-fill:
 		linear-gradient(90deg, rgba(3, 8, 20, 0.94), rgba(11, 17, 31, 0.86));
 	--player-panel-border: rgba(255, 255, 255, 0.16);
-	--lan66-panel-fill: rgba(6, 10, 20, 0.86);
-	--lan66-panel-border: rgba(255, 255, 255, 0.24);
+	--theme-materials-panel-fill: rgba(6, 10, 20, 0.86);
+	--theme-materials-panel-border: rgba(255, 255, 255, 0.24);
+	--lan66-panel-fill: var(--theme-materials-panel-fill);
+	--lan66-panel-border: var(--theme-materials-panel-border);
 	--radar-width: 21%;
 	--focused-player-width: 38%;
 	--top-bar-score-font-size: 2.45rem;
@@ -298,11 +323,16 @@
 }
 
 .hud-viewport.--style-compact {
-	--skew-20: 0deg;
-	--skew-160: 0deg;
-	--ui-radius: 0;
-	--counter-terrorists-fill-rgb: 0, 117, 255;
-	--terrorists-fill-rgb: 255, 124, 24;
+	--theme-shapes-skew-angle: 0deg;
+	--theme-shapes-skew-complement: 0deg;
+	--theme-shapes-radius: 0;
+	--skew-20: var(--theme-shapes-skew-angle);
+	--skew-160: var(--theme-shapes-skew-complement);
+	--ui-radius: var(--theme-shapes-radius);
+	--theme-colors-ct-fill: 0, 117, 255;
+	--theme-colors-t-fill: 255, 124, 24;
+	--counter-terrorists-fill-rgb: var(--theme-colors-ct-fill);
+	--terrorists-fill-rgb: var(--theme-colors-t-fill);
 	--ct-background:
 		linear-gradient(90deg, rgba(0, 147, 255, 0.92), rgba(8, 44, 137, 0.9));
 	--t-background:
@@ -320,8 +350,10 @@
 	--player-panel-fill:
 		linear-gradient(90deg, rgba(3, 5, 10, 0.76), rgba(9, 12, 18, 0.58));
 	--player-panel-border: rgba(255, 255, 255, 0.08);
-	--lan66-panel-fill: rgba(4, 6, 10, 0.76);
-	--lan66-panel-border: rgba(255, 255, 255, 0.14);
+	--theme-materials-panel-fill: rgba(4, 6, 10, 0.76);
+	--theme-materials-panel-border: rgba(255, 255, 255, 0.14);
+	--lan66-panel-fill: var(--theme-materials-panel-fill);
+	--lan66-panel-border: var(--theme-materials-panel-border);
 	--viewport-margin-top: 0.9rem;
 	--viewport-margin-bottom: 1rem;
 	--radar-width: 18%;
@@ -358,13 +390,20 @@
 }
 
 .hud-viewport.--style-diagonal {
-	--skew-20: 14deg;
-	--skew-160: 166deg;
-	--ui-radius: 0.2rem 0 0.2rem 0;
-	--counter-terrorists-fill-rgb: 0, 190, 255;
-	--counter-terrorists-border-rgb: 0, 236, 255;
-	--terrorists-fill-rgb: 255, 214, 43;
-	--terrorists-border-rgb: 255, 245, 91;
+	--theme-shapes-skew-angle: 14deg;
+	--theme-shapes-skew-complement: 166deg;
+	--theme-shapes-radius: 0.2rem 0 0.2rem 0;
+	--skew-20: var(--theme-shapes-skew-angle);
+	--skew-160: var(--theme-shapes-skew-complement);
+	--ui-radius: var(--theme-shapes-radius);
+	--theme-colors-ct-fill: 0, 190, 255;
+	--theme-colors-ct-border: 0, 236, 255;
+	--theme-colors-t-fill: 255, 214, 43;
+	--theme-colors-t-border: 255, 245, 91;
+	--counter-terrorists-fill-rgb: var(--theme-colors-ct-fill);
+	--counter-terrorists-border-rgb: var(--theme-colors-ct-border);
+	--terrorists-fill-rgb: var(--theme-colors-t-fill);
+	--terrorists-border-rgb: var(--theme-colors-t-border);
 	--ct-background:
 		linear-gradient(135deg, #00e4ff 0%, #006aff 44%, #121252 100%);
 	--t-background:
@@ -382,8 +421,10 @@
 	--player-panel-fill:
 		linear-gradient(105deg, rgba(6, 8, 20, 0.88), rgba(18, 14, 36, 0.74));
 	--player-panel-border: rgba(255, 255, 255, 0.18);
-	--lan66-panel-fill: rgba(8, 10, 16, 0.84);
-	--lan66-panel-border: rgba(255, 255, 255, 0.22);
+	--theme-materials-panel-fill: rgba(8, 10, 16, 0.84);
+	--theme-materials-panel-border: rgba(255, 255, 255, 0.22);
+	--lan66-panel-fill: var(--theme-materials-panel-fill);
+	--lan66-panel-border: var(--theme-materials-panel-border);
 	--lan66-accent-soft: rgba(var(--green-rgb), 0.24);
 	--radar-width: 22%;
 	--focused-player-width: 42%;
@@ -667,19 +708,28 @@
 }
 
 .hud-viewport.--style-squared {
-	--skew-20: 0deg;
-	--skew-160: 0deg;
-	--ui-radius: 0;
+	--theme-shapes-skew-angle: 0deg;
+	--theme-shapes-skew-complement: 0deg;
+	--theme-shapes-radius: 0;
+	--skew-20: var(--theme-shapes-skew-angle);
+	--skew-160: var(--theme-shapes-skew-complement);
+	--ui-radius: var(--theme-shapes-radius);
 }
 .hud-viewport.--style-rounded {
-	--skew-20: 0deg;
-	--skew-160: 0deg;
-	--ui-radius: 0.5rem;
+	--theme-shapes-skew-angle: 0deg;
+	--theme-shapes-skew-complement: 0deg;
+	--theme-shapes-radius: 0.5rem;
+	--skew-20: var(--theme-shapes-skew-angle);
+	--skew-160: var(--theme-shapes-skew-complement);
+	--ui-radius: var(--theme-shapes-radius);
 }
 .hud-viewport.--style-abstract {
-	--skew-20: 10deg;
-	--skew-160: 170deg;
-	--ui-radius: 1rem 0 1rem 0;
+	--theme-shapes-skew-angle: 10deg;
+	--theme-shapes-skew-complement: 170deg;
+	--theme-shapes-radius: 1rem 0 1rem 0;
+	--skew-20: var(--theme-shapes-skew-angle);
+	--skew-160: var(--theme-shapes-skew-complement);
+	--ui-radius: var(--theme-shapes-radius);
 }
 
 .layout-hidden, .--layout-hidden {

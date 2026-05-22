@@ -15,7 +15,7 @@ import WinProbGraph from '/hud/win-prob-graph/win-prob-graph.vue'
 import Maps from '/hud/maps/maps.vue'
 import MapsSleek from '/hud/maps-sleek/maps-sleek.vue'
 import { getPlayerDisplayName, getTeamLogoPath } from '/hud/helpers/player-resolver.js'
-import { applyResolvedCssVariables, getMigratedOptionKeys, RADAR_OPTION_DEFINITIONS, TOPBAR_OPTION_DEFINITIONS, SIDEBAR_POSITION_OPTION_DEFINITIONS, SIDEBAR_VISIBILITY_OPTION_DEFINITIONS, PLAYERS_ALIVE_OPTION_DEFINITIONS, FOCUSED_PLAYER_OPTION_DEFINITIONS, CURRENT_MAP_OPTION_DEFINITIONS, EVENT_BADGE_OPTION_DEFINITIONS, SPONSOR_OPTION_DEFINITIONS, MAPS_OPTION_DEFINITIONS } from '/hud/core/resolve-option.js'
+import { applyResolvedCssVariables, getMigratedOptionKeys, resolveOption, RADAR_OPTION_DEFINITIONS, TOPBAR_OPTION_DEFINITIONS, SIDEBAR_POSITION_OPTION_DEFINITIONS, SIDEBAR_VISIBILITY_OPTION_DEFINITIONS, PLAYERS_ALIVE_OPTION_DEFINITIONS, FOCUSED_PLAYER_OPTION_DEFINITIONS, CURRENT_MAP_OPTION_DEFINITIONS, EVENT_BADGE_OPTION_DEFINITIONS, SPONSOR_OPTION_DEFINITIONS, MAPS_OPTION_DEFINITIONS, THEME_MATERIALS_OPTION_DEFINITIONS, THEME_COLORS_OPTION_DEFINITIONS, THEME_SHAPES_OPTION_DEFINITIONS, THEME_TYPOGRAPHY_OPTION_DEFINITIONS } from '/hud/core/resolve-option.js'
 
 export default {
 	components: {
@@ -253,6 +253,10 @@ export default {
 			applyResolvedCssVariables(EVENT_BADGE_OPTION_DEFINITIONS)
 			applyResolvedCssVariables(SPONSOR_OPTION_DEFINITIONS)
 			applyResolvedCssVariables(MAPS_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(THEME_MATERIALS_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(THEME_COLORS_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(THEME_SHAPES_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(THEME_TYPOGRAPHY_OPTION_DEFINITIONS)
 
 			// Dynamically retrieve the keys and legacy aliases to bypass in the loop
 			const migratedKeys = [
@@ -265,7 +269,11 @@ export default {
 				...getMigratedOptionKeys(CURRENT_MAP_OPTION_DEFINITIONS),
 				...getMigratedOptionKeys(EVENT_BADGE_OPTION_DEFINITIONS),
 				...getMigratedOptionKeys(SPONSOR_OPTION_DEFINITIONS),
-				...getMigratedOptionKeys(MAPS_OPTION_DEFINITIONS)
+				...getMigratedOptionKeys(MAPS_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(THEME_MATERIALS_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(THEME_COLORS_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(THEME_SHAPES_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(THEME_TYPOGRAPHY_OPTION_DEFINITIONS)
 			]
 
 			// 2. Generic loop for all other options
@@ -313,8 +321,8 @@ export default {
 		applyCustomFontFace() {
 			const styleId = 'eon-custom-hud-font'
 			const existing = document.getElementById(styleId)
-			const fontUrl = this.$opts?.['css.custom-font-url']
-			const fontFamily = this.$opts?.['css.primary-font-family']
+			const fontUrl = resolveOption('theme.typography.customFontUrl', '')
+			const fontFamily = resolveOption('theme.typography.primaryFont', 'Quantico')
 
 			if (!fontUrl || !fontFamily || !String(fontUrl).startsWith('/hud/')) {
 				existing?.remove()
