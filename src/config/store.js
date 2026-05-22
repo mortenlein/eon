@@ -21,6 +21,26 @@ export const state = reactive({
 watch(() => state.activeCategory, (val) => localStorage.setItem('eon-config-category', val))
 watch(() => state.showAdvancedSettings, (val) => localStorage.setItem('eon-config-advanced', val))
 
+function warnIfLegacy(key) {
+	if (!key) return
+	if (
+		key.startsWith('css.lan66-') ||
+		key.startsWith('css.counter-terrorists-') ||
+		key.startsWith('css.terrorists-') ||
+		key === 'css.primary-font-family' ||
+		key === 'css.custom-font-url' ||
+		key === 'css.sponsor-panel-width' ||
+		key === 'css.sponsor-panel-height' ||
+		key === 'css.ui-radius' ||
+		key === 'css.skew-20' ||
+		key === 'css.skew-160' ||
+		key === 'css.red-rgb' ||
+		key === 'css.green-rgb'
+	) {
+		console.warn(`[Dev Warning] Config SPA emitted legacy key: "${key}". Use the canonical equivalent instead.`)
+	}
+}
+
 export const actions = {
 	async init() {
 		await this.loadOptions()
@@ -77,6 +97,16 @@ export const actions = {
 		state.saveState = 'saving'
 		const payload = partial || { ...state.options, theme: state.theme }
 
+		if (partial) {
+			for (const key of Object.keys(partial)) {
+				warnIfLegacy(key)
+			}
+		} else {
+			for (const key of Object.keys(state.options)) {
+				warnIfLegacy(key)
+			}
+		}
+
 		try {
 			await fetch('/config/options', {
 				method: 'PUT',
@@ -101,6 +131,7 @@ export const actions = {
 	},
 
 	broadcast(key, value) {
+		warnIfLegacy(key)
 		if (state.socket && state.socket.readyState === WebSocket.OPEN) {
 			if (key.includes(':')) {
 				state.socket.send(JSON.stringify({ event: key, body: value }))

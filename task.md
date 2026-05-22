@@ -157,14 +157,43 @@ Tasks:
 - [x] Migrate Theme Shapes slice (`theme.shapes.radius`, `theme.shapes.skewAngle`, `theme.shapes.skewComplement`) using centralized resolve-option.js.
 - [x] Migrate Theme Typography slice (`theme.typography.primaryFont`, `theme.typography.customFontUrl`) using centralized resolve-option.js.
 
+### Phase 9: Config SPA Backend Canonical Translation Layer (Phase 3A)
+
+- [x] Implement Phase 3A: Config SPA backend canonical translation layer.
+  - [x] Create `src/server/helpers/canonical-map.js`
+  - [x] Add `normalizeSettingsOptions` in `settings.js`
+  - [x] Update `getSettings()`
+  - [x] Update `PUT /config/options`
+  - [x] Update `POST /config/import`
+  - [x] Add lightweight migration telemetry logging in dev mode
+  - [x] Verify functionality
+
+### Phase 10: Config SPA Canonical Schema Synchronization (Phase 3B)
+
+- [x] Implement Phase 3B: Config SPA canonical schema synchronization.
+  - [x] Update LayoutEditor.vue to natively use canonical `layout.*`, `style.*`, `theme.*` keys
+  - [x] Update OptionsEditor.vue key groupings and Font Upload flow to use canonical typography keys
+  - [x] Keep server normalization intact for backwards compatibility and clean canonical PUT saves
+  - [x] Add lightweight dev telemetry alerts for legacy key usage in Config SPA
+  - [x] Verify drag/save operations emit and persist canonical keys only with zero legacy key duplication
+
+### Phase 11: Explicit Deprecation Lifecycle System
+
+- [x] Add alias-level lifecycle metadata to option-slice definitions ✅
+- [x] Add `getDeprecatedAliases()` and `getSunsetCandidates(targetRelease)` to `canonical-map.js` ✅
+- [x] Add one-time server console warnings when legacy aliases are loaded or imported ✅
+- [x] Create `docs/architecture/config-migration.md` containing full deprecation architecture ✅
+- [x] Verify via a temporary developer test script or server startup checks ✅
 
 ## Verification Checklist For Next Code Change
 
-- [x] `npm start`
-- [x] `npm run start:ui-dev`
-- [x] Open `/hud`, `/config`, `/radar`, and `/api/gsi/status`
-- [x] Exercise all HUD presets: Slanted, Classic, Compact, Diagonal, Rounded
-- [x] Exercise scenes: default gameplay, `intro`, `halftime`, `fulltime`/`over`, `analytics`
-- [x] Check spectator/freecam/no-focused-player states
-- [x] Check userspace settings are written only under `src/themes/userspace`
+- [ ] `npm start`
+- [ ] `npm run start:ui-dev`
+- [ ] Open `/hud`, `/config`, `/radar`, and `/api/gsi/status`
+- [ ] Exercise all HUD presets: Slanted, Classic, Compact, Diagonal, Rounded
+- [ ] Exercise scenes: default gameplay, `intro`, `halftime`, `fulltime`/`over`, `analytics`
+- [ ] Check spectator/freecam/no-focused-player states
+- [ ] Check userspace settings are written only under `src/themes/userspace`
+
+
 

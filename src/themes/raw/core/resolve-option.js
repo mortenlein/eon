@@ -87,11 +87,25 @@ export function resolveOption(canonicalKey, fallback = null) {
 	return fallback
 }
 
+function hexToRgb(hex) {
+	if (!hex.startsWith('#')) return hex
+	let s = hex.substring(1)
+	if (s.length === 3) s = `${s[0]}${s[0]}${s[1]}${s[1]}${s[2]}${s[2]}`
+	const r = parseInt(s.substring(0, 2), 16)
+	const g = parseInt(s.substring(2, 4), 16)
+	const b = parseInt(s.substring(4, 6), 16)
+	return `${r}, ${g}, ${b}`
+}
+
 /**
  * Wraps resolveOption for CSS-specific processing.
  */
 export function resolveCssOption(canonicalKey, fallback = null) {
-	return resolveOption(canonicalKey, fallback)
+	const val = resolveOption(canonicalKey, fallback)
+	if (typeof val === 'string' && val.startsWith('#') && (canonicalKey.includes('colors.') || canonicalKey.endsWith('-rgb'))) {
+		return hexToRgb(val)
+	}
+	return val
 }
 
 /**

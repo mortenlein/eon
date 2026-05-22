@@ -130,85 +130,96 @@ const DEFS = [
 		color: 'rgba(52,152,219,0.3)', border: 'rgba(52,152,219,0.65)',
 		baseW: 480, baseH: 480,
 		anchor: { v: 'top', h: 'left' },
-		props: [ { key: 'css.lan66-radar-top', edge: 'top' }, { key: 'css.lan66-radar-left', edge: 'left' } ],
+		props: [ { key: 'layout.radar.top', edge: 'top' }, { key: 'layout.radar.left', edge: 'left' } ],
 		resizable: true, keepAspect: true,
-		sizeKey: 'css.radar-width', sizeUnit: '%', sizeRef: VP_W,
+		sizeKey: 'layout.radar.width', sizeUnit: '%', sizeRef: VP_W,
+		visibleKey: 'layout.radar.visible'
 	},
 	{
 		id: 'top-bar', label: 'Top Bar',
 		color: 'rgba(255,255,255,0.12)', border: 'rgba(255,255,255,0.35)',
 		baseW: 960, baseH: 50,
 		anchor: { v: 'top', h: 'center' },
-		props: [{ key: 'css.lan66-top-bar-top', edge: 'top' }],
+		props: [{ key: 'layout.topbar.top', edge: 'top' }],
 		sizeKey: 'css.top-bar-width',
+		visibleKey: 'layout.topbar.visible'
 	},
 	{
 		id: 'players-alive', label: 'Players Alive',
 		color: 'rgba(56,148,107,0.3)', border: 'rgba(56,148,107,0.65)',
 		baseW: 110, baseH: 35,
 		anchor: { v: 'top', h: 'right' },
-		props: [ { key: 'css.lan66-players-alive-top', edge: 'top' }, { key: 'css.lan66-players-alive-right', edge: 'right' } ],
+		props: [ { key: 'layout.playersAlive.top', edge: 'top' }, { key: 'layout.playersAlive.right', edge: 'right' } ],
+		visibleKey: 'layout.playersAlive.visible'
 	},
 	{
 		id: 'sponsor-left', label: 'Sponsor Left',
 		color: 'rgba(220,180,80,0.2)', border: 'rgba(220,180,80,0.5)',
 		baseW: 130, baseH: 48,
 		anchor: { v: 'top', h: 'left' },
-		props: [ { key: 'css.lan66-sponsor-left-top', edge: 'top' }, { key: 'css.lan66-sponsor-left-left', edge: 'left' } ],
-		resizable: true, sizeKey: 'css.sponsor-panel-width', sizeUnit: 'rem',
+		props: [ { key: 'layout.sponsorLeft.top', edge: 'top' }, { key: 'layout.sponsorLeft.left', edge: 'left' } ],
+		resizable: true, sizeKey: 'style.sponsors.width', sizeUnit: 'rem',
+		visibleKey: 'layout.sponsorLeft.visible'
 	},
 	{
 		id: 'sponsor-right', label: 'Sponsor Right',
 		color: 'rgba(220,180,80,0.2)', border: 'rgba(220,180,80,0.5)',
 		baseW: 130, baseH: 48,
 		anchor: { v: 'top', h: 'right' },
-		props: [ { key: 'css.lan66-sponsor-right-top', edge: 'top' }, { key: 'css.lan66-sponsor-right-right', edge: 'right' } ],
-		resizable: true, sizeKey: 'css.sponsor-panel-width', sizeUnit: 'rem',
+		props: [ { key: 'layout.sponsorRight.top', edge: 'top' }, { key: 'layout.sponsorRight.right', edge: 'right' } ],
+		resizable: true, sizeKey: 'style.sponsors.width', sizeUnit: 'rem',
+		visibleKey: 'layout.sponsorRight.visible'
 	},
 	{
 		id: 'sidebar-left', label: 'Left Sidebar',
 		color: 'rgba(240,151,37,0.22)', border: 'rgba(240,151,37,0.55)',
 		baseW: 580, baseH: 200,
 		anchor: { v: 'bottom', h: 'left' },
-		props: [ { key: 'css.lan66-sidebar-left', edge: 'left' }, { key: 'css.lan66-sidebar-bottom', edge: 'bottom' } ],
+		props: [ { key: 'layout.sidebar.left', edge: 'left' }, { key: 'layout.sidebar.bottom', edge: 'bottom' } ],
+		visibleKey: 'layout.sidebar.leftVisible'
 	},
 	{
 		id: 'sidebar-right', label: 'Right Sidebar',
 		color: 'rgba(240,151,37,0.22)', border: 'rgba(240,151,37,0.55)',
 		baseW: 580, baseH: 200,
 		anchor: { v: 'bottom', h: 'right' },
-		props: [ { key: 'css.lan66-sidebar-right', edge: 'right' }, { key: 'css.lan66-sidebar-bottom', edge: 'bottom' } ],
+		props: [ { key: 'layout.sidebar.right', edge: 'right' }, { key: 'layout.sidebar.bottom', edge: 'bottom' } ],
+		visibleKey: 'layout.sidebar.rightVisible'
 	},
 	{
 		id: 'focused-player', label: 'Focused Player',
 		color: 'rgba(155,89,182,0.22)', border: 'rgba(155,89,182,0.55)',
 		baseW: 960, baseH: 70,
 		anchor: { v: 'bottom', h: 'center' },
-		props: [{ key: 'css.lan66-focused-player-bottom', edge: 'bottom' }],
+		props: [{ key: 'layout.focusedPlayer.bottom', edge: 'bottom' }],
+		visibleKey: 'layout.focusedPlayer.visible'
 	},
 	{
 		id: 'current-map', label: 'Current Map',
 		color: 'rgba(100,180,240,0.18)', border: 'rgba(100,180,240,0.5)',
 		baseW: 160, baseH: 90,
 		anchor: { v: 'bottom', h: 'right' },
-		props: [ { key: 'css.lan66-current-map-bottom', edge: 'bottom' }, { key: 'css.lan66-current-map-right', edge: 'right' } ],
-		resizable: true, sizeKey: 'css.lan66-current-map-width', sizeUnit: 'rem',
+		props: [ { key: 'layout.currentMap.bottom', edge: 'bottom' }, { key: 'layout.currentMap.right', edge: 'right' } ],
+		resizable: true, sizeKey: 'style.currentMap.width', sizeUnit: 'rem',
+		visibleKey: 'layout.currentMap.visible'
 	},
 	{
 		id: 'maps-sleek', label: 'Sleek Maps',
 		color: 'rgba(79,227,193,0.18)', border: 'rgba(79,227,193,0.5)',
 		baseW: 210, baseH: 20,
 		anchor: { v: 'top', h: 'center' },
-		props: [ { key: 'css.lan66-maps-sleek-top', edge: 'top' }, { key: 'css.lan66-maps-sleek-left', edge: 'left' } ],
-		resizable: true, sizeKey: 'css.lan66-maps-sleek-scale', sizeUnit: '', 
+		props: [ { key: 'layout.mapsSleek.top', edge: 'top' }, { key: 'layout.mapsSleek.left', edge: 'left' } ],
+		resizable: true, sizeKey: 'style.mapsSleek.scale', sizeUnit: '',
+		visibleKey: 'layout.maps.visible'
 	},
 	{
 		id: 'event-badge', label: 'Event Badge',
 		color: 'rgba(231,76,60,0.22)', border: 'rgba(231,76,60,0.55)',
 		baseW: 240, baseH: 45,
 		anchor: { v: 'top', h: 'left' },
-		props: [ { key: 'css.lan66-event-badge-top', edge: 'top' }, { key: 'css.lan66-event-badge-left', edge: 'left' } ],
-		resizable: true, sizeKey: 'css.lan66-event-badge-width', sizeUnit: 'rem',
+		props: [ { key: 'layout.eventBadge.top', edge: 'top' }, { key: 'layout.eventBadge.left', edge: 'left' } ],
+		resizable: true, sizeKey: 'style.eventBadge.width', sizeUnit: 'rem',
+		visibleKey: 'layout.eventBadge.visible'
 	}
 ]
 
@@ -304,8 +315,8 @@ export default {
 				}
 
 				if (def.id.startsWith('sponsor-')) {
-					bw = this.evaluateCss(state.options['css.sponsor-panel-width'], VP_W, 130)
-					bh = this.evaluateCss(state.options['css.sponsor-panel-height'], VP_H, 48)
+					bw = this.evaluateCss(state.options['style.sponsors.width'], VP_W, 130)
+					bh = this.evaluateCss(state.options['style.sponsors.height'], VP_H, 48)
 				}
 
 				const positions = {}
@@ -324,7 +335,8 @@ export default {
 				else if (def.anchor.h === 'right') left = VP_W - (positions.right ?? 0) - w
 				else left = (VP_W - w) / 2
 
-				const visible = state.options[`css.lan66-${def.id}-display`] !== 'none'
+				const visibleVal = state.options[def.visibleKey]
+				const visible = visibleVal !== false && visibleVal !== 'none'
 				return { def, top, left, w, h, baseW: bw, baseH: bh, scaleX, scaleY, visible }
 			})
 		},
@@ -338,10 +350,10 @@ export default {
 		},
 		toggleVisibility(el) {
 			el.visible = !el.visible
-			const val = el.visible ? 'block' : 'none'
-			state.options[`css.lan66-${el.def.id}-display`] = val
-			actions.broadcast(`css.lan66-${el.def.id}-display`, val)
-			actions.save({ [`css.lan66-${el.def.id}-display`]: val })
+			const val = el.visible ? 'flex' : 'none'
+			state.options[el.def.visibleKey] = val
+			actions.broadcast(el.def.visibleKey, val)
+			actions.save({ [el.def.visibleKey]: val })
 		},
 		resetElement(el) {
 			const partial = {}

@@ -5,6 +5,85 @@ import { merge } from 'lodash-es'
 import { builtinThemesDirectory, customThemesDirectory, userspaceBombsitesPath, userspaceDirectory, userspaceRadarsPath, userspaceSettingsPath } from './helpers/paths.js'
 import { fileExists } from './helpers/file-exists.js'
 import { readJson, readJsonIfExists, writeJson } from './helpers/json-file.js'
+import { LEGACY_TO_CANONICAL, getDeprecatedAliases } from './helpers/canonical-map.js'
+import { isUiDevMode } from './dev-mode.js'
+
+const loggedLegacyKeys = new Set()
+const warnedLegacyKeys = new Set()
+
+export const normalizeSettingsOptions = (settings) => {
+	if (!settings || !settings.options) return settings
+
+	const normalizedOptions = {}
+
+	// First, copy all non-legacy/canonical/unmigrated options
+	for (const [key, data] of Object.entries(settings.options)) {
+		const canonicalKey = LEGACY_TO_CANONICAL[key]
+		if (!canonicalKey) {
+			if (!normalizedOptions[key]) {
+				normalizedOptions[key] = { ...data }
+			} else {
+				normalizedOptions[key] = merge({}, normalizedOptions[key], data)
+			}
+		}
+	}
+
+	// Then, map legacy options to their canonical equivalents, merging metadata and values
+	const deprecatedMeta = getDeprecatedAliases()
+	for (const [key, data] of Object.entries(settings.options)) {
+		const canonicalKey = LEGACY_TO_CANONICAL[key]
+		if (canonicalKey) {
+			// Trigger a one-time deprecation warning for the loaded legacy key
+			if (!warnedLegacyKeys.has(key)) {
+				warnedLegacyKeys.add(key)
+				const meta = deprecatedMeta[key]
+				if (meta) {
+					console.warn(
+						`\n[Deprecation Warning] Legacy configuration alias "${key}" is transitional/deprecated.` +
+						` Please update to the canonical key "${canonicalKey}".` +
+						`\n  - Lifecycle: introduced in ${meta.introducedIn || 'N/A'}, canonical since ${meta.canonicalSince || 'N/A'}` +
+						`\n  - Sunset: phase "${meta.sunsetPhase || 'N/A'}", scheduled for removal in version "${meta.removeAfter || 'N/A'}"` +
+						`\n  - To resolve: Save your configuration in the Config SPA to automatically migrate userspace keys to canonical equivalents.\n`
+					)
+				} else {
+					console.warn(`[Deprecation Warning] Legacy configuration alias "${key}" is transitional/deprecated. Please update to "${canonicalKey}".`)
+				}
+			}
+
+			if (!normalizedOptions[canonicalKey]) {
+				normalizedOptions[canonicalKey] = {}
+			}
+
+			const canonicalExisting = normalizedOptions[canonicalKey]
+			const mergedData = merge({}, data, canonicalExisting)
+
+			if (canonicalExisting.value !== undefined) {
+				mergedData.value = canonicalExisting.value
+			} else if (data.value !== undefined) {
+				mergedData.value = data.value
+			}
+
+			normalizedOptions[canonicalKey] = mergedData
+		}
+	}
+
+	// Add lightweight dev telemetry logging
+	if (isUiDevMode) {
+		const detected = []
+		for (const key of Object.keys(settings.options)) {
+			if (LEGACY_TO_CANONICAL[key] && !loggedLegacyKeys.has(key)) {
+				detected.push(key)
+				loggedLegacyKeys.add(key)
+			}
+		}
+		if (detected.length > 0) {
+			console.log(`[Telemetry] Normalized in-memory legacy keys to canonical in dev mode: ${detected.join(', ')}`)
+		}
+	}
+
+	settings.options = normalizedOptions
+	return settings
+}
 
 export const initSettings = async () => {
 	if (await fileExists(userspaceSettingsPath)) return
@@ -64,13 +143,17 @@ export const getSettings = async () => {
 		}
 	}
 
-	return {
+	const result = {
 		themeTree,
 
 		bombsites: merge({}, ...bombsiteObjects.reverse()),
 		radars: merge({}, ...radarObjects.reverse()),
 		settings: merge({}, ...settingsObjects.reverse()),
 	}
+
+	result.settings = normalizeSettingsOptions(result.settings)
+
+	return result
 }
 
 export const getThemeTree = async (firstTheme = 'userspace') => {

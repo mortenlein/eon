@@ -99,16 +99,16 @@
 								<small>Choose a bundled font or upload a local broadcast font.</small>
 							</div>
 							<div class="segmented">
-								<button v-for="choice in fontChoices" :key="choice.value" :class="{ '--active': state.options['css.primary-font-family'] === choice.value }" @click="setFontPreset(choice.value)">
+								<button v-for="choice in fontChoices" :key="choice.value" :class="{ '--active': state.options['theme.typography.primaryFont'] === choice.value }" @click="setFontPreset(choice.value)">
 									{{ choice.label }}
 								</button>
 							</div>
 							<div class="image-input-row">
-								<input v-model="state.options['css.primary-font-family']" type="text" placeholder="Custom Font Name" @change="saveOption('css.primary-font-family')">
-								<button class="btn-secondary" @click="triggerUpload('css.custom-font-url')">Upload font</button>
-								<input ref="upload-css.custom-font-url" type="file" accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf" class="hidden-file" @change="onFontSelected">
+								<input v-model="state.options['theme.typography.primaryFont']" type="text" placeholder="Custom Font Name" @change="saveOption('theme.typography.primaryFont')">
+								<button class="btn-secondary" @click="triggerUpload('theme.typography.customFontUrl')">Upload font</button>
+								<input ref="upload-theme.typography.customFontUrl" type="file" accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf" class="hidden-file" @change="onFontSelected">
 							</div>
-							<small v-if="state.options['css.custom-font-url']">Using {{ state.options['css.custom-font-url'] }}</small>
+							<small v-if="state.options['theme.typography.customFontUrl']">Using {{ state.options['theme.typography.customFontUrl'] }}</small>
 						</div>
 
 						<label v-for="item in styleTextControls" :key="item.key" class="field-row">
@@ -204,17 +204,17 @@
 import { state, actions } from '/config/store.js'
 
 const displayControls = [
-	{ key: 'css.lan66-radar-display', label: 'Radar', description: 'Map overview and player positions.' },
-	{ key: 'css.lan66-top-bar-display', label: 'Top bar', description: 'Score, clock, team names, and round state.' },
-	{ key: 'css.lan66-players-alive-display', label: 'Players alive', description: 'Small alive count panel.' },
-	{ key: 'css.lan66-sidebar-left-display', label: 'Left roster', description: 'Left team player sidebar.' },
-	{ key: 'css.lan66-sidebar-right-display', label: 'Right roster', description: 'Right team player sidebar.' },
-	{ key: 'css.lan66-focused-player-display', label: 'Focused player', description: 'Observed player lower-third.' },
-	{ key: 'css.lan66-event-badge-display', label: 'Event badge', description: 'Event logo and text block.' },
-	{ key: 'css.lan66-current-map-display', label: 'Current map', description: 'Current map panel.' },
-	{ key: 'css.lan66-sponsor-left-display', label: 'Left sponsor', description: 'Left sponsor slot.' },
-	{ key: 'css.lan66-sponsor-right-display', label: 'Right sponsor', description: 'Right sponsor slot.' },
-	{ key: 'css.lan66-maps-display', label: 'Series maps', description: 'Displays the match maps from Komplettligaen.' },
+	{ key: 'layout.radar.visible', label: 'Radar', description: 'Map overview and player positions.' },
+	{ key: 'layout.topbar.visible', label: 'Top bar', description: 'Score, clock, team names, and round state.' },
+	{ key: 'layout.playersAlive.visible', label: 'Players alive', description: 'Small alive count panel.' },
+	{ key: 'layout.sidebar.leftVisible', label: 'Left roster', description: 'Left team player sidebar.' },
+	{ key: 'layout.sidebar.rightVisible', label: 'Right roster', description: 'Right team player sidebar.' },
+	{ key: 'layout.focusedPlayer.visible', label: 'Focused player', description: 'Observed player lower-third.' },
+	{ key: 'layout.eventBadge.visible', label: 'Event badge', description: 'Event logo and text block.' },
+	{ key: 'layout.currentMap.visible', label: 'Current map', description: 'Current map panel.' },
+	{ key: 'layout.sponsorLeft.visible', label: 'Left sponsor', description: 'Left sponsor slot.' },
+	{ key: 'layout.sponsorRight.visible', label: 'Right sponsor', description: 'Right sponsor slot.' },
+	{ key: 'layout.maps.visible', label: 'Series maps', description: 'Displays the match maps from Komplettligaen.' },
 ]
 
 const behaviorSwitches = [
@@ -237,16 +237,16 @@ const behaviorNumbers = [
 ]
 
 const colorControls = [
-	{ key: 'css.counter-terrorists-fill-rgb', label: 'CT fill' },
-	{ key: 'css.counter-terrorists-border-rgb', label: 'CT border' },
-	{ key: 'css.counter-terrorists-text-rgb', label: 'CT text' },
-	{ key: 'css.terrorists-fill-rgb', label: 'T fill' },
-	{ key: 'css.terrorists-border-rgb', label: 'T border' },
-	{ key: 'css.terrorists-text-rgb', label: 'T text' },
+	{ key: 'theme.colors.ctFill', label: 'CT fill' },
+	{ key: 'theme.colors.ctBorder', label: 'CT border' },
+	{ key: 'theme.colors.ctText', label: 'CT text' },
+	{ key: 'theme.colors.tFill', label: 'T fill' },
+	{ key: 'theme.colors.tBorder', label: 'T border' },
+	{ key: 'theme.colors.tText', label: 'T text' },
 ]
 
 const styleTextControls = [
-	{ key: 'css.radar-width', label: 'Radar width', placeholder: '18% or 320px' },
+	{ key: 'layout.radar.width', label: 'Radar width', placeholder: '18% or 320px' },
 	{ key: 'css.ct-background', label: 'CT custom background', placeholder: 'linear-gradient(...)' },
 	{ key: 'css.t-background', label: 'T custom background', placeholder: 'linear-gradient(...)' },
 ]
@@ -264,8 +264,8 @@ const handledKeys = new Set([
 	...colorControls.map((item) => item.key),
 	...styleTextControls.map((item) => item.key),
 	...brandingTextControls.map((item) => item.key),
-	'css.primary-font-family',
-	'css.custom-font-url',
+	'theme.typography.primaryFont',
+	'theme.typography.customFontUrl',
 	'series.logoUrl',
 ])
 
@@ -370,7 +370,17 @@ export default {
 		},
 		colorValue(key) {
 			const value = state.options[key]
-			return typeof value === 'string' && value.startsWith('#') ? value : '#000000'
+			if (typeof value === 'string') {
+				if (value.startsWith('#')) return value
+				const parts = value.match(/\d+/g)
+				if (parts && parts.length >= 3) {
+					const r = Math.min(255, Math.max(0, parseInt(parts[0])))
+					const g = Math.min(255, Math.max(0, parseInt(parts[1])))
+					const b = Math.min(255, Math.max(0, parseInt(parts[2])))
+					return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')
+				}
+			}
+			return '#000000'
 		},
 		isDisplayVisible(key) {
 			const value = state.options[key]
@@ -393,10 +403,10 @@ export default {
 			this.saveOption(key)
 		},
 		setFontPreset(value) {
-			state.options['css.custom-font-url'] = ''
-			actions.broadcast('css.custom-font-url', '')
-			actions.save({ 'css.custom-font-url': '' })
-			this.setOption('css.primary-font-family', value)
+			state.options['theme.typography.customFontUrl'] = ''
+			actions.broadcast('theme.typography.customFontUrl', '')
+			actions.save({ 'theme.typography.customFontUrl': '' })
+			this.setOption('theme.typography.primaryFont', value)
 		},
 		resetOption(key) {
 			state.options[key] = null
@@ -464,13 +474,13 @@ export default {
 					})
 					const json = await res.json()
 					if (json.url && json.fontFamily) {
-						state.options['css.custom-font-url'] = json.url
-						state.options['css.primary-font-family'] = json.fontFamily
-						actions.broadcast('css.custom-font-url', json.url)
-						actions.broadcast('css.primary-font-family', json.fontFamily)
+						state.options['theme.typography.customFontUrl'] = json.url
+						state.options['theme.typography.primaryFont'] = json.fontFamily
+						actions.broadcast('theme.typography.customFontUrl', json.url)
+						actions.broadcast('theme.typography.primaryFont', json.fontFamily)
 						actions.save({
-							'css.custom-font-url': json.url,
-							'css.primary-font-family': json.fontFamily,
+							'theme.typography.customFontUrl': json.url,
+							'theme.typography.primaryFont': json.fontFamily,
 						})
 						actions.addAlert('Font uploaded successfully', 'success')
 					}

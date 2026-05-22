@@ -1,10 +1,11 @@
 import send from 'koa-send'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { getSettings } from './settings.js'
+import { getSettings, normalizeSettingsOptions } from './settings.js'
 import { readJson, writeJson } from './helpers/json-file.js'
 import { builtinRootDirectory, userspaceDirectory, userspaceSettingsPath } from './helpers/paths.js'
 import { MODE_PRESETS } from './helpers/game-modes.js'
+import { LEGACY_TO_CANONICAL, CANONICAL_TO_LEGACY } from './helpers/canonical-map.js'
 
 export const registerConfigRoutes = (router, websocket) => {
 	router.get('/', (context) => {
@@ -43,6 +44,7 @@ export const registerConfigRoutes = (router, websocket) => {
 
 	router.put('/config/options', async (context) => {
 		const settings = await readJson(userspaceSettingsPath)
+		normalizeSettingsOptions(settings)
 
 		if (! settings.options) settings.options = {}
 
@@ -57,8 +59,15 @@ export const registerConfigRoutes = (router, websocket) => {
 			const presets = MODE_PRESETS[newMode]
 			if (presets) {
 				for (const [key, val] of Object.entries(presets)) {
-					if (! settings.options[key]) settings.options[key] = {}
-					settings.options[key].value = val
+					const canonicalKey = LEGACY_TO_CANONICAL[key] || key
+					if (! settings.options[canonicalKey]) settings.options[canonicalKey] = {}
+					settings.options[canonicalKey].value = val
+
+					// Remove legacy aliases to prevent duplication
+					const aliases = CANONICAL_TO_LEGACY[canonicalKey] || []
+					for (const alias of aliases) {
+						delete settings.options[alias]
+					}
 				}
 			}
 		}
@@ -67,11 +76,20 @@ export const registerConfigRoutes = (router, websocket) => {
 			if (key === 'theme') {
 				wasThemeChanged = settings.parent !== (value || 'default')
 				settings.parent = (value || 'default')
-			} else if (value != null) { // this SHOULD be a double-equal instead of triple-equal (similar to lodash's isNil)
-				if (! settings.options[key]) settings.options[key] = {}
-				settings.options[key].value = value
-			} else if (settings.options[key]) {
-				delete settings.options[key].value
+			} else {
+				const canonicalKey = LEGACY_TO_CANONICAL[key] || key
+				if (value != null) { // this SHOULD be a double-equal instead of triple-equal (similar to lodash's isNil)
+					if (! settings.options[canonicalKey]) settings.options[canonicalKey] = {}
+					settings.options[canonicalKey].value = value
+				} else if (settings.options[canonicalKey]) {
+					delete settings.options[canonicalKey].value
+				}
+
+				// Remove legacy aliases to prevent duplication in userspace theme.json
+				const aliases = CANONICAL_TO_LEGACY[canonicalKey] || []
+				for (const alias of aliases) {
+					delete settings.options[alias]
+				}
 			}
 		}
 
@@ -223,7 +241,20 @@ export const registerConfigRoutes = (router, websocket) => {
 			return
 		}
 
-		if (theme) await writeJson(userspaceSettingsPath, theme)
+		if (theme) {
+			// 1. Create backup of existing theme.json if it exists
+			const currentTheme = await readJson(userspaceSettingsPath).catch(() => null)
+			if (currentTheme) {
+				const backupPath = `${userspaceDirectory}/theme.backup.pre-canonical.json`
+				await writeJson(backupPath, currentTheme)
+			}
+
+			// 2. Normalize imported options to canonical
+			normalizeSettingsOptions(theme)
+
+			await writeJson(userspaceSettingsPath, theme)
+		}
+
 		if (presets) await writeJson(presetsPath, presets)
 
 		websocket.broadcastRefresh()
