@@ -136,13 +136,26 @@ Tasks:
 - [x] Rebrand legacy fallback and title strings `"LAN66NORD"` and `"LAN66NORD Broadcast HUD"` to `"Eon Broadcast"` and `"Eon Broadcast HUD"` in `theme.json` and `shell.html` ✅
 - [x] Verify Config SPA, Layout Editor, and HUD pages load successfully without crash or regressions ✅
 
+### 8. Centralized Configuration Resolution Layer
+
+- [x] Create `resolve-option.js` containing centralized `resolveOption`, `resolveCssOption`, and `applyResolvedCssVariables` helpers.
+- [x] Define `RADAR_OPTION_DEFINITIONS` fully within `resolve-option.js`.
+- [x] Call `applyResolvedCssVariables(RADAR_OPTION_DEFINITIONS)` inside `shell.js`'s `applyCssVariableOverrides()`.
+- [x] Update generic `css.*` loop in `shell.js` to skip migrated keys.
+- [x] Verify HUD radar rendering, reactive toggling, and backwards compatibility.
+- [x] Migrate Top Bar option slice (`layout.topbar.top`, `layout.topbar.visible`) using centralized resolve-option.js.
+- [x] Migrate Sidebar position option slice (`layout.sidebar.left`, `layout.sidebar.right`, `layout.sidebar.bottom`) using centralized resolve-option.js.
+- [x] Migrate Sidebar visibility option slice (`layout.sidebar.leftVisible`, `layout.sidebar.rightVisible`) using centralized resolve-option.js.
+- [x] Migrate Players Alive option slice (`layout.playersAlive.top`, `layout.playersAlive.right`, `layout.playersAlive.visible`) using centralized resolve-option.js.
+- [x] Migrate Focused Player option slice (`layout.focusedPlayer.bottom`, `layout.focusedPlayer.visible`) using centralized resolve-option.js.
 
 ## Verification Checklist For Next Code Change
 
-- [ ] `npm start`
-- [ ] `npm run start:ui-dev`
-- [ ] Open `/hud`, `/config`, `/radar`, and `/api/gsi/status`
-- [ ] Exercise all HUD presets: Slanted, Classic, Compact, Diagonal, Rounded
-- [ ] Exercise scenes: default gameplay, `intro`, `halftime`, `fulltime`/`over`, `analytics`
-- [ ] Check spectator/freecam/no-focused-player states
-- [ ] Check userspace settings are written only under `src/themes/userspace`
+- [x] `npm start`
+- [x] `npm run start:ui-dev`
+- [x] Open `/hud`, `/config`, `/radar`, and `/api/gsi/status`
+- [x] Exercise all HUD presets: Slanted, Classic, Compact, Diagonal, Rounded
+- [x] Exercise scenes: default gameplay, `intro`, `halftime`, `fulltime`/`over`, `analytics`
+- [x] Check spectator/freecam/no-focused-player states
+- [x] Check userspace settings are written only under `src/themes/userspace`
+

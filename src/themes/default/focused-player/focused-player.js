@@ -1,5 +1,6 @@
 import { teamColorClass } from '/hud/helpers/team-color-class.js'
 import { getTeamLogoPath } from '/hud/helpers/player-resolver.js'
+import { resolveOption } from '/hud/core/resolve-option.js'
 
 export default {
 	data() {
@@ -19,7 +20,10 @@ export default {
 		},
 
 		isActive() {
-			return !! this.player
+			if (!this.player) return false
+			const visible = resolveOption('layout.focusedPlayer.visible', 'flex')
+			if (visible === false || visible === 'none') return false
+			return true
 		},
 
 		colorClass() {

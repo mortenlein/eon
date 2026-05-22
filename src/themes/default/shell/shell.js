@@ -15,6 +15,7 @@ import WinProbGraph from '/hud/win-prob-graph/win-prob-graph.vue'
 import Maps from '/hud/maps/maps.vue'
 import MapsSleek from '/hud/maps-sleek/maps-sleek.vue'
 import { getPlayerDisplayName, getTeamLogoPath } from '/hud/helpers/player-resolver.js'
+import { applyResolvedCssVariables, getMigratedOptionKeys, RADAR_OPTION_DEFINITIONS, TOPBAR_OPTION_DEFINITIONS, SIDEBAR_POSITION_OPTION_DEFINITIONS, SIDEBAR_VISIBILITY_OPTION_DEFINITIONS, PLAYERS_ALIVE_OPTION_DEFINITIONS, FOCUSED_PLAYER_OPTION_DEFINITIONS } from '/hud/core/resolve-option.js'
 
 export default {
 	components: {
@@ -241,28 +242,53 @@ export default {
 		applyCssVariableOverrides() {
 			if (!this.$opts) return
 
-			Object.entries(this.$opts).forEach(([key, value]) => {
-				if (!key.startsWith('css.')) return
-				const prop = `--${key.substring(4)}`
+			// 1. Resolve and apply the decoupled Radar, Top Bar, Sidebar, and Players Alive slices cleanly (CSS Variables only)
+			applyResolvedCssVariables(RADAR_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(TOPBAR_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(SIDEBAR_POSITION_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(SIDEBAR_VISIBILITY_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(PLAYERS_ALIVE_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(FOCUSED_PLAYER_OPTION_DEFINITIONS)
 
+			// Dynamically retrieve the keys and legacy aliases to bypass in the loop
+			const migratedKeys = [
+				...getMigratedOptionKeys(RADAR_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(TOPBAR_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(SIDEBAR_POSITION_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(SIDEBAR_VISIBILITY_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(PLAYERS_ALIVE_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(FOCUSED_PLAYER_OPTION_DEFINITIONS)
+			]
+
+			// 2. Generic loop for all other options
+			Object.entries(this.$opts).forEach(([key, value]) => {
 				// Visibility Management via Helper Class (Preserves Design Integrity)
 				if (key.endsWith('-display')) {
-					const id = key.substring(4).replace('-display', '').replace('lan66-', '');
-					let selector = `.${id}`;
-					if (id === 'sidebar-left') selector = '.sidebar.--left';
-					else if (id === 'sidebar-right') selector = '.sidebar.--right';
-					else if (id === 'sponsor-left') selector = '.sponsor-slot.--left';
-					else if (id === 'sponsor-right') selector = '.sponsor-slot.--right';
+					const id = key.substring(4).replace('-display', '').replace('lan66-', '')
+					let selector = `.${id}`
+					if (id === 'sidebar-left') selector = '.sidebar.--left'
+					else if (id === 'sidebar-right') selector = '.sidebar.--right'
+					else if (id === 'sponsor-left') selector = '.sponsor-slot.--left'
+					else if (id === 'sponsor-right') selector = '.sponsor-slot.--right'
 
-					const el = document.querySelector(selector);
+					const el = document.querySelector(selector)
 					if (el) {
-						if (value === 'none') el.classList.add('--layout-hidden');
-						else el.classList.remove('--layout-hidden');
+						if (value === 'none') el.classList.add('--layout-hidden')
+						else el.classList.remove('--layout-hidden')
 					}
-					// Also set the CSS variable so 'display: var(...)' works
-					document.documentElement.style.setProperty(prop, value);
-					return;
+
+					// Skip standard CSS variable assignment for already migrated keys
+					if (migratedKeys.includes(key)) return
+
+					const prop = `--${key.substring(4)}`
+					document.documentElement.style.setProperty(prop, value)
+					return
 				}
+
+				// Skip standard CSS variable assignment for already migrated keys
+				if (migratedKeys.includes(key)) return
+				if (!key.startsWith('css.')) return
+				const prop = `--${key.substring(4)}`
 
 				if (value === '') {
 					document.documentElement.style.removeProperty(prop)

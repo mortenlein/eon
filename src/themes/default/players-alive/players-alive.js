@@ -1,11 +1,15 @@
 import { teamColorClass } from '/hud/helpers/team-color-class.js'
+import { resolveOption } from '/hud/core/resolve-option.js'
 
 export default {
 	computed: {
 		isActive() {
 			if (! this.$teams?.[0] || ! this.$teams?.[1]) return false
 			if (! this.$teams[0]?.players?.length || ! this.$teams[1]?.players?.length) return false
-			if (this.$opts['css.lan66-players-alive-display'] === false) return false
+			
+			// Resolve show/hide state using central resolver
+			const visible = resolveOption('layout.playersAlive.visible', true)
+			if (visible === false || visible === 'none') return false
 
 			if (this.$opts['preferences.playersAlive.showDuringFreezetime']) {
 				return true
