@@ -148,6 +148,7 @@ Tasks:
 - [x] Migrate Sidebar visibility option slice (`layout.sidebar.leftVisible`, `layout.sidebar.rightVisible`) using centralized resolve-option.js.
 - [x] Migrate Players Alive option slice (`layout.playersAlive.top`, `layout.playersAlive.right`, `layout.playersAlive.visible`) using centralized resolve-option.js.
 - [x] Migrate Focused Player option slice (`layout.focusedPlayer.bottom`, `layout.focusedPlayer.visible`) using centralized resolve-option.js.
+- [x] Migrate Current Map option slice (`layout.currentMap.bottom`, `layout.currentMap.right`, `style.currentMap.width`, `layout.currentMap.visible`) using centralized resolve-option.js.
 
 ## Verification Checklist For Next Code Change
 

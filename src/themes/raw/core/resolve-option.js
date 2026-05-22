@@ -20,7 +20,12 @@ export const LEGACY_OPTION_ALIASES = {
 	'layout.playersAlive.visible': ['css.lan66-players-alive-display'],
 
 	'layout.focusedPlayer.bottom': ['css.lan66-focused-player-bottom'],
-	'layout.focusedPlayer.visible': ['css.lan66-focused-player-display']
+	'layout.focusedPlayer.visible': ['css.lan66-focused-player-display'],
+
+	'layout.currentMap.bottom': ['css.lan66-current-map-bottom'],
+	'layout.currentMap.right': ['css.lan66-current-map-right'],
+	'style.currentMap.width': ['css.lan66-current-map-width'],
+	'layout.currentMap.visible': ['css.lan66-current-map-display']
 }
 
 export const RADAR_OPTION_DEFINITIONS = [
@@ -136,6 +141,34 @@ export const FOCUSED_PLAYER_OPTION_DEFINITIONS = [
 		fallback: 'flex'
 	}
 ]
+
+export const CURRENT_MAP_OPTION_DEFINITIONS = [
+	{
+		canonical: 'layout.currentMap.bottom',
+		aliases: ['css.lan66-current-map-bottom'],
+		cssVars: ['--lan66-current-map-bottom', '--layout-current-map-bottom'],
+		fallback: 'var(--viewport-margin-bottom)'
+	},
+	{
+		canonical: 'layout.currentMap.right',
+		aliases: ['css.lan66-current-map-right'],
+		cssVars: ['--lan66-current-map-right', '--layout-current-map-right'],
+		fallback: 'var(--viewport-margin-right)'
+	},
+	{
+		canonical: 'style.currentMap.width',
+		aliases: ['css.lan66-current-map-width'],
+		cssVars: ['--lan66-current-map-width', '--style-current-map-width'],
+		fallback: '16rem'
+	},
+	{
+		canonical: 'layout.currentMap.visible',
+		aliases: ['css.lan66-current-map-display'],
+		cssVars: ['--lan66-current-map-display', '--layout-current-map-display'],
+		fallback: 'flex'
+	}
+]
+
 
 
 /**

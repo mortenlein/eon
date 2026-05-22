@@ -15,7 +15,7 @@ import WinProbGraph from '/hud/win-prob-graph/win-prob-graph.vue'
 import Maps from '/hud/maps/maps.vue'
 import MapsSleek from '/hud/maps-sleek/maps-sleek.vue'
 import { getPlayerDisplayName, getTeamLogoPath } from '/hud/helpers/player-resolver.js'
-import { applyResolvedCssVariables, getMigratedOptionKeys, RADAR_OPTION_DEFINITIONS, TOPBAR_OPTION_DEFINITIONS, SIDEBAR_POSITION_OPTION_DEFINITIONS, SIDEBAR_VISIBILITY_OPTION_DEFINITIONS, PLAYERS_ALIVE_OPTION_DEFINITIONS, FOCUSED_PLAYER_OPTION_DEFINITIONS } from '/hud/core/resolve-option.js'
+import { applyResolvedCssVariables, getMigratedOptionKeys, RADAR_OPTION_DEFINITIONS, TOPBAR_OPTION_DEFINITIONS, SIDEBAR_POSITION_OPTION_DEFINITIONS, SIDEBAR_VISIBILITY_OPTION_DEFINITIONS, PLAYERS_ALIVE_OPTION_DEFINITIONS, FOCUSED_PLAYER_OPTION_DEFINITIONS, CURRENT_MAP_OPTION_DEFINITIONS } from '/hud/core/resolve-option.js'
 
 export default {
 	components: {
@@ -249,6 +249,7 @@ export default {
 			applyResolvedCssVariables(SIDEBAR_VISIBILITY_OPTION_DEFINITIONS)
 			applyResolvedCssVariables(PLAYERS_ALIVE_OPTION_DEFINITIONS)
 			applyResolvedCssVariables(FOCUSED_PLAYER_OPTION_DEFINITIONS)
+			applyResolvedCssVariables(CURRENT_MAP_OPTION_DEFINITIONS)
 
 			// Dynamically retrieve the keys and legacy aliases to bypass in the loop
 			const migratedKeys = [
@@ -257,7 +258,8 @@ export default {
 				...getMigratedOptionKeys(SIDEBAR_POSITION_OPTION_DEFINITIONS),
 				...getMigratedOptionKeys(SIDEBAR_VISIBILITY_OPTION_DEFINITIONS),
 				...getMigratedOptionKeys(PLAYERS_ALIVE_OPTION_DEFINITIONS),
-				...getMigratedOptionKeys(FOCUSED_PLAYER_OPTION_DEFINITIONS)
+				...getMigratedOptionKeys(FOCUSED_PLAYER_OPTION_DEFINITIONS),
+				...getMigratedOptionKeys(CURRENT_MAP_OPTION_DEFINITIONS)
 			]
 
 			// 2. Generic loop for all other options
