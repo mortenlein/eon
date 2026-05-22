@@ -171,7 +171,6 @@ const DEFS = [
 		baseW: 580, baseH: 200,
 		anchor: { v: 'bottom', h: 'left' },
 		props: [ { key: 'css.lan66-sidebar-left', edge: 'left' }, { key: 'css.lan66-sidebar-bottom', edge: 'bottom' } ],
-		resizable: true, scaleKeys: { x: 'css.lan66-sidebar-scale-x', y: 'css.lan66-sidebar-scale-y' },
 	},
 	{
 		id: 'sidebar-right', label: 'Right Sidebar',
@@ -179,7 +178,6 @@ const DEFS = [
 		baseW: 580, baseH: 200,
 		anchor: { v: 'bottom', h: 'right' },
 		props: [ { key: 'css.lan66-sidebar-right', edge: 'right' }, { key: 'css.lan66-sidebar-bottom', edge: 'bottom' } ],
-		resizable: true, scaleKeys: { x: 'css.lan66-sidebar-scale-x', y: 'css.lan66-sidebar-scale-y' },
 	},
 	{
 		id: 'focused-player', label: 'Focused Player',
@@ -393,12 +391,7 @@ export default {
 						el.w = el.baseW * el.scaleX
 					} else {
 						let newScaleY = this.drag.initScaleY - (dy / el.baseH)
-						if (el.def.scaleKeys.y === 'css.lan66-sidebar-scale-y') {
-							newScaleY = Math.max(0.8, Math.min(1.05, newScaleY))
-							newScaleY = Math.round(newScaleY / 0.05) * 0.05
-						} else {
-							newScaleY = Math.max(0.1, newScaleY)
-						}
+						newScaleY = Math.max(0.1, newScaleY)
 						el.scaleY = newScaleY
 						el.h = el.baseH * el.scaleY
 					}

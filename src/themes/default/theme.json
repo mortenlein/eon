@@ -352,7 +352,7 @@
                                          },
                     "series.name.center":  {
                                                "section":  "Event",
-                                               "value":  "LAN66NORD"
+                                               "value":  "Eon Broadcast"
                                            },
                     "series.name.right":  {
                                                "section":  "Event",
@@ -450,21 +450,6 @@
                                                      "label":  "Roster bottom position; e.g. `var(--viewport-margin-bottom)`",
                                                      "value":  "var(--viewport-margin-bottom)"
                                                  },
-                    "css.lan66-sidebar-scale-x":  {
-                                                      "type":  "text",
-                                                      "section":  "HUD Layout",
-                                                      "label":  "Roster sidebar width scale; e.g. `0.5`",
-                                                      "value":  "0.5"
-                                                  },
-                    "css.lan66-sidebar-scale-y":  {
-                                                      "type":  "number",
-                                                      "section":  "Style Overrides",
-                                                      "label":  "Roster sidebar height scale",
-                                                      "value":  1.0,
-                                                      "min":  0.8,
-                                                      "max":  1.05,
-                                                      "step":  0.05
-                                                  },
                     "css.lan66-event-badge-top":  {
                                                       "type":  "text",
                                                       "section":  "HUD Layout",
@@ -820,13 +805,7 @@
                                                        "section":  "HUD Layout",
                                                        "label":  "Sleek Maps Scale Factor",
                                                        "value":  "1"
-                                                   },
-                    "css.lan66-maps-sleek-display":  {
-                                                         "type":  "string",
-                                                         "section":  "HUD Layout",
-                                                         "label":  "Sleek Maps Visibility",
-                                                         "value":  "flex"
-                                                     }
+                                                   }
                 },
     "optionSectionDescriptions":  {
                                       "Style Overrides":  "NB: To apply changes, click Save, then Force HUD Refresh."

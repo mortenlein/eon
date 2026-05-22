@@ -120,6 +120,23 @@ Tasks:
 - [x] Add a non-viewer offline research workflow only when explicitly requested.
 - [x] Remove glowing background blur and center scene content.
 
+### 6. Legacy LAN66/Fennec Audit
+
+- [x] Search for all occurrences of lan66, fennec, css.lan66, --lan66 in codebase.
+- [x] Classify each occurrence as canonical, legacy-alias, deprecated, or dead.
+- [x] Map all legacy settings to their canonical equivalents.
+- [x] Propose a clean prefix-based naming model (layout.*, style.*, broadcast.*, etc.).
+- [x] Create a comprehensive deprecation map artifact.
+- [x] Recommend the first safe implementation step.
+
+### 7. Phase 1 LAN66/Fennec Cleanup
+
+- [x] Remove dead settings `css.lan66-sidebar-scale-x`, `css.lan66-sidebar-scale-y`, and `css.lan66-maps-sleek-display` from default `theme.json` ✅
+- [x] Remove scale key bindings and visual resize capabilities for sidebars in `LayoutEditor.vue` ✅
+- [x] Rebrand legacy fallback and title strings `"LAN66NORD"` and `"LAN66NORD Broadcast HUD"` to `"Eon Broadcast"` and `"Eon Broadcast HUD"` in `theme.json` and `shell.html` ✅
+- [x] Verify Config SPA, Layout Editor, and HUD pages load successfully without crash or regressions ✅
+
+
 ## Verification Checklist For Next Code Change
 
 - [ ] `npm start`
