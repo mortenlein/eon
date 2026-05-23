@@ -20,6 +20,17 @@ Loads the Node server in isolated UI dev mode, serving pre-recorded static match
 npm run start:ui-dev
 ```
 
+### Broadcast-Safe Production (Recommended Operator Command)
+Starts Eon with automatic preflight checks, verifying theme configurations, options validation, and auto-creating required userspace folders/caches to prevent on-air failures:
+```bash
+npm run broadcast:start
+```
+
+#### Optional CLI Arguments
+* `--no-validate`: Skip preflight theme validation checks (use only during emergency diagnostics).
+* `--ui-dev`: Launch the production server in UI Development mode (Offline / Simulated GSI).
+* `--port <number>`: Override the bind port dynamically (e.g. `npm run broadcast:start -- --port 32000`).
+
 ### Supervised Production (PM2 Deployment)
 Starts Eon under PM2 process supervision, enabling autorestart, separate file logs, and a `300MB` safety memory limit:
 ```bash
@@ -32,7 +43,14 @@ Starts Eon under PM2 process supervision, enabling autorestart, separate file lo
 
 ---
 
-## 2. Production Process Supervision Commands
+## 2. When to Use broadcast:start vs PM2 Process Supervision
+
+* **Use `npm run broadcast:start` (Interactive Control)**: Recommended for standard operators running live broadcasts directly from terminal sessions. It provides an immediate visual preflight pass check, prints diagnostic URLs, and gives direct interactive terminal process feedback (`Ctrl+C` cleanly shuts down everything).
+* **Use PM2 Supervision (Background Deployed)**: Recommended for remote servers, multi-system installations, or dedicated broadcast hosts where automated process restart-on-crash, separate background logging, and auto-boot on system startup are mandatory. PM2 does not offer interactive console prompts, so use `broadcast:start` to verify configs before putting PM2 in service.
+
+---
+
+## 3. Production Process Supervision Commands
 
 When using supervised production mode, manage Eon utilizing global PM2 commands:
 
@@ -55,7 +73,7 @@ When using supervised production mode, manage Eon utilizing global PM2 commands:
 
 ---
 
-## 3. Broadcast Operator Setup Checklist
+## 4. Broadcast Operator Setup Checklist
 
 Prior to going live, check and verify the following URLs and configs:
 
@@ -73,7 +91,7 @@ Prior to going live, check and verify the following URLs and configs:
 
 ---
 
-## 4. Emergency Fallback Protocols
+## 5. Emergency Fallback Protocols
 
 ### Scenario A: CS2 client crashes mid-round
 - **Observation**: HUD displays `WAITING FOR FIRST GSI PACKET` or shows stale stats.

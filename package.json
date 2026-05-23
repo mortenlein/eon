@@ -15,6 +15,7 @@
     "start:all": "concurrently -k -n SERVER,OVERLAY \"npm run start\" \"npm run overlay\"",
     "start:broadcast": "concurrently -k -n SERVER,OVERLAY,RADAR \"npm run start\" \"npm run overlay\" \"npm run radar\"",
     "theme:validate": "node scripts/theme-validate.js",
+    "broadcast:start": "node scripts/broadcast-start.js",
     "test:smoke": "playwright test",
     "gsi:simulate": "node scripts/gsi-simulator.js"
   },
