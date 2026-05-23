@@ -67,6 +67,36 @@
 					<button class="btn-win --clear" @click="testKomplettligaen" :disabled="komplettligaenLoading || !komplettligaen.matchId">Test</button>
 				</div>
 				<div class="kl-status" :class="{ '--error': komplettligaenError }">{{ komplettligaenStatus }}</div>
+
+				<!-- Cache Diagnostics (Phase 13) -->
+				<div v-if="cacheStatus" class="cache-diagnostics" style="margin-top: 16px; padding-top: 12px; border-top: 1px dashed #2d333b; font-size: 0.8rem; color: #8b949e; line-height: 1.4;">
+					<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+						<h3 style="font-size: 0.85rem; font-weight: 600; color: #adbac7; margin: 0; text-transform: uppercase;">Cache Health</h3>
+						<button class="btn-ghost" style="padding: 2px 8px; font-size: 0.75rem;" @click="resetCache" :disabled="komplettligaenLoading">Reset Cache</button>
+					</div>
+					<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+						<span>Local Cache:</span>
+						<strong :style="{ color: cacheStatus.exists ? '#2ecc71' : '#e74c3c' }">{{ cacheStatus.exists ? 'Available' : 'Missing' }}</strong>
+					</div>
+					<div v-if="cacheStatus.exists">
+						<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+							<span>Last Updated:</span>
+							<strong>{{ formatTime(cacheStatus.savedAt) }}</strong>
+						</div>
+						<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+							<span>Source Endpoint:</span>
+							<strong style="font-family: monospace;">{{ cacheStatus.source }}</strong>
+						</div>
+						<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+							<span>Stale Status:</span>
+							<strong :style="{ color: cacheStatus.stale ? '#e67e22' : '#2ecc71' }">{{ cacheStatus.stale ? 'Stale (' + cacheStatus.ageMinutes + ' min)' : 'Fresh' }}</strong>
+						</div>
+					</div>
+					<div v-if="cacheStatus.fetchFailureReason" style="margin-top: 8px; color: #e74c3c;">
+						<span>Last Failure Reason:</span>
+						<div style="background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.2); padding: 6px; border-radius: 4px; margin-top: 4px; font-family: monospace; white-space: pre-wrap; font-size: 0.75rem;">{{ cacheStatus.fetchFailureReason }}</div>
+					</div>
+				</div>
 			</div>
 
 			<!-- Manual Overrides -->
@@ -153,6 +183,7 @@ export default {
 			komplettligaenLoading: false,
 			komplettligaenStatus: '',
 			komplettligaenError: false,
+			cacheStatus: null, // Holds cache diagnostics (Phase 13)
 			scenes: [
 				{ id: 'default', label: 'Live HUD' },
 				{ id: 'radar', label: 'Full Radar' },
@@ -207,6 +238,7 @@ export default {
 				})
 				this.komplettligaen = await res.json()
 				this.komplettligaenStatus = 'Saved. HUD scenes will refresh.'
+				await this.loadCacheStatus()
 			} catch (err) {
 				this.komplettligaenStatus = 'Save failed'
 				this.komplettligaenError = true
@@ -238,11 +270,50 @@ export default {
 				const data = await res.json()
 				if (!res.ok || data.error) throw new Error(data.error || 'Fetch failed')
 				this.komplettligaenStatus = `${data.match.home.name} vs ${data.match.away.name}`
+				await this.loadCacheStatus()
 			} catch (err) {
 				this.komplettligaenStatus = err.message || 'Fetch failed'
 				this.komplettligaenError = true
+				await this.loadCacheStatus()
 			} finally {
 				this.komplettligaenLoading = false
+			}
+		},
+		async loadCacheStatus() {
+			try {
+				const res = await fetch('/api/komplettligaen/cache-status')
+				if (res.ok) {
+					this.cacheStatus = await res.json()
+				}
+			} catch (err) {
+				console.warn('Failed to load cache status:', err)
+			}
+		},
+		async resetCache() {
+			if (!confirm('Are you sure you want to completely clear Eon\'s offline tournament cache?')) return;
+			
+			this.komplettligaenLoading = true
+			this.komplettligaenStatus = 'Resetting cache...'
+			try {
+				const res = await fetch('/config/komplettligaen/cache-reset', { method: 'POST' })
+				if (res.ok) {
+					this.komplettligaenStatus = 'Offline cache reset successfully.'
+					await this.loadCacheStatus()
+				} else {
+					this.komplettligaenStatus = 'Failed to reset cache'
+				}
+			} catch (err) {
+				this.komplettligaenStatus = 'Error resetting cache'
+			} finally {
+				this.komplettligaenLoading = false
+			}
+		},
+		formatTime(dateStr) {
+			if (!dateStr) return 'N/A';
+			try {
+				return new Date(dateStr).toLocaleString();
+			} catch (e) {
+				return dateStr;
 			}
 		},
 		setWinner(id) {
@@ -321,6 +392,7 @@ export default {
 		canvas.width = rect.width
 		canvas.height = rect.height
 		this.loadKomplettligaen()
+		this.loadCacheStatus() // Fetch initial cache diagnostics
 	}
 }
 </script>

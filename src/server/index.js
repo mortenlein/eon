@@ -121,6 +121,42 @@ const run = async () => {
 	if (isUiDevMode) {
 		console.info('UI dev mode enabled: serving static match state and ignoring live GSI posts.')
 	}
+
+	// 4. Graceful Shutdown & Unhandled Exception Logging
+	process.on('uncaughtException', (error) => {
+		console.error('[FATAL] Uncaught Exception:', error);
+		shutdown(1);
+	});
+
+	process.on('unhandledRejection', (reason, promise) => {
+		console.error('[FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+	});
+
+	const shutdown = (code = 0) => {
+		console.info('Shutting down Eon server cleanly...');
+		
+		try {
+			websocket.websocket.close(() => {
+				console.info('Websocket server closed.');
+				server.close(() => {
+					console.info('HTTP server closed.');
+					process.exit(code);
+				});
+			});
+		} catch (err) {
+			console.error('Error during graceful shutdown:', err);
+			process.exit(code);
+		}
+
+		// Force exit after timeout if closing hangs
+		setTimeout(() => {
+			console.warn('Shutdown timed out, forcing exit.');
+			process.exit(code);
+		}, 3000);
+	};
+
+	process.on('SIGINT', () => shutdown(0));
+	process.on('SIGTERM', () => shutdown(0));
 }
 
 run().then(() => {}).catch(console.error)

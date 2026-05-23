@@ -13,7 +13,10 @@
     "config": "electron src/electron/config.js",
     "radar": "electron src/electron/radar.js",
     "start:all": "concurrently -k -n SERVER,OVERLAY \"npm run start\" \"npm run overlay\"",
-    "start:broadcast": "concurrently -k -n SERVER,OVERLAY,RADAR \"npm run start\" \"npm run overlay\" \"npm run radar\""
+    "start:broadcast": "concurrently -k -n SERVER,OVERLAY,RADAR \"npm run start\" \"npm run overlay\" \"npm run radar\"",
+    "theme:validate": "node scripts/theme-validate.js",
+    "test:smoke": "playwright test",
+    "gsi:simulate": "node scripts/gsi-simulator.js"
   },
   "dependencies": {
     "@fontsource/noto-sans": "^5.2.10",

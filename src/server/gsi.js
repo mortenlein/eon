@@ -862,6 +862,8 @@ const processAllPlayers = (body, mapChanged, wasRoundFreezetime) => {
 	let ctHp = 0, tHp = 0
 
 	for (const [steam64Id, player] of Object.entries(body.allplayers)) {
+		if (!player) continue
+
 		// A. Observer Slot
 		if (player.observer_slot !== null && player.observer_slot !== undefined) {
 			additionalState.lastKnownPlayerObserverSlot[steam64Id] = player.observer_slot
@@ -873,7 +875,7 @@ const processAllPlayers = (body, mapChanged, wasRoundFreezetime) => {
 			&& player.state
 			&& additionalState.moneyAtStartOfRound[steam64Id] === undefined
 		) {
-			additionalState.moneyAtStartOfRound[steam64Id] = player.state.money
+			additionalState.moneyAtStartOfRound[steam64Id] = player.state.money ?? 0
 		}
 
 		// C. Round Damages
@@ -881,17 +883,18 @@ const processAllPlayers = (body, mapChanged, wasRoundFreezetime) => {
 			if (! additionalState.roundDamages[steam64Id]) {
 				additionalState.roundDamages[steam64Id] = {}
 			}
-			if (player.state.round_totaldmg !== 0 || ! additionalState.roundDamages[steam64Id].hasOwnProperty(roundNumber)) {
-				additionalState.roundDamages[steam64Id][roundNumber] = player.state.round_totaldmg
+			const roundDmg = player.state?.round_totaldmg ?? 0
+			if (roundDmg !== 0 || ! additionalState.roundDamages[steam64Id].hasOwnProperty(roundNumber)) {
+				additionalState.roundDamages[steam64Id][roundNumber] = roundDmg
 			}
 		}
 
 		// D. Win Prob Accumulators
-		if (isLive && player.state.health > 0) {
+		if (isLive && player.state && player.state.health > 0) {
 			if (player.team === 'CT') {
 				ctPlayers++
 				ctHp += player.state.health
-			} else {
+			} else if (player.team === 'T') {
 				tPlayers++
 				tHp += player.state.health
 			}

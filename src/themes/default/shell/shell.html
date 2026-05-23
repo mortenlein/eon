@@ -1,4 +1,4 @@
-<div :class="['hud-viewport', '--scene-' + ($opts['match.activeScene'] || 'default'), '--style-' + ($opts['css.ui-style'] || 'slanted')]">
+<div :class="['hud-viewport', '--scene-' + ($opts['match.activeScene'] || 'default'), '--style-' + ($opts['css.ui-style'] || 'slanted'), $additionalState.connectionState ? 'ws-' + $additionalState.connectionState : 'ws-connected']">
 	<div v-if="$map.name || ['intro', 'halftime', 'fulltime', 'over', 'analytics'].includes($opts['match.activeScene'])" class="hud-stage">
 		<Telestrator />
 		<MvpCard v-if="false" />
