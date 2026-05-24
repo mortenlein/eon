@@ -69,6 +69,7 @@ import TeamsEditor from '/config/components/TeamsEditor.vue'
 import SeriesEditor from '/config/components/SeriesEditor.vue'
 import MatchRulesEditor from '/config/components/MatchRulesEditor.vue'
 import SponsorsEditor from '/config/components/SponsorsEditor.vue'
+import ThemeDesigner from '/config/components/ThemeDesigner.vue'
 import PortabilityEditor from '/config/components/PortabilityEditor.vue'
 
 const iconPaths = {
@@ -113,6 +114,7 @@ export default {
 				{ id: 'rules', label: 'Match Rules', icon: 'rules', component: MatchRulesEditor },
 				{ id: 'teams', label: 'Teams Setup', icon: 'teams', component: TeamsEditor },
 				{ id: 'sponsors', label: 'Sponsors', icon: 'sponsors', component: SponsorsEditor },
+				{ id: 'theme-designer', label: 'Theme Designer', icon: 'options', component: ThemeDesigner },
 				{ id: 'options', label: 'HUD Options', icon: 'options', component: OptionsEditor },
 				{ id: 'portability', label: 'Import / Export', icon: 'portability', component: PortabilityEditor },
 			]

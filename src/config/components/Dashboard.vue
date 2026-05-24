@@ -160,6 +160,336 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- Match Session Control Panel (Phase 16A) -->
+			<div class="card --span-2 match-sessions-card">
+				<div class="card-header">
+					<h2>Match Session Telemetry Manager</h2>
+					<div style="display: flex; gap: 8px; align-items: center;">
+						<button class="btn-ghost" style="padding: 4px 10px; font-size: 0.75rem;" @click="loadActiveSession(); loadSessions()">🔄 Refresh</button>
+						<div :class="['session-status-badge', activeSessionData ? '--active' : '--inactive']">
+							<span class="status-indicator-dot" :class="{ '--pulsing': activeSessionData }"></span>
+							{{ activeSessionData ? 'Logging Active' : 'Logging Inactive' }}
+						</div>
+					</div>
+				</div>
+
+				<div v-if="sessionSuccess" class="session-alert --success">{{ sessionSuccess }}</div>
+				<div v-if="sessionError" class="session-alert --error">{{ sessionError }}</div>
+
+				<div class="session-panel-layout">
+					<!-- Active Session & Timeline Preview -->
+					<div class="session-panel-main">
+						<div v-if="activeSessionData" class="active-session-info">
+							<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #21262d; padding-bottom: 12px; margin-bottom: 12px;">
+								<span style="font-size: 1rem; font-weight: 700; color: #fff;">
+									{{ activeSessionData.teams?.home?.name }} vs {{ activeSessionData.teams?.away?.name }}
+								</span>
+								<button class="btn-win --hidden" style="flex: none; font-size: 0.8rem; padding: 6px 14px;" @click="endSession" :disabled="sessionLoading">End Session</button>
+							</div>
+							<div class="session-meta-grid">
+								<div class="session-meta-item">
+									<span class="session-meta-label">Session ID</span>
+									<span class="session-meta-value" style="font-family: monospace;">{{ activeSessionData.id }}</span>
+								</div>
+								<div class="session-meta-item">
+									<span class="session-meta-label">Match Format</span>
+									<span class="session-meta-value">{{ activeSessionData.match?.format }}</span>
+								</div>
+								<div class="session-meta-item">
+									<span class="session-meta-label">Event Name</span>
+									<span class="session-meta-value">{{ activeSessionData.match?.eventName }}</span>
+								</div>
+								<div class="session-meta-item">
+									<span class="session-meta-label">Created At</span>
+									<span class="session-meta-value" style="font-size: 0.8rem;">{{ formatTime(activeSessionData.createdAt) }}</span>
+								</div>
+							</div>
+							
+							<!-- Summary Statistics -->
+							<div v-if="activeSessionData.summary" class="session-meta-grid" style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #21262d;">
+								<div class="session-meta-item">
+									<span class="session-meta-label">Rounds Observed</span>
+									<span class="session-meta-value" style="color: #58a6ff;">{{ activeSessionData.summary.roundsObserved }}</span>
+								</div>
+								<div class="session-meta-item">
+									<span class="session-meta-label">Maps Played</span>
+									<span class="session-meta-value" style="color: #2ecc71;">{{ activeSessionData.summary.mapsObserved }}</span>
+								</div>
+								<div class="session-meta-item">
+									<span class="session-meta-label">Events Logged</span>
+									<span class="session-meta-value" style="color: #e67e22;">{{ activeSessionData.summary.eventsRecorded }}</span>
+								</div>
+							</div>
+
+							<!-- Live Match Statistics (Phase 16B) -->
+							<div v-if="activeSessionData.stats" style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #21262d;">
+								<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+									<h4 style="margin: 0; font-size: 0.85rem; font-weight: 600; color: #adbac7; text-transform: uppercase; letter-spacing: 0.05em;">Live Statistics</h4>
+									
+									<!-- Export buttons -->
+									<div style="display: flex; gap: 8px;">
+										<a :href="`/api/sessions/${activeSessionData.id}/export/csv`" class="btn-ghost" style="padding: 3px 8px; font-size: 0.7rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" download>
+											📥 Export CSV
+										</a>
+										<a :href="`/api/sessions/${activeSessionData.id}/export/json`" class="btn-ghost" style="padding: 3px 8px; font-size: 0.7rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" download>
+											📥 Export JSON
+										</a>
+									</div>
+								</div>
+
+								<!-- Team Summary grid -->
+								<div class="team-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; background: #161b22; padding: 12px; border-radius: 6px; border: 1px solid #21262d;">
+									<div style="border-right: 1px solid #21262d; padding-right: 8px;">
+										<div style="font-weight: 700; color: #58a6ff; font-size: 0.85rem; display: flex; justify-content: space-between;">
+											<span>{{ activeSessionData.stats.teams?.home?.name || 'Home' }}</span>
+											<span style="font-size: 1.1rem; color: #fff;">{{ activeSessionData.stats.teams?.home?.roundsWon ?? 0 }}</span>
+										</div>
+										<div style="font-size: 0.75rem; color: #8b949e; margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
+											<span>Kills: {{ activeSessionData.stats.teams?.home?.kills ?? 0 }}</span>
+											<span>Deaths: {{ activeSessionData.stats.teams?.home?.deaths ?? 0 }}</span>
+											<span>Plants/Defuses: {{ activeSessionData.stats.teams?.home?.bombPlants ?? 0 }} / {{ activeSessionData.stats.teams?.home?.bombDefuses ?? 0 }}</span>
+										</div>
+									</div>
+									<div style="padding-left: 8px;">
+										<div style="font-weight: 700; color: #e67e22; font-size: 0.85rem; display: flex; justify-content: space-between;">
+											<span>{{ activeSessionData.stats.teams?.away?.name || 'Away' }}</span>
+											<span style="font-size: 1.1rem; color: #fff;">{{ activeSessionData.stats.teams?.away?.roundsWon ?? 0 }}</span>
+										</div>
+										<div style="font-size: 0.75rem; color: #8b949e; margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
+											<span>Kills: {{ activeSessionData.stats.teams?.away?.kills ?? 0 }}</span>
+											<span>Deaths: {{ activeSessionData.stats.teams?.away?.deaths ?? 0 }}</span>
+											<span>Plants/Defuses: {{ activeSessionData.stats.teams?.away?.bombPlants ?? 0 }} / {{ activeSessionData.stats.teams?.away?.bombDefuses ?? 0 }}</span>
+										</div>
+									</div>
+								</div>
+
+								<!-- Top Fraggers -->
+								<div v-if="topFraggers.length > 0">
+									<div style="font-size: 0.8rem; font-weight: 600; color: #8b949e; text-transform: uppercase; margin-bottom: 8px;">🏆 Top Fraggers</div>
+									<div style="display: flex; flex-direction: column; gap: 6px;">
+										<div v-for="(p, index) in topFraggers" :key="index" style="display: flex; justify-content: space-between; align-items: center; background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 6px 12px; font-size: 0.8rem;">
+											<div style="display: flex; align-items: center; gap: 8px;">
+												<span style="font-weight: bold; color: #8b949e;">#{{ index + 1 }}</span>
+												<span :style="{ color: p.team === 'away' ? '#e67e22' : '#58a6ff' }" style="font-weight: 600;">{{ p.name }}</span>
+											</div>
+											<div style="display: flex; gap: 12px; color: #adbac7;">
+												<span>K: <strong style="color: #fff;">{{ p.kills }}</strong></span>
+												<span>D: <strong style="color: #fff;">{{ p.deaths }}</strong></span>
+												<span>A: <strong>{{ p.assists ?? 0 }}</strong></span>
+												<span>KD: <strong :style="{ color: p.kdRatio >= 1.0 ? '#2ecc71' : '#e74c3c' }">{{ p.kdRatio }}</strong></span>
+												<span>MVP: <strong style="color: #f1c40f;">{{ p.mvps ?? 0 }}</strong></span>
+											</div>
+										</div>
+									</div>
+								</div>
+								
+								<!-- Match Duration & Bomb Counters -->
+								<div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #8b949e; margin-top: 12px; padding: 6px; background: rgba(88, 166, 255, 0.05); border-radius: 4px; border: 1px solid rgba(88, 166, 255, 0.1);">
+									<span>Match Duration: <strong>{{ activeSessionDuration }}</strong></span>
+									<span>Bomb Plants: <strong>{{ activeSessionData.stats.matchTotals?.bombPlants ?? 0 }}</strong></span>
+									<span>Defuses: <strong>{{ activeSessionData.stats.matchTotals?.bombDefuses ?? 0 }}</strong></span>
+								</div>
+							</div>
+						</div>
+
+						<div v-else style="background: #0d1117; border: 1px dashed #30363d; border-radius: 8px; padding: 32px; text-align: center; color: #8b949e; margin-bottom: 20px;">
+							<div style="font-size: 2.2rem; margin-bottom: 12px;">📊</div>
+							<p style="margin: 0; font-size: 0.95rem;">No active match telemetry session is running.</p>
+							<p style="margin: 6px 0 0 0; font-size: 0.8rem; color: #6e7681;">Create a new session or activate an existing one from the list to start timeline logging.</p>
+						</div>
+
+						<!-- Timeline Preview -->
+						<div class="timeline-preview">
+							<h3 style="font-size: 0.9rem; font-weight: 600; color: #adbac7; margin: 0 0 12px 0; text-transform: uppercase;">Timeline Event Feed (Last 10 Events)</h3>
+							<div v-if="activeTimeline.length > 0" class="timeline-events-list">
+								<div v-for="evt in activeTimeline" :key="evt.id" class="timeline-event-row">
+									<div style="display: flex; align-items: center; gap: 8px;">
+										<span class="event-type-badge">{{ evt.type }}</span>
+										<span v-if="evt.actor" style="font-weight: 600; color: #adbac7;">
+											{{ evt.actor.name }} [{{ evt.actor.team }}]
+										</span>
+										<span v-if="evt.type === 'player/death' && evt.target" style="font-weight: 600; color: #adbac7;">
+											{{ evt.target.name }} [{{ evt.target.team }}]
+										</span>
+										<span v-if="evt.type === 'round/over'" style="font-weight: 600; color: #2ecc71;">
+											Winner: {{ evt.data?.winner }} (Score: CT {{ evt.data?.score?.ct }} - T {{ evt.data?.score?.t }})
+										</span>
+										<span v-if="evt.type === 'team/score_changed'" style="font-weight: 600; color: #58a6ff;">
+											Score: CT {{ evt.data?.ctScore }} - T {{ evt.data?.tScore }}
+										</span>
+									</div>
+									<div class="event-meta">
+										<span v-if="evt.round" style="background: #21262d; padding: 2px 6px; border-radius: 4px;">R{{ evt.round }}</span>
+										<span>{{ new Date(evt.at).toLocaleTimeString() }}</span>
+									</div>
+								</div>
+							</div>
+							<div v-else style="background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 16px; text-align: center; color: #6e7681; font-size: 0.85rem;">
+								No events recorded in this session yet.
+							</div>
+						</div>
+					</div>
+
+					<!-- Create & List Panels -->
+					<div class="session-panel-side" style="display: flex; flex-direction: column; gap: 20px;">
+						<!-- Create Session Form -->
+						<div style="background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 16px;">
+							<h3 style="font-size: 0.9rem; font-weight: 600; color: #adbac7; margin: 0 0 12px 0; text-transform: uppercase;">Create Match Session</h3>
+							<div class="session-form">
+								<div class="form-row">
+									<div>
+										<label style="display: block; font-size: 0.75rem; color: #8b949e; margin-bottom: 4px;">Home Team</label>
+										<input v-model="sessionForm.homeTeam" class="text-input" style="padding: 8px;" placeholder="Astralis">
+									</div>
+									<div>
+										<label style="display: block; font-size: 0.75rem; color: #8b949e; margin-bottom: 4px;">Away Team</label>
+										<input v-model="sessionForm.awayTeam" class="text-input" style="padding: 8px;" placeholder="NaVi">
+									</div>
+								</div>
+								<div class="form-row">
+									<div>
+										<label style="display: block; font-size: 0.75rem; color: #8b949e; margin-bottom: 4px;">Event Name</label>
+										<input v-model="sessionForm.eventName" class="text-input" style="padding: 8px;" placeholder="Major 2026">
+									</div>
+									<div>
+										<label style="display: block; font-size: 0.75rem; color: #8b949e; margin-bottom: 4px;">Format</label>
+										<select v-model="sessionForm.format" class="style-select" style="padding: 8px; height: 35px;">
+											<option value="BO1">BO1</option>
+											<option value="BO3">BO3</option>
+											<option value="BO5">BO5</option>
+										</select>
+									</div>
+								</div>
+								<div>
+									<label style="display: block; font-size: 0.75rem; color: #8b949e; margin-bottom: 4px;">External Match ID</label>
+									<input v-model="sessionForm.externalMatchId" class="text-input" style="padding: 8px;" placeholder="Optional">
+								</div>
+								<button class="btn-promo" style="padding: 10px; margin-top: 4px;" @click="createNewSession" :disabled="sessionLoading">Start Session</button>
+							</div>
+						</div>
+
+						<!-- Recent Sessions List -->
+						<div style="background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 16px;">
+							<h3 style="font-size: 0.9rem; font-weight: 600; color: #adbac7; margin: 0 0 10px 0; text-transform: uppercase;">Recent Sessions</h3>
+							<div v-if="sessionsList.length > 0" class="sessions-list-wrapper">
+								<table class="session-list-table">
+									<thead>
+										<tr>
+											<th>Teams / Date</th>
+											<th>Status</th>
+											<th>Actions</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr v-for="s in sessionsList" :key="s.metadata?.id">
+											<td>
+												<div style="font-weight: 600; color: #adbac7;">
+													{{ s.metadata?.teams?.home?.name }} vs {{ s.metadata?.teams?.away?.name }}
+												</div>
+												<div style="color: #6e7681; font-size: 0.7rem; margin-top: 2px;">
+													{{ formatTime(s.metadata?.createdAt) }}
+												</div>
+											</td>
+											<td>
+												<span :class="['session-status-badge', s.metadata?.status === 'active' ? '--active' : '--inactive']" style="padding: 2px 6px; font-size: 0.65rem;">
+													{{ s.metadata?.status }}
+												</span>
+											</td>
+											<td class="session-list-actions">
+												<button 
+													v-if="s.metadata?.status !== 'active'"
+													class="btn-win --clear" 
+													style="padding: 4px 8px; font-size: 0.7rem; flex: none;"
+													@click="activateSession(s.metadata?.id)"
+													:disabled="sessionLoading"
+												>
+													Activate
+												</button>
+												<button 
+													class="btn-ghost" 
+													style="padding: 3px 6px; font-size: 0.7rem;"
+													@click="inspectSession(s.metadata?.id)"
+												>
+													Inspect
+												</button>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div v-else style="color: #6e7681; text-align: center; padding: 16px; font-size: 0.8rem;">
+								No recent sessions found.
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Inspect Session Summary Popup Modal -->
+			<div v-if="inspectedSession" class="inspect-modal-overlay" @click.self="inspectedSession = null">
+				<div class="inspect-modal">
+					<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 12px; margin-bottom: 16px;">
+						<h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0;">Session Diagnostics</h3>
+						<button class="btn-ghost" style="padding: 2px 8px;" @click="inspectedSession = null">Close</button>
+					</div>
+					
+					<div style="display: flex; flex-direction: column; gap: 12px;">
+						<div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+							<span style="color: #8b949e;">Slug:</span>
+							<strong style="color: #adbac7; font-family: monospace; font-size: 0.75rem;">{{ inspectedSession.metadata?.slug }}</strong>
+						</div>
+						<div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+							<span style="color: #8b949e;">Match Format:</span>
+							<strong style="color: #adbac7;">{{ inspectedSession.metadata?.match?.format }}</strong>
+						</div>
+						<div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+							<span style="color: #8b949e;">Event Name:</span>
+							<strong style="color: #adbac7;">{{ inspectedSession.metadata?.match?.eventName }}</strong>
+						</div>
+						<div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+							<span style="color: #8b949e;">Status:</span>
+							<strong :style="{ color: inspectedSession.metadata?.status === 'active' ? '#2ecc71' : '#8b949e' }">
+								{{ inspectedSession.metadata?.status }}
+							</strong>
+						</div>
+						
+						<div style="background: #0d1117; border: 1px dashed #30363d; border-radius: 8px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+							<h4 style="margin: 0; font-size: 0.8rem; font-weight: 600; color: #8b949e; text-transform: uppercase;">Recorded Summary</h4>
+							<div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+								<span>Rounds Observed:</span>
+								<strong>{{ inspectedSession.summary?.roundsObserved }}</strong>
+							</div>
+							<div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+								<span>Maps Observed:</span>
+								<strong>{{ inspectedSession.summary?.mapsObserved }}</strong>
+							</div>
+							<div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+								<span>Events Recorded:</span>
+								<strong style="color: #e67e22;">{{ inspectedSession.summary?.eventsRecorded }}</strong>
+							</div>
+							<div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+								<span>First GSI Signal:</span>
+								<strong>{{ formatTime(inspectedSession.summary?.firstGsiAt) }}</strong>
+							</div>
+							<div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+								<span>Last GSI Signal:</span>
+								<strong>{{ formatTime(inspectedSession.summary?.lastGsiAt) }}</strong>
+							</div>
+						</div>
+
+						<!-- Export buttons in modal -->
+						<div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; border-top: 1px solid #30363d; padding-top: 12px;">
+							<a :href="`/api/sessions/${inspectedSession.metadata?.id}/export/csv`" class="btn-ghost" style="padding: 4px 10px; font-size: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" download>
+								📥 Export CSV
+							</a>
+							<a :href="`/api/sessions/${inspectedSession.metadata?.id}/export/json`" class="btn-ghost" style="padding: 4px 10px; font-size: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" download>
+								📥 Export JSON
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -170,6 +500,18 @@ import { state, actions } from '/config/store.js'
 export default {
 	setup() {
 		return { state, actions }
+	},
+	computed: {
+		topFraggers() {
+			if (!this.activeSessionData?.stats?.players) return []
+			return Object.values(this.activeSessionData.stats.players)
+				.sort((a, b) => b.kills - a.kills)
+				.slice(0, 5)
+		},
+		activeSessionDuration() {
+			const sec = this.activeSessionData?.stats?.matchTotals?.durationSeconds || 0
+			return `${Math.floor(sec / 60)}m ${Math.floor(sec % 60)}s`
+		}
 	},
 	data() {
 		return {
@@ -184,6 +526,21 @@ export default {
 			komplettligaenStatus: '',
 			komplettligaenError: false,
 			cacheStatus: null, // Holds cache diagnostics (Phase 13)
+			sessionsList: [],
+			activeSessionData: null,
+			activeTimeline: [],
+			sessionForm: {
+				homeTeam: '',
+				awayTeam: '',
+				eventName: '',
+				format: 'BO3',
+				externalMatchId: ''
+			},
+			sessionLoading: false,
+			sessionError: '',
+			sessionSuccess: '',
+			inspectedSession: null,
+			sessionPollInterval: null,
 			scenes: [
 				{ id: 'default', label: 'Live HUD' },
 				{ id: 'radar', label: 'Full Radar' },
@@ -385,6 +742,146 @@ export default {
 			state.options[key] = value
 			actions.broadcast(key, value)
 		},
+		async loadSessions() {
+			try {
+				const res = await fetch('/api/sessions')
+				if (res.ok) {
+					this.sessionsList = await res.json()
+				}
+			} catch (err) {
+				console.warn('Failed to load sessions:', err)
+			}
+		},
+		async loadActiveSession() {
+			try {
+				const res = await fetch('/api/sessions/active')
+				if (res.ok) {
+					const data = await res.json()
+					if (data && data.active) {
+						// Fetch active session summary data dynamically
+						const summaryRes = await fetch(`/api/sessions/${data.session.id}`)
+						if (summaryRes.ok) {
+							const details = await summaryRes.json()
+							this.activeSessionData = {
+								...data.session,
+								summary: details.summary,
+								stats: details.stats
+							}
+						} else {
+							this.activeSessionData = data.session
+						}
+						await this.loadTimeline(data.session.id)
+					} else {
+						this.activeSessionData = null
+						this.activeTimeline = []
+					}
+				}
+			} catch (err) {
+				console.warn('Failed to load active session:', err)
+			}
+		},
+		async loadTimeline(sessionId) {
+			try {
+				const res = await fetch(`/api/sessions/${sessionId}/timeline`)
+				if (res.ok) {
+					const events = await res.json()
+					this.activeTimeline = events.slice(-10).reverse()
+				}
+			} catch (err) {
+				console.warn('Failed to load timeline:', err)
+			}
+		},
+		async createNewSession() {
+			if (!this.sessionForm.homeTeam || !this.sessionForm.awayTeam) {
+				this.sessionError = 'Home and Away team names are required.'
+				return
+			}
+			this.sessionLoading = true
+			this.sessionError = ''
+			this.sessionSuccess = ''
+			try {
+				const payload = {
+					teams: {
+						home: { name: this.sessionForm.homeTeam, id: 'home', logo: '' },
+						away: { name: this.sessionForm.awayTeam, id: 'away', logo: '' }
+					},
+					match: {
+						format: this.sessionForm.format,
+						eventName: this.sessionForm.eventName || 'Eon Match',
+						externalMatchId: this.sessionForm.externalMatchId || null
+					}
+				}
+				const res = await fetch('/api/sessions', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(payload)
+				})
+				const data = await res.json()
+				if (!res.ok || data.error) {
+					throw new Error(data.error || 'Failed to create session.')
+				}
+				this.sessionSuccess = `Session "${data.slug}" started successfully.`
+				this.sessionForm.homeTeam = ''
+				this.sessionForm.awayTeam = ''
+				this.sessionForm.eventName = ''
+				this.sessionForm.externalMatchId = ''
+				await this.loadActiveSession()
+				await this.loadSessions()
+			} catch (err) {
+				this.sessionError = err.message || 'Error starting session.'
+			} finally {
+				this.sessionLoading = false
+			}
+		},
+		async endSession() {
+			if (!confirm('Are you sure you want to end the active match session?')) return
+			this.sessionLoading = true
+			this.sessionError = ''
+			this.sessionSuccess = ''
+			try {
+				const res = await fetch('/api/sessions/end', { method: 'POST' })
+				const data = await res.json()
+				if (!res.ok || data.error) {
+					throw new Error(data.error || 'Failed to end session.')
+				}
+				this.sessionSuccess = 'Active session ended successfully.'
+				await this.loadActiveSession()
+				await this.loadSessions()
+			} catch (err) {
+				this.sessionError = err.message || 'Error ending active session.'
+			} finally {
+				this.sessionLoading = false
+			}
+		},
+		async activateSession(sessionId) {
+			this.sessionLoading = true
+			this.sessionError = ''
+			this.sessionSuccess = ''
+			try {
+				const res = await fetch(`/api/sessions/active/${sessionId}`, { method: 'POST' })
+				const data = await res.json()
+				if (!res.ok || data.error) {
+					throw new Error(data.error || 'Failed to activate session.')
+				}
+				this.sessionSuccess = `Session activated successfully.`
+				await this.loadActiveSession()
+				await this.loadSessions()
+			} catch (err) {
+				this.sessionError = err.message || 'Error activating session.'
+			} finally {
+				this.sessionLoading = false
+			}
+		},
+		async inspectSession(sessionId) {
+			try {
+				const res = await fetch(`/api/sessions/${sessionId}`)
+				if (res.ok) {
+					this.inspectedSession = await res.json()
+				}
+			} catch (err) {
+				console.warn('Failed to inspect session:', err)
+			}
+		},
 	},
 	mounted() {
 		const canvas = this.$refs.canvas
@@ -393,6 +890,17 @@ export default {
 		canvas.height = rect.height
 		this.loadKomplettligaen()
 		this.loadCacheStatus() // Fetch initial cache diagnostics
+		this.loadSessions()
+		this.loadActiveSession()
+		this.sessionPollInterval = setInterval(() => {
+			this.loadActiveSession()
+			this.loadSessions()
+		}, 5000)
+	},
+	beforeUnmount() {
+		if (this.sessionPollInterval) {
+			clearInterval(this.sessionPollInterval)
+		}
 	}
 }
 </script>
@@ -537,5 +1045,184 @@ canvas {
 	background: #3498db;
 	color: #fff;
 	font-weight: 600;
+}
+
+/* Session Card Styles */
+.match-sessions-card {
+	margin-top: 24px;
+}
+.session-panel-layout {
+	display: grid;
+	grid-template-columns: 1.2fr 0.8fr;
+	gap: 24px;
+}
+@media (max-width: 1024px) {
+	.session-panel-layout {
+		grid-template-columns: 1fr;
+	}
+}
+.session-form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+.form-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+}
+.session-status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: 99px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+.session-status-badge.--active {
+	background: rgba(46, 204, 113, 0.15);
+	color: #2ecc71;
+	border: 1px solid rgba(46, 204, 113, 0.3);
+}
+.session-status-badge.--inactive {
+	background: rgba(139, 148, 158, 0.15);
+	color: #8b949e;
+	border: 1px solid rgba(139, 148, 158, 0.3);
+}
+.status-indicator-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentColor;
+}
+.status-indicator-dot.--pulsing {
+	animation: dot-pulse 1.5s infinite alternate;
+}
+@keyframes dot-pulse {
+	0% { opacity: 0.4; }
+	100% { opacity: 1; }
+}
+.active-session-info {
+	background: #0d1117;
+	border: 1px solid #30363d;
+	border-radius: 8px;
+	padding: 16px;
+	margin-bottom: 20px;
+}
+.session-meta-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 16px;
+	margin-top: 16px;
+}
+.session-meta-item {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.session-meta-label {
+	font-size: 0.75rem;
+	color: #8b949e;
+	text-transform: uppercase;
+}
+.session-meta-value {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #c9d1d9;
+}
+.timeline-preview {
+	margin-top: 20px;
+}
+.timeline-events-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	max-height: 260px;
+	overflow-y: auto;
+	padding-right: 4px;
+}
+.timeline-event-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: #161b22;
+	border: 1px solid #30363d;
+	border-radius: 6px;
+	padding: 8px 12px;
+	font-size: 0.8rem;
+}
+.event-type-badge {
+	font-family: monospace;
+	padding: 2px 6px;
+	border-radius: 4px;
+	background: rgba(52, 152, 219, 0.15);
+	color: #58a6ff;
+	font-weight: 600;
+}
+.event-meta {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	color: #8b949e;
+}
+.sessions-list-wrapper {
+	max-height: 220px;
+	overflow-y: auto;
+	margin-top: 12px;
+}
+.session-list-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.8rem;
+	text-align: left;
+}
+.session-list-table th, .session-list-table td {
+	padding: 10px;
+	border-bottom: 1px solid #21262d;
+}
+.session-list-table th {
+	color: #8b949e;
+	text-transform: uppercase;
+	font-weight: 600;
+}
+.session-list-actions {
+	display: flex;
+	gap: 6px;
+}
+.session-alert {
+	padding: 10px;
+	border-radius: 6px;
+	font-size: 0.85rem;
+	margin-bottom: 16px;
+}
+.session-alert.--success {
+	background: rgba(46, 204, 113, 0.1);
+	border: 1px solid rgba(46, 204, 113, 0.2);
+	color: #2ecc71;
+}
+.session-alert.--error {
+	background: rgba(231, 76, 60, 0.1);
+	border: 1px solid rgba(231, 76, 60, 0.2);
+	color: #ea6060;
+}
+.inspect-modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+.inspect-modal {
+	background: #1a1d23;
+	border: 1px solid #30363d;
+	border-radius: 12px;
+	width: 90%;
+	max-width: 500px;
+	padding: 24px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 </style>

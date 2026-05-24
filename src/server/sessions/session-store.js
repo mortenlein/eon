@@ -8,6 +8,7 @@ const SESSIONS_DIR = path.resolve(userspaceDirectory, 'sessions')
 
 // Keep activeSessionId in memory
 let activeSessionId = null
+let hasScannedActive = false
 
 /**
  * Ensures the sessions directory exists

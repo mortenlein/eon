@@ -9,6 +9,8 @@ import {
 	readSession,
 	getSessionPath
 } from './session-store.js'
+import { rebuildSessionStats } from './stats-aggregator.js'
+import { exportSessionToJson, exportSessionToCsv } from './session-export.js'
 
 export function registerSessionRoutes(router) {
 	// GET /api/sessions
@@ -101,12 +103,77 @@ export function registerSessionRoutes(router) {
 	router.get('/api/sessions/:sessionId', (context) => {
 		try {
 			const sessionId = context.params.sessionId
+			const sPath = getSessionPath(sessionId)
+			if (!sPath) {
+				context.status = 404
+				context.body = { error: `Session with ID/slug "${sessionId}" not found.` }
+				return
+			}
+			
 			const data = readSession(sessionId)
 			if (!data) {
 				context.status = 404
 				context.body = { error: `Session with ID/slug "${sessionId}" not found.` }
 				return
 			}
+			
+			// Lazy load/rebuild stats.json
+			const statsPath = path.join(sPath, 'stats.json')
+			let stats = null
+			if (!fs.existsSync(statsPath)) {
+				stats = rebuildSessionStats(sessionId)
+			} else {
+				try {
+					stats = JSON.parse(fs.readFileSync(statsPath, 'utf8'))
+				} catch (err) {
+					console.warn(`[SessionRoutes] Failed to read stats.json for ${sessionId}, rebuilding:`, err.message)
+					stats = rebuildSessionStats(sessionId)
+				}
+			}
+			
+			context.body = {
+				metadata: data.metadata,
+				summary: data.summary,
+				stats
+			}
+			context.status = 200
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
+	})
+
+	// GET /api/sessions/:sessionId/export/json
+	router.get('/api/sessions/:sessionId/export/json', (context) => {
+		try {
+			const sessionId = context.params.sessionId
+			const data = exportSessionToJson(sessionId)
+			if (!data) {
+				context.status = 404
+				context.body = { error: `Session with ID/slug "${sessionId}" not found or failed to export.` }
+				return
+			}
+			context.set('Content-Disposition', `attachment; filename="eon_session_${sessionId}.json"`)
+			context.body = data
+			context.status = 200
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
+	})
+
+	// GET /api/sessions/:sessionId/export/csv
+	router.get('/api/sessions/:sessionId/export/csv', (context) => {
+		try {
+			const sessionId = context.params.sessionId
+			const data = exportSessionToCsv(sessionId)
+			if (data === null) {
+				context.status = 404
+				context.body = { error: `Session with ID/slug "${sessionId}" not found or failed to export.` }
+				return
+			}
+			context.set('Content-Type', 'text/csv; charset=utf-8')
+			context.set('Content-Disposition', `attachment; filename="eon_session_${sessionId}.csv"`)
 			context.body = data
 			context.status = 200
 		} catch (err) {

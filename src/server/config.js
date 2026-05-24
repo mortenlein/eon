@@ -6,6 +6,13 @@ import { readJson, writeJson } from './helpers/json-file.js'
 import { builtinRootDirectory, userspaceDirectory, userspaceSettingsPath } from './helpers/paths.js'
 import { MODE_PRESETS } from './helpers/game-modes.js'
 import { LEGACY_TO_CANONICAL, CANONICAL_TO_LEGACY } from './helpers/canonical-map.js'
+import {
+	listEventThemes,
+	getEventTheme,
+	saveCustomTheme,
+	deleteCustomTheme,
+	applyThemeToOptions
+} from './helpers/theme-designer-helper.js'
 
 export const registerConfigRoutes = (router, websocket) => {
 	router.get('/', (context) => {
@@ -259,5 +266,86 @@ export const registerConfigRoutes = (router, websocket) => {
 
 		websocket.broadcastRefresh()
 		context.status = 204
+	})
+
+	/* ── Visual Event Themes CRUD (Phase 17A) ── */
+	router.get('/config/event-themes', async (context) => {
+		try {
+			context.body = listEventThemes()
+			context.status = 200
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
+	})
+
+	router.get('/config/event-themes/:id', async (context) => {
+		try {
+			const theme = getEventTheme(context.params.id)
+			if (!theme) {
+				context.status = 404
+				context.body = { error: `Theme with ID "${context.params.id}" not found.` }
+				return
+			}
+			context.body = theme
+			context.status = 200
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
+	})
+
+	router.post('/config/event-themes', async (context) => {
+		try {
+			const incoming = context.request.body || {}
+			const slug = incoming.id || ('theme-' + Math.random().toString(36).substring(2, 8))
+			const saved = saveCustomTheme(slug, incoming)
+			context.body = saved
+			context.status = 201
+		} catch (err) {
+			context.status = 400
+			context.body = { error: 'Validation Error', message: err.message }
+		}
+	})
+
+	router.put('/config/event-themes/:id', async (context) => {
+		try {
+			const id = context.params.id
+			const incoming = context.request.body || {}
+			const saved = saveCustomTheme(id, incoming)
+			context.body = saved
+			context.status = 200
+		} catch (err) {
+			context.status = 400
+			context.body = { error: 'Validation Error', message: err.message }
+		}
+	})
+
+	router.delete('/config/event-themes/:id', async (context) => {
+		try {
+			const deleted = deleteCustomTheme(context.params.id)
+			if (!deleted) {
+				context.status = 404
+				context.body = { error: `Theme with ID "${context.params.id}" not found or cannot be deleted.` }
+				return
+			}
+			context.status = 204
+		} catch (err) {
+			context.status = 403
+			context.body = { error: 'Forbidden', message: err.message }
+		}
+	})
+
+	router.post('/config/event-themes/:id/apply', async (context) => {
+		try {
+			applyThemeToOptions(context.params.id)
+			await websocket.updateCaches()
+			websocket.broadcastRefresh()
+			context.status = 200
+			context.body = { success: true, message: `Theme "${context.params.id}" applied successfully.` }
+		} catch (err) {
+			context.status = 400
+			context.body = { error: 'Execution Error', message: err.message }
+		}
 	})
 }
