@@ -185,7 +185,7 @@ Tasks:
 - [x] Create `docs/architecture/config-migration.md` containing full deprecation architecture ✅
 - [x] Verify via a temporary developer test script or server startup checks ✅
 
-### Phase 12: 1:1 HUD Layout Editor & Safety Diagnostics (Phases 18A, 18B, 18C)
+### Phase 12: 1:1 HUD Layout Editor & Safety Diagnostics (Phases 18A, 18B, 18C, 18D)
 
 - [x] Rebuild Layout Editor workspace around strict 1920x1080 virtual canvas with CS2 gameplay screenshots ✅
 - [x] Add togglable safety outlines: 40px/10px grid, center alignment lines, and 10% TV/Broadcast safe boundaries ✅
@@ -197,6 +197,26 @@ Tasks:
 - [x] Implement 10% Broadcast safe-area warning outlines and status indicators ✅
 - [x] Construct properties diagnostics inspector showing anchor info, pixel & canonical coords, size, safe-zone, and overlap clashing lists ✅
 - [x] Maintain high performance without layout thrashing, DOM querying, watchers, or interval timers ✅
+- [x] Implement backend layouts preset flat-file storage directory `userspace/layouts/` ✅
+- [x] Enforce robust preset sanitization with strict path traversal guards ✅
+- [x] Enforce strict backend validation limiting keys to `layout.*` and permitted `style.*` properties while rejecting brand/theme overrides ✅
+- [x] Add REST Koa routes for layout presets listing, loading, saving, duplicating, deleting, and merging/applying ✅
+- [x] Integrate premium preset toolbar, save changes, and confirmation flows in LayoutEditor.vue ✅
+- [x] Integrate JSON import/export roundtrip widgets with client-side option schema checks in LayoutEditor.vue ✅
+- [x] Add localStorage selection memory recalling active layout configuration on editor tab mount ✅
+
+### Phase 13: Magnetic Alignment & Smart Snapping (Phase 19A)
+
+- [x] Add `Smart Guides` checkbox toggle control to the Layout Editor toolbar (defaults ON) ✅
+- [x] Implement Axis-Aligned Smart Snapping with 6px Stage-space tolerance during drags ✅
+- [x] Snaps horizontal coordinates against viewport center X (960), safe boundaries (96, 1824), and other visible element left/right/centerX edges ✅
+- [x] Snaps vertical coordinates against viewport center Y (540), safe boundaries (54, 1026), and other visible element top/bottom/centerY edges ✅
+- [x] Respect center-anchored horizontal lock (Topbar, Focused Player) and vertical coordinate checks ✅
+- [x] Apply best snap candidate per axis (preferring nearest), snap once, and avoid chaining ✅
+- [x] Reset snap states atomically on mouse up ✅
+- [x] Render thin dashed cyan guidelines (`rgba(0, 229, 255, 0.8)`) with dark cyan badges specifying snap targets ✅
+- [x] Display active snap target badges live in properties diagnostics panel ✅
+- [x] Verify everything compiles and passes Eon's preflight validator ✅
 
 ## Verification Checklist For Next Code Change
 

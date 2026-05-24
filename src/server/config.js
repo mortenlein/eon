@@ -13,6 +13,13 @@ import {
 	deleteCustomTheme,
 	applyThemeToOptions
 } from './helpers/theme-designer-helper.js'
+import {
+	listLayoutPresets,
+	getLayoutPreset,
+	saveLayoutPreset,
+	deleteLayoutPreset,
+	applyLayoutPresetToOptions
+} from './helpers/layout-preset-helper.js'
 
 export const registerConfigRoutes = (router, websocket) => {
 	router.get('/', (context) => {
@@ -181,56 +188,91 @@ export const registerConfigRoutes = (router, websocket) => {
 		context.status = 204
 	})
 
-	/* ── Layout presets ── */
-	const presetsPath = `${userspaceDirectory}/layout-presets.json`
-
-	const loadPresets = async () => {
-		try { return await readJson(presetsPath) }
-		catch { return [] }
-	}
-
+	/* ── Layout Presets CRUD (Phase 18D) ── */
 	router.get('/config/layout-presets', async (context) => {
-		context.body = await loadPresets()
+		try {
+			context.body = listLayoutPresets()
+			context.status = 200
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
+	})
+
+	router.get('/config/layout-presets/:id', async (context) => {
+		try {
+			const preset = getLayoutPreset(context.params.id)
+			if (!preset) {
+				context.status = 404
+				context.body = { error: `Layout preset with ID "${context.params.id}" not found.` }
+				return
+			}
+			context.body = preset
+			context.status = 200
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
 	})
 
 	router.post('/config/layout-presets', async (context) => {
-		const presets = await loadPresets()
-		const preset = {
-			id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-			name: context.request.body.name || 'Untitled',
-			values: context.request.body.values || {},
-			createdAt: new Date().toISOString(),
+		try {
+			const incoming = context.request.body || {}
+			const slug = incoming.id || ('layout-' + Math.random().toString(36).substring(2, 8))
+			const saved = saveLayoutPreset(slug, incoming)
+			context.body = saved
+			context.status = 201
+		} catch (err) {
+			context.status = 400
+			context.body = { error: 'Validation Error', message: err.message }
 		}
-		presets.push(preset)
-		await writeJson(presetsPath, presets)
-		context.body = preset
-		context.status = 201
 	})
 
 	router.put('/config/layout-presets/:id', async (context) => {
-		const presets = await loadPresets()
-		const idx = presets.findIndex(p => p.id === context.params.id)
-		if (idx === -1) { context.status = 404; return }
-		if (context.request.body.name) presets[idx].name = context.request.body.name
-		if (context.request.body.values) presets[idx].values = context.request.body.values
-		presets[idx].updatedAt = new Date().toISOString()
-		await writeJson(presetsPath, presets)
-		context.body = presets[idx]
+		try {
+			const id = context.params.id
+			const incoming = context.request.body || {}
+			const saved = saveLayoutPreset(id, incoming)
+			context.body = saved
+			context.status = 200
+		} catch (err) {
+			context.status = 400
+			context.body = { error: 'Validation Error', message: err.message }
+		}
 	})
 
 	router.delete('/config/layout-presets/:id', async (context) => {
-		let presets = await loadPresets()
-		presets = presets.filter(p => p.id !== context.params.id)
-		await writeJson(presetsPath, presets)
-		context.status = 204
+		try {
+			const deleted = deleteLayoutPreset(context.params.id)
+			if (!deleted) {
+				context.status = 404
+				context.body = { error: `Layout preset with ID "${context.params.id}" not found.` }
+				return
+			}
+			context.status = 204
+		} catch (err) {
+			context.status = 403
+			context.body = { error: 'Forbidden', message: err.message }
+		}
 	})
 
-
+	router.post('/config/layout-presets/:id/apply', async (context) => {
+		try {
+			applyLayoutPresetToOptions(context.params.id)
+			await websocket.updateCaches()
+			websocket.broadcastRefresh()
+			context.status = 200
+			context.body = { success: true, message: `Layout preset "${context.params.id}" applied successfully.` }
+		} catch (err) {
+			context.status = 400
+			context.body = { error: 'Execution Error', message: err.message }
+		}
+	})
 
 	/* ── Setup Import/Export ── */
 	router.get('/config/export', async (context) => {
 		const theme = await readJson(userspaceSettingsPath).catch(() => ({}))
-		const presets = await loadPresets()
+		const presets = listLayoutPresets()
 		
 		context.body = {
 			theme,

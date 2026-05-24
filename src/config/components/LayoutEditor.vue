@@ -3,12 +3,22 @@
 		<div class="editor-header">
 			<div class="header-left">
 				<h2>Layout Editor</h2>
-				<div class="preset-controls">
-					<select v-model="activePreset" @change="loadPreset">
-						<option value="">-- Load Preset --</option>
+				<div class="preset-controls" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+					<select v-model="activePreset" @change="selectPreset" style="min-width: 160px; padding: 6px; background: #0d1117; border: 1px solid #30363d; color: #c9d1d9; border-radius: 4px; font-size: 0.75rem;">
+						<option value="">-- Active Canvas (Live) --</option>
 						<option v-for="p in presets" :key="p.id" :value="p.id">{{ p.name }}</option>
 					</select>
-					<button class="btn-secondary" @click="savePreset">Save as Preset</button>
+					<button class="btn-secondary" title="Save current layout as a new preset" @click="saveNewPreset">💾 Save As...</button>
+					<button v-if="activePreset && currentPresetIsCustom" class="btn-secondary" title="Save changes to active preset" @click="saveActivePresetChanges">💾 Save Changes</button>
+					<button v-if="activePreset" class="btn-secondary" title="Duplicate active preset" @click="duplicatePreset">👥 Duplicate</button>
+					<button v-if="activePreset && currentPresetIsCustom" class="btn-secondary --danger-btn" title="Delete custom preset" @click="deletePreset">🗑️ Delete</button>
+					<button v-if="activePreset" class="btn-secondary" title="Apply preset coordinates to live HUD" @click="applyPreset">🚀 Apply Live</button>
+					<span class="toolbar-divider">|</span>
+					<button v-if="activePreset" class="btn-secondary" title="Export active preset as JSON" @click="exportPreset">📤 Export</button>
+					<label class="btn-secondary" title="Import preset from JSON" style="cursor: pointer; margin: 0; display: inline-flex; align-items: center; gap: 4px;">
+						📥 Import
+						<input type="file" accept=".json" @change="importPreset" style="display: none;">
+					</label>
 				</div>
 			</div>
 			
@@ -34,6 +44,10 @@
 					<label class="toggle-control" title="Enable/Disable Snapping to Grid">
 						<input type="checkbox" v-model="snapEnabled">
 						<span>🧲 Snap</span>
+					</label>
+					<label class="toggle-control" title="Enable/Disable Composition Smart Snapping & Guides">
+						<input type="checkbox" v-model="smartGuidesEnabled">
+						<span>🧲 Smart Guides</span>
 					</label>
 				</div>
 				
@@ -79,6 +93,14 @@
 					<!-- 10% Broadcast safe area outline -->
 					<div v-if="showSafeArea" class="safe-area-outline">
 						<span class="safe-area-label">90% Broadcast Safe Area</span>
+					</div>
+					
+					<!-- Smart Snapping Visual Guidelines -->
+					<div v-if="smartGuidesEnabled && activeSnapX" class="smart-guide --vertical" :style="{ left: `${activeSnapX.lineValue}px` }">
+						<span class="smart-guide-label">{{ activeSnapX.label }}</span>
+					</div>
+					<div v-if="smartGuidesEnabled && activeSnapY" class="smart-guide --horizontal" :style="{ top: `${activeSnapY.lineValue}px` }">
+						<span class="smart-guide-label">{{ activeSnapY.label }}</span>
 					</div>
 					
 					<!-- Draggable High-Fidelity Elements -->
@@ -363,12 +385,24 @@
 						</div>
 					</div>
 
+					<!-- Smart Snap Target Diagnostics -->
+					<div v-if="smartGuidesEnabled && (activeSnapX || activeSnapY)" class="prop-group">
+						<label>Smart Snap Target</label>
+						<div class="prop-row" style="flex-direction: column; gap: 4px; font-family: monospace; font-size: 0.75rem; color: #adbac7;">
+							<div v-if="activeSnapX" style="color: #00e5ff; display: flex; align-items: center; gap: 4px;">
+								🧲 X: {{ activeSnapX.label }}
+							</div>
+							<div v-if="activeSnapY" style="color: #00e5ff; display: flex; align-items: center; gap: 4px;">
+								🧲 Y: {{ activeSnapY.label }}
+							</div>
+						</div>
+					</div>
+
 					<button class="btn-secondary" style="width: 100%; margin-top: 12px;" @click="resetElement(selectedElement)">Reset to Default</button>
 				</div>
 			</aside>
 		</div>
 	</div>
-</template>
 
 <script>
 import { state, actions } from '/config/store.js'
@@ -492,7 +526,10 @@ export default {
 			showBgImage: true,
 			showGrid: true,
 			showCenterLines: true,
-			showSafeArea: true
+			showSafeArea: true,
+			smartGuidesEnabled: true,
+			activeSnapX: null,
+			activeSnapY: null
 		}
 	},
 	computed: {
@@ -503,6 +540,11 @@ export default {
 				if (b.def.id === this.selectedId) return -1
 				return 0
 			})
+		},
+		currentPresetIsCustom() {
+			if (!this.activePreset) return false
+			const p = this.presets.find(x => x.id === this.activePreset)
+			return p ? p.isCustom !== false : false
 		},
 		viewportStyles() {
 			const ct = state.options['theme.colors.ctFill'] || '25, 106, 232'
@@ -541,6 +583,14 @@ export default {
 		window.addEventListener('resize', this.resize)
 		window.addEventListener('mousemove', this.onMouseMove)
 		window.addEventListener('mouseup', this.onMouseUp)
+
+		this.loadPresetsList().then(() => {
+			const lastId = localStorage.getItem('lastSelectedLayoutPresetId')
+			if (lastId && this.presets.some(p => p.id === lastId)) {
+				this.activePreset = lastId
+				this.selectPreset()
+			}
+		})
 	},
 	beforeUnmount() {
 		window.removeEventListener('resize', this.resize)
@@ -689,8 +739,117 @@ export default {
 					newTop = el.top
 				}
 
-				el.top = snap(newTop)
-				el.left = snap(newLeft)
+				// Smart composition snapping & alignment guidelines (Phase 19A)
+				let activeSnapX = null
+				let activeSnapY = null
+				
+				if (this.smartGuidesEnabled) {
+					const snapTolerance = 6
+					
+					// A. Horizontal axis (X) Snapping - Bypassed if center-anchored horizontally locked
+					const isHorizontallyLocked = el.def.anchor.h === 'center' && !hasHorizontal
+					if (!isHorizontallyLocked) {
+						const xCandidates = [
+							{ value: 960, label: 'Viewport Center X' },
+							{ value: 96, label: 'Title Safe Left (96px)' },
+							{ value: 1824, label: 'Title Safe Right (1824px)' }
+						]
+						this.elements.forEach(other => {
+							if (!other.visible || other.def.id === el.def.id) return
+							xCandidates.push({ value: other.left, label: `${other.def.label} Left Edge` })
+							xCandidates.push({ value: other.left + other.w, label: `${other.def.label} Right Edge` })
+							xCandidates.push({ value: other.left + other.w / 2, label: `${other.def.label} Center X` })
+						})
+						
+						let bestSnapX = null
+						let minDeltaX = snapTolerance + 1
+						
+						const proposedLeft = newLeft
+						const proposedRight = newLeft + el.w
+						const proposedCenterX = newLeft + el.w / 2
+						
+						xCandidates.forEach(cand => {
+							// 1. el.left snaps to candidate
+							const dL = Math.abs(proposedLeft - cand.value)
+							if (dL <= snapTolerance && dL < minDeltaX) {
+								minDeltaX = dL
+								bestSnapX = { snappedPos: cand.value, lineValue: cand.value, label: cand.label }
+							}
+							// 2. el.right snaps to candidate
+							const dR = Math.abs(proposedRight - cand.value)
+							if (dR <= snapTolerance && dR < minDeltaX) {
+								minDeltaX = dR
+								bestSnapX = { snappedPos: cand.value - el.w, lineValue: cand.value, label: cand.label }
+							}
+							// 3. el.centerX snaps to candidate
+							const dC = Math.abs(proposedCenterX - cand.value)
+							if (dC <= snapTolerance && dC < minDeltaX) {
+								minDeltaX = dC
+								bestSnapX = { snappedPos: cand.value - el.w / 2, lineValue: cand.value, label: cand.label }
+							}
+						})
+						
+						if (bestSnapX) {
+							newLeft = bestSnapX.snappedPos
+							activeSnapX = bestSnapX
+						}
+					}
+					
+					// B. Vertical axis (Y) Snapping - Bypassed if vertically locked
+					if (hasVertical) {
+						const yCandidates = [
+							{ value: 540, label: 'Viewport Center Y' },
+							{ value: 54, label: 'Title Safe Top (54px)' },
+							{ value: 1026, label: 'Title Safe Bottom (1026px)' }
+						]
+						this.elements.forEach(other => {
+							if (!other.visible || other.def.id === el.def.id) return
+							yCandidates.push({ value: other.top, label: `${other.def.label} Top Edge` })
+							yCandidates.push({ value: other.top + other.h, label: `${other.def.label} Bottom Edge` })
+							yCandidates.push({ value: other.top + other.h / 2, label: `${other.def.label} Center Y` })
+						})
+						
+						let bestSnapY = null
+						let minDeltaY = snapTolerance + 1
+						
+						const proposedTop = newTop
+						const proposedBottom = newTop + el.h
+						const proposedCenterY = newTop + el.h / 2
+						
+						yCandidates.forEach(cand => {
+							// 1. el.top snaps to candidate
+							const dT = Math.abs(proposedTop - cand.value)
+							if (dT <= snapTolerance && dT < minDeltaY) {
+								minDeltaY = dT
+								bestSnapY = { snappedPos: cand.value, lineValue: cand.value, label: cand.label }
+							}
+							// 2. el.bottom snaps to candidate
+							const dB = Math.abs(proposedBottom - cand.value)
+							if (dB <= snapTolerance && dB < minDeltaY) {
+								minDeltaY = dB
+								bestSnapY = { snappedPos: cand.value - el.h, lineValue: cand.value, label: cand.label }
+							}
+							// 3. el.centerY snaps to candidate
+							const dC = Math.abs(proposedCenterY - cand.value)
+							if (dC <= snapTolerance && dC < minDeltaY) {
+								minDeltaY = dC
+								bestSnapY = { snappedPos: cand.value - el.h / 2, lineValue: cand.value, label: cand.label }
+							}
+						})
+						
+						if (bestSnapY) {
+							newTop = bestSnapY.snappedPos
+							activeSnapY = bestSnapY
+						}
+					}
+				}
+				
+				this.activeSnapX = activeSnapX
+				this.activeSnapY = activeSnapY
+
+				// Fallback to normal grid snapping only if no smart snapping occurred on that axis
+				el.top = activeSnapY ? newTop : snap(newTop)
+				el.left = activeSnapX ? newLeft : snap(newLeft)
 			} else if (this.drag.type === 'resize-x' || this.drag.type === 'resize-y') {
 				// Use direct width/height resizing
 				if (this.drag.type === 'resize-x') {
@@ -711,6 +870,9 @@ export default {
 			if (!this.drag) return
 			const el = this.drag.el
 			this.drag = null
+
+			this.activeSnapX = null
+			this.activeSnapY = null
 
 			// Save positions to state
 			const partial = {}
@@ -741,32 +903,311 @@ export default {
 
 			actions.save(partial)
 		},
-		savePreset() {
-			const name = prompt("Enter preset name:")
-			if (!name) return
-			const values = {}
-			this.elements.forEach(el => {
-				for (const p of el.def.props) values[p.key] = state.options[p.key]
-				if (el.def.sizeKey) values[el.def.sizeKey] = state.options[el.def.sizeKey]
-			})
-			fetch('/config/layout-presets', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name, values })
-			}).then(async res => {
-				const p = await res.json()
-				this.presets.push(p)
-				this.activePreset = p.id
-			})
+		async loadPresetsList() {
+			try {
+				const res = await fetch('/config/layout-presets')
+				this.presets = await res.json()
+			} catch (err) {
+				console.error('Failed to load layout presets:', err)
+			}
 		},
-		loadPreset() {
+		selectPreset() {
+			if (!this.activePreset) {
+				this.initElements()
+				localStorage.removeItem('lastSelectedLayoutPresetId')
+				return
+			}
+			
 			const p = this.presets.find(x => x.id === this.activePreset)
 			if (!p) return
-			Object.assign(state.options, p.values)
-			actions.save(p.values)
-			Object.entries(p.values).forEach(([k, v]) => actions.broadcast(k, v))
-			this.computeRemPx()
-			this.initElements()
+			
+			localStorage.setItem('lastSelectedLayoutPresetId', this.activePreset)
+			
+			this.elements.forEach(el => {
+				let bw = el.def.baseW, bh = el.def.baseH
+				
+				if (el.def.sizeKey) {
+					const refSize = (el.def.sizeKey.includes('width') || el.def.sizeKey.includes('left') || el.def.sizeKey.includes('right')) ? VP_W : VP_H
+					const presetSize = p.options[el.def.sizeKey] ? p.options[el.def.sizeKey].value : null
+					bw = this.evaluateCss(presetSize ?? state.options[el.def.sizeKey], refSize, el.def.baseW)
+					if (el.def.keepAspect) bh = bw * (el.def.baseH / el.def.baseW)
+				}
+				
+				if (el.def.id.startsWith('sponsor-')) {
+					const presetW = p.options['style.sponsors.width'] ? p.options['style.sponsors.width'].value : null
+					const presetH = p.options['style.sponsors.height'] ? p.options['style.sponsors.height'].value : null
+					bw = this.evaluateCss(presetW ?? state.options['style.sponsors.width'], VP_W, 130)
+					bh = this.evaluateCss(presetH ?? state.options['style.sponsors.height'], VP_H, 48)
+				}
+				
+				const positions = {}
+				for (const prop of el.def.props) {
+					const refSize = (prop.edge === 'top' || prop.edge === 'bottom') ? VP_H : VP_W
+					const presetPos = p.options[prop.key] ? p.options[prop.key].value : null
+					positions[prop.edge] = this.evaluateCss(presetPos ?? state.options[prop.key], refSize, 11)
+				}
+				
+				let w = bw, h = bh
+				let top = 0, left = 0
+				
+				if (el.def.anchor.v === 'top') top = positions.top ?? 0
+				else top = VP_H - (positions.bottom ?? 0) - h
+				
+				if (el.def.anchor.h === 'left') left = positions.left ?? 0
+				else if (el.def.anchor.h === 'right') left = VP_W - (positions.right ?? 0) - w
+				else left = (VP_W - w) / 2
+				
+				const visibleVal = p.options[el.def.visibleKey] ? p.options[el.def.visibleKey].value : state.options[el.def.visibleKey]
+				const visible = visibleVal !== false && visibleVal !== 'none'
+				
+				el.top = top
+				el.left = left
+				el.w = w
+				el.h = h
+				el.baseW = bw
+				el.baseH = bh
+				el.visible = visible
+			})
+		},
+		async saveActivePresetChanges() {
+			if (!this.activePreset) return
+			const p = this.presets.find(x => x.id === this.activePreset)
+			if (!p) return
+			
+			const options = {}
+			this.elements.forEach(el => {
+				for (const prop of el.def.props) {
+					options[prop.key] = { value: this.getCanonicalValue(prop, el) }
+				}
+				if (el.def.sizeKey) {
+					options[el.def.sizeKey] = { value: this.getCanonicalSizeValue(el) }
+				}
+				if (el.def.id.startsWith('sponsor-')) {
+					options['style.sponsors.width'] = { value: (el.baseW / this.remPx).toFixed(2) + 'rem' }
+					options['style.sponsors.height'] = { value: (el.baseH / this.remPx).toFixed(2) + 'rem' }
+				}
+			})
+			
+			try {
+				const res = await fetch(`/config/layout-presets/${p.id}`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						name: p.name,
+						description: p.description,
+						options
+					})
+				})
+				if (!res.ok) {
+					const err = await res.json()
+					alert(`Save failed: ${err.message}`)
+					return
+				}
+				const updated = await res.json()
+				const idx = this.presets.findIndex(x => x.id === p.id)
+				if (idx !== -1) {
+					this.presets[idx] = updated
+				}
+				alert('Preset changes saved successfully!')
+			} catch (err) {
+				alert(`Failed to save preset changes: ${err.message}`)
+			}
+		},
+		async saveNewPreset() {
+			const name = prompt("Enter new preset name:")
+			if (!name) return
+			
+			const options = {}
+			this.elements.forEach(el => {
+				for (const prop of el.def.props) {
+					options[prop.key] = { value: this.getCanonicalValue(prop, el) }
+				}
+				if (el.def.sizeKey) {
+					options[el.def.sizeKey] = { value: this.getCanonicalSizeValue(el) }
+				}
+				if (el.def.id.startsWith('sponsor-')) {
+					options['style.sponsors.width'] = { value: (el.baseW / this.remPx).toFixed(2) + 'rem' }
+					options['style.sponsors.height'] = { value: (el.baseH / this.remPx).toFixed(2) + 'rem' }
+				}
+			})
+			
+			try {
+				const res = await fetch('/config/layout-presets', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						name,
+						options
+					})
+				})
+				if (!res.ok) {
+					const err = await res.json()
+					alert(`Save failed: ${err.message}`)
+					return
+				}
+				const saved = await res.json()
+				this.presets.push(saved)
+				this.activePreset = saved.id
+				this.selectPreset()
+				alert('Preset saved successfully!')
+			} catch (err) {
+				alert(`Failed to save preset: ${err.message}`)
+			}
+		},
+		async duplicatePreset() {
+			if (!this.activePreset) return
+			const p = this.presets.find(x => x.id === this.activePreset)
+			if (!p) return
+			
+			const name = `${p.name} (Copy)`
+			
+			try {
+				const res = await fetch('/config/layout-presets', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						name,
+						options: p.options
+					})
+				})
+				if (!res.ok) {
+					const err = await res.json()
+					alert(`Duplicate failed: ${err.message}`)
+					return
+				}
+				const saved = await res.json()
+				this.presets.push(saved)
+				this.activePreset = saved.id
+				this.selectPreset()
+			} catch (err) {
+				alert(`Failed to duplicate preset: ${err.message}`)
+			}
+		},
+		async deletePreset() {
+			if (!this.activePreset) return
+			const p = this.presets.find(x => x.id === this.activePreset)
+			if (!p) return
+			
+			if (!confirm(`Are you sure you want to delete layout preset "${p.name}"?`)) return
+			
+			try {
+				const res = await fetch(`/config/layout-presets/${p.id}`, {
+					method: 'DELETE'
+				})
+				if (!res.ok) {
+					alert('Failed to delete preset.')
+					return
+				}
+				this.presets = this.presets.filter(x => x.id !== p.id)
+				this.activePreset = ''
+				this.selectPreset()
+			} catch (err) {
+				alert(`Failed to delete preset: ${err.message}`)
+			}
+		},
+		async applyPreset() {
+			if (!this.activePreset) return
+			const p = this.presets.find(x => x.id === this.activePreset)
+			if (!p) return
+			
+			try {
+				const res = await fetch(`/config/layout-presets/${p.id}/apply`, {
+					method: 'POST'
+				})
+				if (!res.ok) {
+					const err = await res.json()
+					alert(`Apply failed: ${err.message}`)
+					return
+				}
+				this.computeRemPx()
+				this.initElements()
+				this.activePreset = p.id
+				this.selectPreset()
+				alert(`Preset "${p.name}" applied successfully to Live HUD!`)
+			} catch (err) {
+				alert(`Failed to apply preset: ${err.message}`)
+			}
+		},
+		exportPreset() {
+			if (!this.activePreset) return
+			const p = this.presets.find(x => x.id === this.activePreset)
+			if (!p) return
+			
+			const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(p, null, 2))
+			const downloadAnchor = document.createElement('a')
+			downloadAnchor.setAttribute("href",     dataStr)
+			downloadAnchor.setAttribute("download", `eon-layout-${p.id}.json`)
+			document.body.appendChild(downloadAnchor)
+			downloadAnchor.click()
+			downloadAnchor.remove()
+		},
+		async importPreset(e) {
+			const file = e.target.files[0]
+			if (!file) return
+			
+			const reader = new FileReader()
+			reader.onload = async (event) => {
+				try {
+					const imported = JSON.parse(event.target.result)
+					
+					if (!imported.name || !imported.options || typeof imported.options !== 'object') {
+						alert('Invalid layout preset JSON format. Must contain "name" and "options".')
+						return
+					}
+					
+					const allowedKeys = [
+						'style.eventBadge.width',
+						'style.currentMap.width',
+						'style.sponsors.width',
+						'style.sponsors.height',
+						'style.maps.scale',
+						'style.mapsSleek.scale'
+					]
+					
+					for (const key of Object.keys(imported.options)) {
+						const isLayoutKey = key.startsWith('layout.')
+						const isAllowedStyleKey = allowedKeys.includes(key)
+						if (!isLayoutKey && !isAllowedStyleKey) {
+							alert(`Key mutation rejected: "${key}" is not allowed. Layout presets can only modify layout.* and specific style width/scale keys.`)
+							return
+						}
+						if (key.startsWith('theme.') || key.startsWith('series.') || key.startsWith('sponsors.')) {
+							alert(`Key mutation rejected: "${key}" is branding configuration and cannot be modified.`)
+							return
+						}
+						if (key === 'css.lan66-sidebar-scale-y' || key === 'css.top-bar-width') {
+							alert(`Key mutation rejected: Legacy key "${key}" is deprecated and forbidden.`)
+							return
+						}
+					}
+					
+					const res = await fetch('/config/layout-presets', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							name: imported.name,
+							description: imported.description || '',
+							options: imported.options
+						})
+					})
+					
+					if (!res.ok) {
+						const err = await res.json()
+						alert(`Import failed: ${err.message}`)
+						return
+					}
+					
+					const saved = await res.json()
+					this.presets.push(saved)
+					this.activePreset = saved.id
+					this.selectPreset()
+					alert(`Preset "${saved.name}" imported and saved successfully!`)
+				} catch (err) {
+					alert(`Failed to import layout preset: ${err.message}`)
+				}
+			}
+			reader.readAsText(file)
+			e.target.value = ''
 		},
 		
 		// Phase 18C: Diagnostics and Broadcast Safety Math
@@ -807,9 +1248,8 @@ export default {
 			if (edge === 'right') return VP_W - el.left - el.w
 			return 0
 		},
-		getCanonicalValue(prop) {
-			if (!this.selectedElement) return '0.00rem'
-			const el = this.selectedElement
+		getCanonicalValue(prop, el = this.selectedElement) {
+			if (!el) return '0.00rem'
 			let val = 0
 			if (prop.edge === 'top') val = el.top
 			else if (prop.edge === 'bottom') val = VP_H - el.top - el.h
@@ -817,10 +1257,8 @@ export default {
 			else if (prop.edge === 'right') val = VP_W - el.left - el.w
 			return (val / this.remPx).toFixed(2) + 'rem'
 		},
-		getCanonicalSizeValue() {
-			if (!this.selectedElement) return '0px'
-			const el = this.selectedElement
-			if (!el.def.sizeKey) return '0px'
+		getCanonicalSizeValue(el = this.selectedElement) {
+			if (!el || !el.def.sizeKey) return '0px'
 			const unit = el.def.sizeUnit || 'px'
 			let val = el.baseW
 			if (unit === '%') return (el.baseW / VP_W * 100).toFixed(2) + '%'
@@ -1676,5 +2114,60 @@ export default {
 	width: 100%;
 	padding: 2px 0;
 	border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+
+.toolbar-divider {
+	color: #30363d;
+	margin: 0 4px;
+	user-select: none;
+}
+.--danger-btn {
+	color: #f85149 !important;
+	border-color: rgba(248, 81, 73, 0.4) !important;
+}
+.--danger-btn:hover {
+	background: rgba(248, 81, 73, 0.15) !important;
+	border-color: #f85149 !important;
+	color: #ff7b72 !important;
+}
+
+/* Phase 19A: Smart Snapping visual guidelines */
+.smart-guide {
+	position: absolute;
+	background: none;
+	pointer-events: none;
+	z-index: 99;
+}
+.smart-guide.--vertical {
+	top: 0;
+	bottom: 0;
+	width: 1px;
+	border-left: 1px dashed rgba(0, 229, 255, 0.8);
+}
+.smart-guide.--horizontal {
+	left: 0;
+	right: 0;
+	height: 1px;
+	border-top: 1px dashed rgba(0, 229, 255, 0.8);
+}
+.smart-guide-label {
+	position: absolute;
+	background: rgba(13, 17, 23, 0.9);
+	color: #00e5ff;
+	font-size: 0.6rem;
+	padding: 2px 6px;
+	border-radius: 3px;
+	border: 1px solid rgba(0, 229, 255, 0.35);
+	white-space: nowrap;
+	font-family: monospace;
+	z-index: 100;
+}
+.smart-guide.--vertical .smart-guide-label {
+	top: 12px;
+	left: 6px;
+}
+.smart-guide.--horizontal .smart-guide-label {
+	left: 12px;
+	top: 6px;
 }
 </style>
