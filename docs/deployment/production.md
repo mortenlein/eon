@@ -82,6 +82,7 @@ Prior to going live, check and verify the following URLs and configs:
 - **Config Management Dashboard**: `http://localhost:31982/config/`
 - **Mini-Radar Overlay**: `http://localhost:31982/radar/`
 - **Operator Diagnostics Status**: `http://localhost:31982/operator/status`
+- **Operator Readiness Console**: `http://localhost:31982/operator/readiness`
 
 ### Pre-Broadcast Preflight Steps
 1. Run preflight theme validation: `npm run theme:validate`. Ensure it outputs `✔ PASS`.

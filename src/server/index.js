@@ -16,6 +16,7 @@ import { registerKomplettligaenRoutes } from './komplettligaen.js'
 import { registerLicensesRoutes } from './licenses.js'
 import { registerRadarRoutes } from './radar.js'
 import { registerVersionRoutes } from './version.js'
+import { registerSessionRoutes } from './sessions/session-routes.js'
 import { Websocket } from './websocket.js'
 import send from 'koa-send'
 import { builtinRootDirectory } from './helpers/paths.js'
@@ -65,6 +66,7 @@ const run = async () => {
 	registerLicensesRoutes(router)
 	registerRadarRoutes(router)
 	registerVersionRoutes(router)
+	registerSessionRoutes(router)
 
 	app.use(router.routes())
 	app.use(router.allowedMethods())
