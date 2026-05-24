@@ -11,12 +11,40 @@
 					<button class="btn-secondary" @click="savePreset">Save as Preset</button>
 				</div>
 			</div>
+			
 			<div class="header-right">
-				<label class="toggle">
-					<input type="checkbox" v-model="snapEnabled">
-					Snap to Grid ({{ gridSizes[gridIdx] }}px)
-				</label>
-				<input type="range" v-model="gridIdx" min="0" :max="gridSizes.length - 1" step="1">
+				<!-- High-Fidelity Workbench Toggles -->
+				<div class="workbench-toggles">
+					<label class="toggle-control" title="Show/Hide CS2 Gameplay Screenshot">
+						<input type="checkbox" v-model="showBgImage">
+						<span>🖼️ Background</span>
+					</label>
+					<label class="toggle-control" title="Show/Hide Technical Alignment Grid">
+						<input type="checkbox" v-model="showGrid">
+						<span>📐 Grid</span>
+					</label>
+					<label class="toggle-control" title="Show/Hide Center Crosshairs">
+						<input type="checkbox" v-model="showCenterLines">
+						<span>🎯 Center Lines</span>
+					</label>
+					<label class="toggle-control" title="Show/Hide 10% TV Safe Area Outline">
+						<input type="checkbox" v-model="showSafeArea">
+						<span>🛡️ Safe Area</span>
+					</label>
+					<label class="toggle-control" title="Enable/Disable Snapping to Grid">
+						<input type="checkbox" v-model="snapEnabled">
+						<span>🧲 Snap</span>
+					</label>
+				</div>
+				
+				<div class="grid-size-selector" style="display: flex; align-items: center; gap: 8px;">
+					<span style="font-size: 0.8rem; color: #8b949e;">Grid Size:</span>
+					<select v-model="gridIdx" class="grid-select">
+						<option v-for="(size, idx) in gridSizes" :key="size" :value="idx">
+							{{ size === 0 ? 'Off' : size + 'px' }}
+						</option>
+					</select>
+				</div>
 			</div>
 		</div>
 
@@ -28,7 +56,30 @@
 					id="viewport"
 					:style="{ transform: `scale(${viewportScale})` }"
 				>
+					<!-- Backdrop CS2 Screenshot (Visual only, does not affect values) -->
+					<img 
+						v-if="showBgImage" 
+						src="https://csprofile.com/Images/Blog/best-cs2-screenshots/Screenshot_without_HUD.webp" 
+						class="hud-screenshot-bg" 
+						alt="CS2 Gameplay"
+					/>
+					
+					<!-- Live HUD Overlay Frame -->
 					<iframe src="/hud/?transparent" class="hud-bg"></iframe>
+					
+					<!-- Technical Alignment Grid -->
+					<div v-if="showGrid" class="tech-grid"></div>
+					
+					<!-- Center Lines -->
+					<div v-if="showCenterLines" class="center-lines">
+						<div class="center-line --vertical"></div>
+						<div class="center-line --horizontal"></div>
+					</div>
+					
+					<!-- 10% Broadcast safe area outline -->
+					<div v-if="showSafeArea" class="safe-area-outline">
+						<span class="safe-area-label">90% Broadcast Safe Area</span>
+					</div>
 					
 					<!-- Draggable Elements -->
 					<div 
@@ -96,22 +147,29 @@
 					<h3>Properties: {{ selectedElement.def.label }}</h3>
 					
 					<div class="prop-group">
-						<label>Position</label>
-						<div class="prop-row">
-							<span>X: {{ Math.round(selectedElement.left) }}</span>
-							<span>Y: {{ Math.round(selectedElement.top) }}</span>
+						<label>Anchor alignment</label>
+						<div class="prop-row" style="color: #58a6ff; text-transform: capitalize;">
+							⚓ {{ selectedElement.def.anchor.v }} {{ selectedElement.def.anchor.h }}
 						</div>
 					</div>
 					
 					<div class="prop-group">
-						<label>Size</label>
+						<label>Viewport Position (1080p)</label>
 						<div class="prop-row">
-							<span>W: {{ Math.round(selectedElement.w) }}</span>
-							<span>H: {{ Math.round(selectedElement.h) }}</span>
+							<span>X: {{ Math.round(selectedElement.left) }}px</span>
+							<span>Y: {{ Math.round(selectedElement.top) }}px</span>
+						</div>
+					</div>
+					
+					<div class="prop-group">
+						<label>Size Dimensions</label>
+						<div class="prop-row">
+							<span>W: {{ Math.round(selectedElement.w) }}px</span>
+							<span>H: {{ Math.round(selectedElement.h) }}px</span>
 						</div>
 					</div>
 
-					<button class="btn-secondary" @click="resetElement(selectedElement)">Reset to Default</button>
+					<button class="btn-secondary" style="width: 100%; margin-top: 8px;" @click="resetElement(selectedElement)">Reset to Default</button>
 				</div>
 			</aside>
 		</div>
@@ -121,7 +179,6 @@
 <script>
 import { state, actions } from '/config/store.js'
 
-// Simple implementation of the layout definitions from layout.js
 const VP_W = 1920, VP_H = 1080;
 
 const DEFS = [
@@ -130,7 +187,7 @@ const DEFS = [
 		color: 'rgba(52,152,219,0.3)', border: 'rgba(52,152,219,0.65)',
 		baseW: 480, baseH: 480,
 		anchor: { v: 'top', h: 'left' },
-		props: [ { key: 'layout.radar.top', edge: 'top' }, { key: 'layout.radar.left', edge: 'left' } ],
+		props: [ { key: 'layout.radar.left', edge: 'left' }, { key: 'layout.radar.top', edge: 'top' } ],
 		resizable: true, keepAspect: true,
 		sizeKey: 'layout.radar.width', sizeUnit: '%', sizeRef: VP_W,
 		visibleKey: 'layout.radar.visible'
@@ -141,7 +198,6 @@ const DEFS = [
 		baseW: 960, baseH: 50,
 		anchor: { v: 'top', h: 'center' },
 		props: [{ key: 'layout.topbar.top', edge: 'top' }],
-		sizeKey: 'css.top-bar-width',
 		visibleKey: 'layout.topbar.visible'
 	},
 	{
@@ -236,7 +292,13 @@ export default {
 			remPx: 10,
 			drag: null,
 			presets: [],
-			activePreset: ''
+			activePreset: '',
+			
+			// Visual state toggles for 1:1 layout view
+			showBgImage: true,
+			showGrid: true,
+			showCenterLines: true,
+			showSafeArea: true
 		}
 	},
 	computed: {
@@ -304,8 +366,6 @@ export default {
 		resolveNum(key, fb) { const v = state.options[key]; return v != null ? (parseFloat(v) || fb) : fb },
 		initElements() {
 			this.elements = DEFS.map(def => {
-				const scaleX = def.scaleKeys ? this.resolveNum(def.scaleKeys.x, 1) : 1
-				const scaleY = def.scaleKeys ? this.resolveNum(def.scaleKeys.y, 1) : 1
 				let bw = def.baseW, bh = def.baseH
 
 				if (def.sizeKey) {
@@ -325,7 +385,7 @@ export default {
 					positions[p.edge] = this.evaluateCss(state.options[p.key], refSize, 11)
 				}
 
-				let w = bw * scaleX, h = bh * scaleY
+				let w = bw, h = bh
 				let top = 0, left = 0
 				
 				if (def.anchor.v === 'top') top = positions.top ?? 0
@@ -337,7 +397,7 @@ export default {
 
 				const visibleVal = state.options[def.visibleKey]
 				const visible = visibleVal !== false && visibleVal !== 'none'
-				return { def, top, left, w, h, baseW: bw, baseH: bh, scaleX, scaleY, visible }
+				return { def, top, left, w, h, baseW: bw, baseH: bh, scaleX: 1, scaleY: 1, visible }
 			})
 		},
 		getTransformOrigin(anchorH) {
@@ -359,10 +419,6 @@ export default {
 			const partial = {}
 			for (const p of el.def.props) { partial[p.key] = null; state.options[p.key] = null }
 			if (el.def.sizeKey) { partial[el.def.sizeKey] = null; state.options[el.def.sizeKey] = null }
-			if (el.def.scaleKeys) {
-				partial[el.def.scaleKeys.x] = null; state.options[el.def.scaleKeys.x] = null
-				partial[el.def.scaleKeys.y] = null; state.options[el.def.scaleKeys.y] = null
-			}
 			actions.save(partial)
 			this.computeRemPx()
 			this.initElements()
@@ -379,8 +435,7 @@ export default {
 				el, type,
 				startX: e.clientX, startY: e.clientY,
 				initTop: el.top, initLeft: el.left,
-				initW: el.baseW, initH: el.baseH,
-				initScaleX: el.scaleX, initScaleY: el.scaleY
+				initW: el.baseW, initH: el.baseH
 			}
 		},
 		onMouseMove(e) {
@@ -392,35 +447,40 @@ export default {
 			const snap = v => (g ? Math.round(v / g) * g : v)
 
 			if (this.drag.type === 'move') {
-				el.top = snap(this.drag.initTop + dy)
-				el.left = snap(this.drag.initLeft + dx)
+				let newTop = this.drag.initTop + dy
+				let newLeft = this.drag.initLeft + dx
+				
+				// Clamp values within 1920x1080 stage boundaries to prevent element loss
+				newTop = Math.max(0, Math.min(VP_H - el.h, newTop))
+				newLeft = Math.max(0, Math.min(VP_W - el.w, newLeft))
+
+				// Lock horizontal position for center-anchored components unless they have horizontal props
+				const hasHorizontal = el.def.props.some(p => p.edge === 'left' || p.edge === 'right')
+				if (el.def.anchor.h === 'center' && !hasHorizontal) {
+					newLeft = (VP_W - el.w) / 2
+				}
+
+				// Lock vertical position if there are no vertical keys mapped
+				const hasVertical = el.def.props.some(p => p.edge === 'top' || p.edge === 'bottom')
+				if (!hasVertical) {
+					newTop = el.top
+				}
+
+				el.top = snap(newTop)
+				el.left = snap(newLeft)
 			} else if (this.drag.type === 'resize-x' || this.drag.type === 'resize-y') {
-				if (el.def.scaleKeys) {
-					// Use scaling
-					if (this.drag.type === 'resize-x') {
-						const sign = (el.def.anchor.h === 'right') ? -1 : 1
-						el.scaleX = Math.max(0.1, this.drag.initScaleX + (dx * sign / el.baseW))
-						el.w = el.baseW * el.scaleX
-					} else {
-						let newScaleY = this.drag.initScaleY - (dy / el.baseH)
-						newScaleY = Math.max(0.1, newScaleY)
-						el.scaleY = newScaleY
-						el.h = el.baseH * el.scaleY
-					}
-				} else {
-					// Use direct width/height resizing
-					if (this.drag.type === 'resize-x') {
-						const sign = (el.def.anchor.h === 'right') ? -1 : 1
-						el.baseW = snap(Math.max(20, this.drag.initW + dx * sign))
-						el.w = el.baseW
-						if (el.def.keepAspect) {
-							el.baseH = el.baseW * (el.def.baseH / el.def.baseW)
-							el.h = el.baseH
-						}
-					} else {
-						el.baseH = snap(Math.max(20, this.drag.initH - dy))
+				// Use direct width/height resizing
+				if (this.drag.type === 'resize-x') {
+					const sign = (el.def.anchor.h === 'right') ? -1 : 1
+					el.baseW = snap(Math.max(20, this.drag.initW + dx * sign))
+					el.w = el.baseW
+					if (el.def.keepAspect) {
+						el.baseH = el.baseW * (el.def.baseH / el.def.baseW)
 						el.h = el.baseH
 					}
+				} else {
+					el.baseH = snap(Math.max(20, this.drag.initH - dy))
+					el.h = el.baseH
 				}
 			}
 		},
@@ -456,15 +516,6 @@ export default {
 				actions.broadcast(el.def.sizeKey, val)
 			}
 
-			if (el.def.scaleKeys) {
-				state.options[el.def.scaleKeys.x] = el.scaleX.toFixed(3)
-				state.options[el.def.scaleKeys.y] = el.scaleY.toFixed(3)
-				partial[el.def.scaleKeys.x] = el.scaleX.toFixed(3)
-				partial[el.def.scaleKeys.y] = el.scaleY.toFixed(3)
-				actions.broadcast(el.def.scaleKeys.x, el.scaleX.toFixed(3))
-				actions.broadcast(el.def.scaleKeys.y, el.scaleY.toFixed(3))
-			}
-
 			actions.save(partial)
 		},
 		savePreset() {
@@ -474,10 +525,6 @@ export default {
 			this.elements.forEach(el => {
 				for (const p of el.def.props) values[p.key] = state.options[p.key]
 				if (el.def.sizeKey) values[el.def.sizeKey] = state.options[el.def.sizeKey]
-				if (el.def.scaleKeys) {
-					values[el.def.scaleKeys.x] = state.options[el.def.scaleKeys.x]
-					values[el.def.scaleKeys.y] = state.options[el.def.scaleKeys.y]
-				}
 			})
 			fetch('/config/layout-presets', {
 				method: 'POST',
@@ -525,6 +572,56 @@ export default {
 
 .header-right { display: flex; align-items: center; gap: 16px; color: #8b949e; }
 
+/* Workbench Toggles */
+.workbench-toggles {
+	display: flex;
+	align-items: center;
+	background: #161b22;
+	border: 1px solid #30363d;
+	border-radius: 6px;
+	padding: 4px;
+	gap: 4px;
+}
+
+.toggle-control {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 10px;
+	border-radius: 4px;
+	cursor: pointer;
+	user-select: none;
+	transition: background 0.15s;
+}
+
+.toggle-control:hover {
+	background: #21262d;
+}
+
+.toggle-control input[type="checkbox"] {
+	margin: 0;
+	cursor: pointer;
+}
+
+.toggle-control span {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: #adbac7;
+}
+
+.toggle-control input[type="checkbox"]:checked + span {
+	color: #fff;
+}
+
+.grid-select {
+	padding: 6px;
+	background: #0d1117;
+	border: 1px solid #30363d;
+	color: #c9d1d9;
+	border-radius: 4px;
+	font-size: 0.75rem;
+}
+
 .editor-workspace {
 	display: flex; gap: 24px; flex: 1; min-height: 0;
 }
@@ -545,9 +642,21 @@ export default {
 	width: 1920px;
 	height: 1080px;
 	position: relative;
-	background: #222;
-	box-shadow: 0 0 40px rgba(0,0,0,0.5);
+	background: #111;
+	box-shadow: 0 0 40px rgba(0,0,0,0.8);
 	transform-origin: center center;
+}
+
+/* Optional Background CS2 Screenshot */
+.hud-screenshot-bg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	pointer-events: none;
+	z-index: 1;
+	opacity: 0.75;
 }
 
 .hud-bg {
@@ -557,6 +666,74 @@ export default {
 	height: 100%;
 	border: none;
 	pointer-events: none;
+	z-index: 2;
+}
+
+/* Technical Alignment Grid styling */
+.tech-grid {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 3;
+	background-size: 40px 40px, 40px 40px, 10px 10px, 10px 10px;
+	background-image: 
+		linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+		linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+}
+
+/* Center Crosshair Lines styling */
+.center-lines {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 4;
+}
+
+.center-line {
+	position: absolute;
+	background: none;
+}
+
+.center-line.--vertical {
+	left: 50%;
+	top: 0;
+	bottom: 0;
+	width: 1px;
+	border-left: 1px dashed rgba(52, 152, 219, 0.35);
+}
+
+.center-line.--horizontal {
+	top: 50%;
+	left: 0;
+	right: 0;
+	height: 1px;
+	border-top: 1px dashed rgba(52, 152, 219, 0.35);
+}
+
+/* 10% TV safe area outline styling */
+.safe-area-outline {
+	position: absolute;
+	left: 96px;
+	top: 54px;
+	width: 1728px;
+	height: 972px;
+	border: 1px dashed rgba(230, 126, 34, 0.35);
+	pointer-events: none;
+	z-index: 5;
+	box-sizing: border-box;
+}
+
+.safe-area-label {
+	position: absolute;
+	top: 6px;
+	left: 10px;
+	font-size: 0.65rem;
+	color: rgba(230, 126, 34, 0.5);
+	text-transform: uppercase;
+	font-weight: 600;
+	letter-spacing: 0.05em;
 }
 
 .hud-el {
@@ -566,6 +743,7 @@ export default {
 	cursor: move;
 	opacity: 0.7;
 	transition: opacity 0.2s;
+	z-index: 10;
 }
 
 .hud-el:hover { opacity: 0.9; }

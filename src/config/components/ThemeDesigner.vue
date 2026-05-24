@@ -21,9 +21,15 @@
 							:class="['theme-item', { '--active': activeTheme.id === theme.id }]"
 							@click="loadTheme(theme)"
 						>
-							<div class="theme-item-meta">
-								<strong style="color: #fff;">{{ theme.name }}</strong>
-								<span>{{ theme.description }}</span>
+							<div class="theme-item-content">
+								<div class="theme-thumbnail" :style="getThumbnailStyles(theme)">
+									<div class="thumb-side ct"></div>
+									<div class="thumb-side t"></div>
+								</div>
+								<div class="theme-item-meta">
+									<strong style="color: #fff;">{{ theme.name }}</strong>
+									<span>{{ theme.description }}</span>
+								</div>
 							</div>
 							<span class="badge --preset">Preset</span>
 						</div>
@@ -37,9 +43,15 @@
 								:class="['theme-item', { '--active': activeTheme.id === theme.id }]"
 								@click="loadTheme(theme)"
 							>
-								<div class="theme-item-meta">
-									<strong style="color: #58a6ff;">{{ theme.name }}</strong>
-									<span>{{ theme.description || 'Custom operator theme' }}</span>
+								<div class="theme-item-content">
+									<div class="theme-thumbnail" :style="getThumbnailStyles(theme)">
+										<div class="thumb-side ct"></div>
+										<div class="thumb-side t"></div>
+									</div>
+									<div class="theme-item-meta">
+										<strong style="color: #58a6ff;">{{ theme.name }}</strong>
+										<span>{{ theme.description || 'Custom operator theme' }}</span>
+									</div>
 								</div>
 								<span class="badge --custom">Custom</span>
 							</div>
@@ -50,11 +62,34 @@
 					</div>
 
 					<div class="designer-actions">
+						<!-- Unsaved changes & save status indicator -->
+						<div class="dirty-status-container">
+							<div v-if="isDirty" class="status-badge --dirty">
+								<span>⚠️ Unsaved Changes</span>
+							</div>
+							<div v-else-if="saveStatus === 'success'" class="status-badge --success">
+								<span>✅ Save Successful</span>
+							</div>
+							<div v-else-if="saveStatus === 'error'" class="status-badge --error">
+								<span>❌ Save Failed: {{ saveError }}</span>
+							</div>
+							<div v-else class="status-badge --synced">
+								<span>🟢 Theme Synced</span>
+							</div>
+						</div>
+
 						<button class="btn-win --clear" style="width: 100%; font-size: 0.85rem;" @click="clearForNew">➕ Create Custom Theme</button>
 						<button class="btn-promo" style="width: 100%; font-size: 0.85rem;" @click="saveTheme" :disabled="loading">💾 Save Theme</button>
 						<button class="btn-win --clear" style="width: 100%; font-size: 0.85rem;" @click="duplicateTheme" :disabled="!activeTheme.id || loading">👥 Duplicate</button>
 						<button class="btn-win --hidden" style="width: 100%; font-size: 0.85rem;" @click="deleteTheme" :disabled="!activeTheme.isCustom || loading">🗑️ Delete Theme</button>
-						<button class="btn-primary" style="width: 100%; margin-top: 8px; font-size: 0.9rem;" @click="applyTheme" :disabled="!activeTheme.id || loading">⚡ Apply Theme to Overlays</button>
+						
+						<!-- Theme import/export actions -->
+						<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+							<button class="btn-win --clear" style="width: 100%; font-size: 0.85rem;" @click="triggerImport">📥 Import JSON</button>
+							<button class="btn-win --clear" style="width: 100%; font-size: 0.85rem;" @click="exportTheme" :disabled="!activeTheme.id">📤 Export JSON</button>
+						</div>
+						
+						<button class="btn-primary" style="width: 100%; margin-top: 12px; font-size: 0.9rem;" @click="applyTheme" :disabled="!activeTheme.id || loading">⚡ Apply Theme to Overlays</button>
 					</div>
 				</div>
 			</div>
@@ -141,7 +176,13 @@
 							<div class="form-row" style="margin-top: 12px;">
 								<div class="form-group">
 									<label>Branding Logo URL</label>
-									<input v-model="activeTheme.event.logo" class="text-input" placeholder="/hud/img/branding/logo-ubg.png">
+									<div class="picker-controls">
+										<input v-model="activeTheme.event.logo" class="text-input" placeholder="/hud/img/branding/logo-ubg.png">
+										<button class="btn-win --clear" style="padding: 10px; font-size: 0.8rem; flex: none; display: flex; align-items: center; gap: 4px;" @click="triggerLogoUpload" :disabled="logoUploadState === 'uploading'">
+											<span>{{ logoUploadState === 'uploading' ? '⌛ ...' : '📁 Upload Logo' }}</span>
+										</button>
+										<input type="file" ref="logoInput" style="display: none" accept=".png,.jpg,.jpeg,.svg,.gif,.webp" @change="uploadLogo">
+									</div>
 								</div>
 								<div class="form-group">
 									<label>Sponsor Text Highlight</label>
@@ -300,14 +341,31 @@
 
 							<div class="form-group" style="margin-top: 16px;">
 								<label>Local Font File URL Path (Offline-Safe Only)</label>
-								<input v-model="activeTheme.tokens['theme.typography.customFontUrl']" class="text-input" placeholder="e.g. /hud/fonts/my-font.woff2">
-								<p class="field-desc" style="margin-top: 4px;">Must start with `/hud/`. You can upload custom font files under the "Import / Export" tab.</p>
+								<div class="picker-controls">
+									<input v-model="activeTheme.tokens['theme.typography.customFontUrl']" class="text-input" placeholder="e.g. /hud/fonts/my-font.woff2">
+									<button class="btn-win --clear" style="padding: 10px; font-size: 0.8rem; flex: none; display: flex; align-items: center; gap: 4px;" @click="triggerFontUpload" :disabled="fontUploadState === 'uploading'">
+										<span>{{ fontUploadState === 'uploading' ? '⌛ ...' : '📁 Upload Font' }}</span>
+									</button>
+									<input type="file" ref="fontInput" style="display: none" accept=".woff2,.woff,.ttf,.otf" @change="uploadFont">
+								</div>
+								<p class="field-desc" style="margin-top: 4px;">Must start with `/hud/` and be offline-safe.</p>
+							</div>
+
+							<!-- Dynamic Premium Font Preview Sample -->
+							<div v-if="activeTheme.tokens['theme.typography.customFontUrl']" class="form-group" style="margin-top: 16px;">
+								<label>Active Font Preview</label>
+								<div class="font-preview-sample" :style="{ fontFamily: activeTheme.tokens['theme.typography.primaryFont'] || 'Quantico' }">
+									Aa Bb Cc 123 - The quick brown fox jumps over the lazy dog.
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</section>
+
+		<!-- Hidden file uploader for theme imports -->
+		<input type="file" ref="importInput" style="display: none;" accept=".json" @change="importTheme" />
 	</div>
 </template>
 
@@ -353,6 +411,9 @@ export default {
 					'theme.typography.customFontUrl': ''
 				}
 			},
+			originalTheme: null,
+			saveStatus: 'idle',
+			saveError: '',
 			activeTab: 'branding',
 			tabs: [
 				{ id: 'branding', label: 'Branding' },
@@ -365,10 +426,30 @@ export default {
 			radiusVal: 0,
 			skewVal: 20,
 			fillOpacity: 0.95,
-			borderOpacity: 0.12
+			borderOpacity: 0.12,
+			// Upload states
+			logoUploadState: 'idle',
+			fontUploadState: 'idle',
+			// Font injection caching
+			lastInjectedUrl: '',
+			lastInjectedFamily: ''
 		}
 	},
 	computed: {
+		isDirty() {
+			if (!this.originalTheme) return true
+			const activeTokens = this.activeTheme.tokens || {}
+			const origTokens = this.originalTheme.tokens || {}
+			const activeEvent = this.activeTheme.event || {}
+			const origEvent = this.originalTheme.event || {}
+			
+			const tokensDirty = JSON.stringify(activeTokens) !== JSON.stringify(origTokens)
+			const eventDirty = JSON.stringify(activeEvent) !== JSON.stringify(origEvent)
+			const metaDirty = this.activeTheme.name !== this.originalTheme.name || 
+			                  this.activeTheme.description !== this.originalTheme.description
+			                  
+			return tokensDirty || eventDirty || metaDirty
+		},
 		mockupStyles() {
 			const tokens = this.activeTheme.tokens || {}
 			const event = this.activeTheme.event || {}
@@ -397,7 +478,37 @@ export default {
 			}
 		}
 	},
+	watch: {
+		activeTheme: {
+			deep: true,
+			handler() {
+				this.updateDynamicFont()
+				if (this.isDirty) {
+					this.saveStatus = 'idle'
+					this.saveError = ''
+				}
+			}
+		}
+	},
 	methods: {
+		getThumbnailStyles(theme) {
+			const tokens = theme.tokens || {}
+			const ct = tokens['theme.colors.ctFill'] || '25, 106, 232'
+			const t = tokens['theme.colors.tFill'] || '232, 137, 22'
+			const bg = tokens['theme.materials.panelFill'] || 'rgba(13, 17, 23, 0.95)'
+			const border = tokens['theme.materials.panelBorder'] || 'rgba(255, 255, 255, 0.12)'
+			const radius = tokens['theme.shapes.radius'] || '0px'
+			const skew = tokens['theme.shapes.skewAngle'] || '20deg'
+			
+			return {
+				'--thumb-ct': `rgb(${ct})`,
+				'--thumb-t': `rgb(${t})`,
+				'--thumb-panel-bg': bg,
+				'--thumb-panel-border': border,
+				'--thumb-radius': radius,
+				'--thumb-skew': skew
+			}
+		},
 		rgbToHex(rgbStr) {
 			if (!rgbStr) return '#000000'
 			const parts = rgbStr.split(',').map(p => parseInt(p.trim(), 10))
@@ -425,6 +536,81 @@ export default {
 		},
 		updateColorToken(tokenKey, hexValue) {
 			this.activeTheme.tokens[tokenKey] = this.hexToRgb(hexValue)
+		},
+		triggerLogoUpload() {
+			this.$refs.logoInput.click()
+		},
+		async uploadLogo(e) {
+			const file = e.target.files[0]
+			if (!file) return
+			
+			const ext = file.name.split('.').pop().toLowerCase()
+			if (!['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp'].includes(ext)) {
+				actions.addAlert('Unsupported image file type. Please select PNG, JPG, JPEG, SVG, GIF, or WEBP.', 'error')
+				return
+			}
+			
+			this.logoUploadState = 'uploading'
+			const reader = new FileReader()
+			reader.onload = async (event) => {
+				try {
+					const base64 = event.target.result
+					const res = await fetch('/config/upload-image', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ filename: file.name, base64 })
+					})
+					const data = await res.json()
+					if (!res.ok || data.error) throw new Error(data.error || 'Upload failed')
+					
+					this.activeTheme.event.logo = data.url
+					this.logoUploadState = 'success'
+					actions.addAlert('Logo uploaded successfully!', 'success')
+				} catch (err) {
+					this.logoUploadState = 'error'
+					actions.addAlert('Logo upload failed: ' + err.message, 'error')
+				}
+			}
+			reader.readAsDataURL(file)
+		},
+		triggerFontUpload() {
+			this.$refs.fontInput.click()
+		},
+		async uploadFont(e) {
+			const file = e.target.files[0]
+			if (!file) return
+			
+			const ext = file.name.split('.').pop().toLowerCase()
+			if (!['woff2', 'woff', 'ttf', 'otf'].includes(ext)) {
+				actions.addAlert('Unsupported font file type. Please select WOFF2, WOFF, TTF, or OTF.', 'error')
+				return
+			}
+			
+			this.fontUploadState = 'uploading'
+			const reader = new FileReader()
+			reader.onload = async (event) => {
+				try {
+					const base64 = event.target.result
+					const res = await fetch('/config/upload-font', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ filename: file.name, base64 })
+					})
+					const data = await res.json()
+					if (!res.ok || data.error) throw new Error(data.error || 'Upload failed')
+					
+					this.activeTheme.tokens['theme.typography.customFontUrl'] = data.url
+					if (data.fontFamily) {
+						this.activeTheme.tokens['theme.typography.primaryFont'] = `'${data.fontFamily}'`
+					}
+					this.fontUploadState = 'success'
+					actions.addAlert('Font uploaded successfully!', 'success')
+				} catch (err) {
+					this.fontUploadState = 'error'
+					actions.addAlert('Font upload failed: ' + err.message, 'error')
+				}
+			}
+			reader.readAsDataURL(file)
 		},
 		updateRadiusToken() {
 			this.activeTheme.tokens['theme.shapes.radius'] = `${this.radiusVal}px`
@@ -478,7 +664,10 @@ export default {
 		},
 		loadTheme(theme) {
 			this.activeTheme = JSON.parse(JSON.stringify(theme))
+			this.originalTheme = JSON.parse(JSON.stringify(theme))
 			this.loadSlidersFromTokens()
+			this.saveStatus = 'idle'
+			this.saveError = ''
 		},
 		clearForNew() {
 			this.activeTheme = {
@@ -512,13 +701,56 @@ export default {
 				}
 			}
 			this.loadSlidersFromTokens()
+			this.originalTheme = JSON.parse(JSON.stringify(this.activeTheme))
+			this.saveStatus = 'idle'
+			this.saveError = ''
+		},
+		getUniqueDuplicateName(originalName) {
+			const baseName = originalName.replace(/\s*\(Copy(\s+\d+)?\)$/i, '')
+			let candidate = `${baseName} (Copy)`
+			let counter = 2
+			
+			const allNames = [
+				...this.presets.map(p => p.name),
+				...this.customThemes.map(c => c.name)
+			]
+			
+			while (allNames.includes(candidate)) {
+				candidate = `${baseName} (Copy ${counter})`
+				counter++
+			}
+			
+			return candidate
+		},
+		getUniqueSlug(name) {
+			const baseSlug = name.toLowerCase()
+				.replace(/[^a-z0-9]+/g, '-')
+				.replace(/^-+|-+$/g, '')
+			let candidate = baseSlug || 'custom-theme'
+			
+			const allSlugs = [
+				...this.presets.map(p => p.id),
+				...this.customThemes.map(c => c.id)
+			]
+			
+			let counter = 2
+			let tempCandidate = candidate
+			while (allSlugs.includes(tempCandidate)) {
+				tempCandidate = `${candidate}-${counter}`
+				counter++
+			}
+			return tempCandidate
 		},
 		duplicateTheme() {
+			if (!this.activeTheme.id) return
 			const clone = JSON.parse(JSON.stringify(this.activeTheme))
+			clone.name = this.getUniqueDuplicateName(clone.name)
 			clone.id = '' // reset to force create
-			clone.name = `${clone.name} (Copy)`
 			clone.isCustom = true
 			this.activeTheme = clone
+			this.originalTheme = null // make it dirty
+			this.saveStatus = 'idle'
+			this.saveError = ''
 			actions.addAlert('Theme duplicated in memory. Click "Save Theme" to persist.', 'success')
 		},
 		async saveTheme() {
@@ -541,12 +773,21 @@ export default {
 			}
 			
 			this.loading = true
+			this.saveStatus = 'idle'
+			this.saveError = ''
+			
 			try {
 				const isNew = !this.activeTheme.id || !this.activeTheme.isCustom
 				const slug = isNew 
-					? this.activeTheme.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(2, 6)
+					? this.getUniqueSlug(this.activeTheme.name)
 					: this.activeTheme.id
 					
+				// Prevent accidental overwrite of built-in presets
+				const isPreset = this.presets.some(p => p.id === slug)
+				if (isPreset) {
+					throw new Error('Cannot overwrite built-in presets. Please choose a different theme name.')
+				}
+				
 				const url = isNew ? '/config/event-themes' : `/config/event-themes/${slug}`
 				const method = isNew ? 'POST' : 'PUT'
 				
@@ -565,18 +806,26 @@ export default {
 				if (!res.ok) throw new Error(data.message || 'Failed to save theme.')
 				
 				actions.addAlert(`Theme "${data.name}" saved successfully.`, 'success')
+				this.saveStatus = 'success'
+				
 				await this.fetchThemes()
-				// Auto-select the saved theme
+				// Auto-select the saved theme and reset dirty state
 				const matched = this.customThemes.find(x => x.id === data.id)
-				if (matched) this.loadTheme(matched)
+				if (matched) {
+					this.loadTheme(matched)
+				} else {
+					this.originalTheme = JSON.parse(JSON.stringify(payload))
+				}
 			} catch (err) {
+				this.saveStatus = 'error'
+				this.saveError = err.message
 				actions.addAlert('Save Error: ' + err.message, 'error')
 			} finally {
 				this.loading = false
 			}
 		},
 		async deleteTheme() {
-			if (!confirm(`Are you sure you want to delete the custom theme "${this.activeTheme.name}"?`)) return
+			if (!confirm(`Are you sure you want to delete the custom theme "${this.activeTheme.name}"? This action cannot be undone.`)) return
 			this.loading = true
 			try {
 				const res = await fetch(`/config/event-themes/${this.activeTheme.id}`, { method: 'DELETE' })
@@ -602,10 +851,153 @@ export default {
 			} finally {
 				this.loading = false
 			}
+		},
+		// Client-side theme export
+		exportTheme() {
+			if (!this.activeTheme) return
+			const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.activeTheme, null, 2))
+			const downloadAnchor = document.createElement('a')
+			const filename = `${this.activeTheme.id || 'theme'}-export.json`
+			downloadAnchor.setAttribute("href", dataStr)
+			downloadAnchor.setAttribute("download", filename)
+			document.body.appendChild(downloadAnchor)
+			downloadAnchor.click()
+			downloadAnchor.remove()
+			actions.addAlert(`Theme "${this.activeTheme.name}" exported successfully.`, 'success')
+		},
+		// Client-side theme import
+		triggerImport() {
+			this.$refs.importInput.click()
+		},
+		importTheme(e) {
+			const file = e.target.files[0]
+			if (!file) return
+			
+			const reader = new FileReader()
+			reader.onload = async (event) => {
+				try {
+					const parsed = JSON.parse(event.target.result)
+					
+					// Validate structure
+					if (!parsed || typeof parsed !== 'object') throw new Error('Invalid JSON format.')
+					if (!parsed.name) throw new Error('Missing theme name.')
+					if (!parsed.tokens || typeof parsed.tokens !== 'object') throw new Error('Missing visual tokens.')
+					
+					// Token schema checks
+					const allowedPrefixes = ['theme.', 'series.', 'sponsors.']
+					for (const key of Object.keys(parsed.tokens)) {
+						if (key.startsWith('layout.') || key.startsWith('style.')) {
+							throw new Error(`Token "${key}" is forbidden. Layout and style keys are rejected.`)
+						}
+						const isAllowed = allowedPrefixes.some(pref => key.startsWith(pref))
+						if (!isAllowed) {
+							throw new Error(`Token prefix for "${key}" is invalid. Only theme.*, series.*, and sponsors.* keys are allowed.`)
+						}
+					}
+					
+					// Font safety check
+					const fontUrl = String(parsed.tokens['theme.typography.customFontUrl'] || '').trim()
+					if (fontUrl && (fontUrl.includes('://') || /^(https?:)?\/\//i.test(fontUrl) || !fontUrl.startsWith('/hud/'))) {
+						throw new Error('Only local offline-safe font URLs starting with "/hud/" are allowed.')
+					}
+					
+					// Setup imported structure
+					const imported = {
+						id: '',
+						name: parsed.name.endsWith('(Imported)') ? parsed.name : `${parsed.name} (Imported)`,
+						description: parsed.description || 'Imported custom theme',
+						isCustom: true,
+						event: {
+							name: parsed.event?.name || '',
+							subtitle: parsed.event?.subtitle || '',
+							logo: parsed.event?.logo || '',
+							sponsorFlavor: parsed.event?.sponsorFlavor || '',
+							accentColor: parsed.event?.accentColor || '#3498db'
+						},
+						tokens: {
+							'theme.colors.ctFill': parsed.tokens['theme.colors.ctFill'] || '25, 106, 232',
+							'theme.colors.ctBorder': parsed.tokens['theme.colors.ctBorder'] || '91, 166, 255',
+							'theme.colors.ctText': parsed.tokens['theme.colors.ctText'] || '156, 204, 255',
+							'theme.colors.tFill': parsed.tokens['theme.colors.tFill'] || '232, 137, 22',
+							'theme.colors.tBorder': parsed.tokens['theme.colors.tBorder'] || '255, 181, 71',
+							'theme.colors.tText': parsed.tokens['theme.colors.tText'] || '255, 214, 138',
+							'theme.colors.red': parsed.tokens['theme.colors.red'] || '240, 49, 37',
+							'theme.colors.green': parsed.tokens['theme.colors.green'] || '56, 148, 107',
+							'theme.materials.panelFill': parsed.tokens['theme.materials.panelFill'] || 'rgba(13, 17, 23, 0.95)',
+							'theme.materials.panelBorder': parsed.tokens['theme.materials.panelBorder'] || 'rgba(255, 255, 255, 0.12)',
+							'theme.shapes.radius': parsed.tokens['theme.shapes.radius'] || '4px',
+							'theme.shapes.skewAngle': parsed.tokens['theme.shapes.skewAngle'] || '20deg',
+							'theme.shapes.skewComplement': parsed.tokens['theme.shapes.skewComplement'] || '160deg',
+							'theme.typography.primaryFont': parsed.tokens['theme.typography.primaryFont'] || 'Quantico',
+							'theme.typography.customFontUrl': parsed.tokens['theme.typography.customFontUrl'] || ''
+						}
+					}
+					
+					this.activeTheme = imported
+					this.loadSlidersFromTokens()
+					this.originalTheme = null // Mark dirty as imported but not saved
+					this.saveStatus = 'idle'
+					this.saveError = ''
+					
+					actions.addAlert('Theme imported successfully into memory! Click "Save Theme" to persist it.', 'success')
+				} catch (err) {
+					actions.addAlert('Import Error: ' + err.message, 'error')
+				} finally {
+					e.target.value = ''
+				}
+			}
+			reader.readAsText(file)
+		},
+		// Dynamic head style injection for font family previewing
+		updateDynamicFont() {
+			const tokens = this.activeTheme.tokens || {}
+			const fontUrl = tokens['theme.typography.customFontUrl']
+			const fontFamily = tokens['theme.typography.primaryFont']
+			
+			if (fontUrl === this.lastInjectedUrl && fontFamily === this.lastInjectedFamily) {
+				return
+			}
+			
+			this.lastInjectedUrl = fontUrl
+			this.lastInjectedFamily = fontFamily
+			
+			const existing = document.getElementById('dynamic-theme-font')
+			if (existing) {
+				existing.remove()
+			}
+			
+			if (!fontUrl) return
+			
+			const cleanFamily = String(fontFamily || 'CustomThemeFont').replace(/['"]/g, '')
+			const styleEl = document.createElement('style')
+			styleEl.id = 'dynamic-theme-font'
+			styleEl.innerHTML = `
+				@font-face {
+					font-family: '${cleanFamily}';
+					src: url('${fontUrl}');
+					font-display: swap;
+				}
+			`
+			document.head.appendChild(styleEl)
+		},
+		handleBeforeUnload(e) {
+			if (this.isDirty) {
+				e.preventDefault()
+				e.returnValue = 'You have unsaved changes in your theme. Are you sure you want to leave?'
+				return e.returnValue
+			}
 		}
 	},
 	mounted() {
 		this.fetchThemes()
+		window.addEventListener('beforeunload', this.handleBeforeUnload)
+	},
+	beforeUnmount() {
+		window.removeEventListener('beforeunload', this.handleBeforeUnload)
+		const existing = document.getElementById('dynamic-theme-font')
+		if (existing) {
+			existing.remove()
+		}
 	}
 }
 </script>
@@ -618,7 +1010,7 @@ export default {
 
 .designer-grid {
 	display: grid;
-	grid-template-columns: 360px 1fr;
+	grid-template-columns: 380px 1fr;
 	gap: 24px;
 }
 
@@ -700,15 +1092,58 @@ export default {
 	box-shadow: 0 0 8px rgba(31, 111, 235, 0.2);
 }
 
+.theme-item-content {
+	display: flex;
+	align-items: center;
+	flex: 1;
+	min-width: 0;
+}
+
+/* Preset Miniature Style Thumbnail */
+.theme-thumbnail {
+	width: 48px;
+	height: 24px;
+	border-radius: var(--thumb-radius);
+	background: var(--thumb-panel-bg);
+	border: 1px solid var(--thumb-panel-border);
+	display: flex;
+	overflow: hidden;
+	position: relative;
+	flex-shrink: 0;
+	margin-right: 12px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.thumb-side {
+	flex: 1;
+	height: 100%;
+	transform: skewX(var(--thumb-skew));
+	transition: background 0.3s, transform 0.3s;
+}
+
+.thumb-side.ct {
+	background: var(--thumb-ct);
+	margin-left: -8px;
+}
+
+.thumb-side.t {
+	background: var(--thumb-t);
+	margin-right: -8px;
+}
+
 .theme-item-meta {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
-	max-width: 70%;
+	min-width: 0;
+	flex: 1;
 }
 
 .theme-item-meta strong {
 	font-size: 0.85rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .theme-item-meta span {
@@ -725,6 +1160,7 @@ export default {
 	border-radius: 4px;
 	font-weight: 600;
 	text-transform: uppercase;
+	flex-shrink: 0;
 }
 
 .badge.--preset {
@@ -753,6 +1189,46 @@ export default {
 	gap: 8px;
 	border-top: 1px dashed #2d333b;
 	padding-top: 16px;
+}
+
+/* Unsaved Changes & Sync Status Badges */
+.dirty-status-container {
+	margin-bottom: 8px;
+}
+
+.status-badge {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 12px;
+	border-radius: 6px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-align: center;
+}
+
+.status-badge.--dirty {
+	background: rgba(230, 126, 34, 0.15);
+	border: 1px solid rgba(230, 126, 34, 0.3);
+	color: #e67e22;
+}
+
+.status-badge.--success {
+	background: rgba(46, 204, 113, 0.15);
+	border: 1px solid rgba(46, 204, 113, 0.3);
+	color: #2ecc71;
+}
+
+.status-badge.--error {
+	background: rgba(231, 76, 60, 0.15);
+	border: 1px solid rgba(231, 76, 60, 0.3);
+	color: #e74c3c;
+}
+
+.status-badge.--synced {
+	background: rgba(52, 152, 219, 0.1);
+	border: 1px solid rgba(52, 152, 219, 0.2);
+	color: #3498db;
 }
 
 /* Tab controls */
@@ -967,6 +1443,17 @@ export default {
 	font-family: var(--primary-font), 'Quantico', sans-serif;
 }
 
+/* Premium micro-animations for visual state modifications */
+.hud-mockup * {
+	transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+	            background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+	            border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+	            color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+	            border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+	            transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+	            opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .hud-bar {
 	width: 100%;
 	display: grid;
@@ -1087,6 +1574,19 @@ export default {
 .hud-sponsor-tag span {
 	display: block;
 	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+/* Offline Custom Font Sample styling */
+.font-preview-sample {
+	margin-top: 12px;
+	padding: 16px;
+	background: #0d1117;
+	border: 1px solid #30363d;
+	border-radius: 6px;
+	font-size: 1.1rem;
+	color: #fff;
+	text-align: center;
+	box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
 }
 
 /* Button styles matching global theme */
