@@ -49,12 +49,12 @@
 		</div>
 
 		<div class="editor-workspace">
-			<!-- Canvas Area -->
+			<!-- Canvas Stage Area -->
 			<div class="canvas-container" ref="container">
 				<div 
 					class="viewport" 
 					id="viewport"
-					:style="{ transform: `scale(${viewportScale})` }"
+					:style="viewportStyles"
 				>
 					<!-- Backdrop CS2 Screenshot (Visual only, does not affect values) -->
 					<img 
@@ -81,22 +81,143 @@
 						<span class="safe-area-label">90% Broadcast Safe Area</span>
 					</div>
 					
-					<!-- Draggable Elements -->
+					<!-- Draggable High-Fidelity Elements -->
 					<div 
 						v-for="el in sortedElements" 
 						:key="el.def.id"
-						:class="['hud-el', { '--active': selectedId === el.def.id, '--hidden': !el.visible }]"
+						:class="[
+							'hud-el', 
+							{ 
+								'--active': selectedId === el.def.id, 
+								'--hidden': !el.visible,
+								'--outside-safe': showSafeArea && checkOutsideSafe(el),
+								'--colliding': getCollidingElements(el).length > 0
+							}
+						]"
 						:style="{
 							top: `${el.top}px`,
 							left: `${el.left}px`,
 							width: `${el.w}px`,
-							height: `${el.h}px`,
-							borderColor: el.def.border
+							height: `${el.h}px`
 						}"
 						@mousedown.stop="startDrag($event, el, 'move')"
 					>
-						<div class="mock-content" :style="{ transform: `scale(${el.scaleX}, ${el.scaleY})`, transformOrigin: getTransformOrigin(el.def.anchor.h) }">
-							<div class="mock-box" :style="{ backgroundColor: el.def.color }">
+						<div class="mock-content" :style="{ transformOrigin: getTransformOrigin(el.def.anchor.h) }">
+							
+							<!-- 1. TOP BAR -->
+							<div v-if="el.def.id === 'top-bar'" class="mock-top-bar">
+								<div class="mock-top-bar-team mock-team-ct">
+									<span class="team-name">CT TEAM</span>
+									<span class="score">12</span>
+								</div>
+								<div class="mock-top-bar-center">
+									<span class="timer">1:40</span>
+									<span class="round">Round 23</span>
+								</div>
+								<div class="mock-top-bar-team mock-team-t">
+									<span class="score">10</span>
+									<span class="team-name">T TEAM</span>
+								</div>
+							</div>
+
+							<!-- 2. RADAR -->
+							<div v-else-if="el.def.id === 'radar'" class="mock-radar">
+								<div class="radar-plate">
+									<div class="radar-sweep"></div>
+									<div class="radar-grid-vertical"></div>
+									<div class="radar-grid-horizontal"></div>
+									<div class="radar-blip --ct" style="top: 32%; left: 38%;"></div>
+									<div class="radar-blip --t" style="top: 68%; left: 58%;"></div>
+									<div class="radar-blip --bomb" style="top: 48%; left: 48%;"></div>
+								</div>
+								<div class="mock-label-overlay">Radar</div>
+							</div>
+
+							<!-- 3. LEFT SIDEBAR -->
+							<div v-else-if="el.def.id === 'sidebar-left'" class="mock-sidebar --left">
+								<div v-for="i in 5" :key="i" class="mock-player-card">
+									<div class="hp-bar" style="width: 80%;"></div>
+									<span class="player-hp">80</span>
+									<span class="player-name">Player {{ i }}</span>
+									<div class="weapons">
+										<span class="weapon">🔫</span>
+										<span class="weapon">💣</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- 4. RIGHT SIDEBAR -->
+							<div v-else-if="el.def.id === 'sidebar-right'" class="mock-sidebar --right">
+								<div v-for="i in 5" :key="i" class="mock-player-card">
+									<div class="weapons">
+										<span class="weapon">💣</span>
+										<span class="weapon">🔫</span>
+									</div>
+									<span class="player-name">Player {{ i + 5 }}</span>
+									<span class="player-hp">100</span>
+									<div class="hp-bar" style="width: 100%;"></div>
+								</div>
+							</div>
+
+							<!-- 5. FOCUSED PLAYER -->
+							<div v-else-if="el.def.id === 'focused-player'" class="mock-focused-player">
+								<div class="avatar-placeholder">👤</div>
+								<div class="player-details">
+									<div class="details-top">
+										<span class="player-name">FOCUSED_OBSERVER</span>
+										<span class="player-weapon">AK-47</span>
+									</div>
+									<div class="details-bottom">
+										<div class="hp-bar" style="width: 85%;"></div>
+										<span class="health-armor">❤️ 85  🛡️ 100</span>
+										<span class="ammo">30 / 90</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- 6. PLAYERS ALIVE -->
+							<div v-else-if="el.def.id === 'players-alive'" class="mock-players-alive">
+								<div class="ct-alive">5 ALIVE</div>
+								<div class="vs-label">VS</div>
+								<div class="t-alive">4 ALIVE</div>
+							</div>
+
+							<!-- 7. EVENT BADGE -->
+							<div v-else-if="el.def.id === 'event-badge'" class="mock-event-badge">
+								<img class="logo" src="/hud/img/branding/logo-ubg.png" alt="Logo" />
+								<div class="text">
+									<span class="title">EON Broadcast</span>
+									<span class="subtitle">Live Stage HUD</span>
+								</div>
+							</div>
+
+							<!-- 8. CURRENT MAP -->
+							<div v-else-if="el.def.id === 'current-map'" class="mock-current-map">
+								<div class="map-bg">de_inferno</div>
+								<div class="map-overlay">
+									<span class="map-name">de_inferno</span>
+									<span class="series-score">CT 1 - 0 T</span>
+								</div>
+							</div>
+
+							<!-- 9. SLEEK MAPS -->
+							<div v-else-if="el.def.id === 'maps-sleek'" class="mock-maps-sleek">
+								<div class="veto-bar">
+									<span class="veto-item --picked">Inferno</span>
+									<span class="veto-item --picked">Mirage</span>
+									<span class="veto-item --active">Nuke</span>
+									<span class="veto-item">Anubis</span>
+								</div>
+							</div>
+
+							<!-- 10. SPONSORS LEFT/RIGHT -->
+							<div v-else-if="el.def.id.startsWith('sponsor-')" class="mock-sponsor-panel">
+								<span class="title">Eon Broadcast Partner</span>
+								<span class="subtitle">Official Tournament Sponsor</span>
+							</div>
+
+							<!-- FALLBACK WIREFRAME BOX -->
+							<div v-else class="mock-box" :style="{ backgroundColor: el.def.color }">
 								{{ el.def.label }}
 							</div>
 						</div>
@@ -118,7 +239,7 @@
 				</div>
 			</div>
 
-			<!-- Properties Sidebar -->
+			<!-- Properties Sidebar with Technical Diagnostics -->
 			<aside class="properties-sidebar">
 				<div class="sidebar-header">
 					<h3>Elements</h3>
@@ -129,47 +250,120 @@
 					<div 
 						v-for="el in elements" 
 						:key="el.def.id"
-						:class="['element-item', { '--active': selectedId === el.def.id }]"
+						:class="['element-item', { 
+							'--active': selectedId === el.def.id,
+							'--warning': showSafeArea && checkOutsideSafe(el) && el.visible,
+							'--danger': getCollidingElements(el).length > 0 && el.visible
+						}]"
 						@click="selectElement(el.def.id)"
 					>
 						<span class="el-name">{{ el.def.label }}</span>
-						<button 
-							class="btn-icon" 
-							@click.stop="toggleVisibility(el)"
-							:title="el.visible ? 'Hide' : 'Show'"
-						>
-							{{ el.visible ? '👁️' : '👁️‍🗨️' }}
-						</button>
+						<div style="display: flex; align-items: center; gap: 8px;">
+							<span v-if="el.visible && getCollidingElements(el).length > 0" title="Collision detected" style="font-size: 0.75rem;">💥</span>
+							<span v-else-if="el.visible && showSafeArea && checkOutsideSafe(el)" title="Outside Safe Area" style="font-size: 0.75rem;">⚠️</span>
+							<button 
+								class="btn-icon" 
+								@click.stop="toggleVisibility(el)"
+								:title="el.visible ? 'Hide' : 'Show'"
+							>
+								{{ el.visible ? '👁️' : '👁️‍🗨️' }}
+							</button>
+						</div>
 					</div>
 				</div>
 
+				<!-- Right-side properties diagnostics inspector panel -->
 				<div v-if="selectedElement" class="properties-panel">
 					<h3>Properties: {{ selectedElement.def.label }}</h3>
 					
+					<!-- 1. Anchor -->
 					<div class="prop-group">
 						<label>Anchor alignment</label>
-						<div class="prop-row" style="color: #58a6ff; text-transform: capitalize;">
+						<div class="prop-row" style="color: #58a6ff; font-weight: bold;">
 							⚓ {{ selectedElement.def.anchor.v }} {{ selectedElement.def.anchor.h }}
 						</div>
 					</div>
 					
+					<!-- 2. Visibility state -->
 					<div class="prop-group">
-						<label>Viewport Position (1080p)</label>
-						<div class="prop-row">
-							<span>X: {{ Math.round(selectedElement.left) }}px</span>
-							<span>Y: {{ Math.round(selectedElement.top) }}px</span>
-						</div>
-					</div>
-					
-					<div class="prop-group">
-						<label>Size Dimensions</label>
-						<div class="prop-row">
-							<span>W: {{ Math.round(selectedElement.w) }}px</span>
-							<span>H: {{ Math.round(selectedElement.h) }}px</span>
+						<label>Visibility state</label>
+						<div class="prop-row" style="align-items: center;">
+							<span :style="{ color: selectedElement.visible ? '#2ecc71' : '#8b949e', fontWeight: 'bold' }">
+								{{ selectedElement.visible ? '👁️ Visible (Active)' : '👁️‍🗨️ Hidden (Inactive)' }}
+							</span>
 						</div>
 					</div>
 
-					<button class="btn-secondary" style="width: 100%; margin-top: 8px;" @click="resetElement(selectedElement)">Reset to Default</button>
+					<!-- 3. Pixel coordinates -->
+					<div class="prop-group">
+						<label>Stage Position (1080p Pixels)</label>
+						<div class="prop-row" style="flex-direction: column; gap: 4px; font-family: monospace; font-size: 0.75rem; color: #adbac7;">
+							<div class="coord-item">Canvas Left (X): <span style="color: #fff; font-weight: bold;">{{ Math.round(selectedElement.left) }}px</span></div>
+							<div class="coord-item">Canvas Top (Y): <span style="color: #fff; font-weight: bold;">{{ Math.round(selectedElement.top) }}px</span></div>
+							<div v-for="prop in selectedElement.def.props" :key="prop.key" class="coord-item">
+								<span style="text-transform: capitalize;">{{ prop.edge }} Anchor</span>: 
+								<span style="color: #fff; font-weight: bold;">{{ Math.round(getPixelPositionByEdge(prop.edge)) }}px</span>
+							</div>
+						</div>
+					</div>
+					
+					<!-- 4. Width/height -->
+					<div class="prop-group">
+						<label>Size Dimensions</label>
+						<div class="prop-row" style="flex-direction: column; gap: 4px; font-family: monospace; font-size: 0.75rem; color: #adbac7;">
+							<div class="coord-item">Width: <span style="color: #fff; font-weight: bold;">{{ Math.round(selectedElement.w) }}px</span></div>
+							<div class="coord-item">Height: <span style="color: #fff; font-weight: bold;">{{ Math.round(selectedElement.h) }}px</span></div>
+						</div>
+					</div>
+
+					<!-- 5. Canonical rem options coordinates -->
+					<div class="prop-group">
+						<label>Canonical Options Save Keys</label>
+						<div class="prop-row --canonical-keys" style="flex-direction: column; gap: 6px; font-family: monospace; font-size: 0.7rem; background: #0d1117; padding: 8px; border-radius: 4px; border: 1px solid #21262d;">
+							<div v-for="prop in selectedElement.def.props" :key="prop.key" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="prop.key">
+								<span style="color: #ff7b72;">{{ prop.key }}</span>: 
+								<span style="color: #79c0ff;">"{{ getCanonicalValue(prop) }}"</span>
+							</div>
+							<div v-if="selectedElement.def.sizeKey" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="selectedElement.def.sizeKey">
+								<span style="color: #ff7b72;">{{ selectedElement.def.sizeKey }}</span>: 
+								<span style="color: #79c0ff;">"{{ getCanonicalSizeValue() }}"</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- 6. Safe-area validation status -->
+					<div class="prop-group">
+						<label>Safe Area Status</label>
+						<div class="prop-row">
+							<span v-if="checkOutsideSafe(selectedElement)" style="color: #e67e22; font-weight: bold; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+								⚠️ Warning: Outside Title Safe Area
+							</span>
+							<span v-else style="color: #2ecc71; font-weight: bold; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+								🟢 Safe: Inside Safe Area
+							</span>
+						</div>
+					</div>
+
+					<!-- 7. Overlap clashing elements list -->
+					<div class="prop-group">
+						<label>Component Overlaps</label>
+						<div class="prop-row" style="flex-direction: column; gap: 4px;">
+							<div v-if="getCollidingElements(selectedElement).length > 0">
+								<div 
+									v-for="other in getCollidingElements(selectedElement)" 
+									:key="other.def.id" 
+									style="color: #e74c3c; font-weight: bold; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;"
+								>
+									💥 Clashes with {{ other.def.label }}
+								</div>
+							</div>
+							<div v-else style="color: #2ecc71; font-weight: bold; font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+								🟢 None: Position Clear
+							</div>
+						</div>
+					</div>
+
+					<button class="btn-secondary" style="width: 100%; margin-top: 12px;" @click="resetElement(selectedElement)">Reset to Default</button>
 				</div>
 			</aside>
 		</div>
@@ -309,6 +503,35 @@ export default {
 				if (b.def.id === this.selectedId) return -1
 				return 0
 			})
+		},
+		viewportStyles() {
+			const ct = state.options['theme.colors.ctFill'] || '25, 106, 232'
+			const ctBorder = state.options['theme.colors.ctBorder'] || '91, 166, 255'
+			const ctText = state.options['theme.colors.ctText'] || '156, 204, 255'
+			const t = state.options['theme.colors.tFill'] || '232, 137, 22'
+			const tBorder = state.options['theme.colors.tBorder'] || '255, 181, 71'
+			const tText = state.options['theme.colors.tText'] || '255, 214, 138'
+			
+			const bg = state.options['theme.materials.panelFill'] || 'rgba(13, 17, 23, 0.95)'
+			const border = state.options['theme.materials.panelBorder'] || 'rgba(255, 255, 255, 0.12)'
+			const radius = state.options['theme.shapes.radius'] || '4px'
+			const skew = state.options['theme.shapes.skewAngle'] || '20deg'
+			const primaryFont = state.options['theme.typography.primaryFont'] || 'Quantico'
+			
+			return {
+				transform: `scale(${this.viewportScale})`,
+				'--ct-fill': `rgb(${ct})`,
+				'--ct-border': `rgb(${ctBorder})`,
+				'--ct-text-color': `rgb(${ctText})`,
+				'--t-fill': `rgb(${t})`,
+				'--t-text-color': `rgb(${tText})`,
+				'--t-border': `rgb(${tBorder})`,
+				'--panel-bg': bg,
+				'--panel-border': border,
+				'--panel-radius': radius,
+				'--panel-skew': skew,
+				'--primary-font': primaryFont
+			}
 		}
 	},
 	mounted() {
@@ -544,6 +767,65 @@ export default {
 			Object.entries(p.values).forEach(([k, v]) => actions.broadcast(k, v))
 			this.computeRemPx()
 			this.initElements()
+		},
+		
+		// Phase 18C: Diagnostics and Broadcast Safety Math
+		checkOutsideSafe(el) {
+			if (!el.visible) return false
+			return (el.left < 96 || 
+			        (el.left + el.w) > (VP_W - 96) || 
+			        el.top < 54 || 
+			        (el.top + el.h) > (VP_H - 54))
+		},
+		checkCollision(el1, el2) {
+			if (!el1.visible || !el2.visible || el1.def.id === el2.def.id) return false
+			
+			const boxA = {
+				x1: el1.left, x2: el1.left + el1.w,
+				y1: el1.top,  y2: el1.top + el1.h
+			}
+			const boxB = {
+				x1: el2.left, x2: el2.left + el2.w,
+				y1: el2.top,  y2: el2.top + el2.h
+			}
+			
+			return !(boxA.x2 < boxB.x1 || 
+			         boxB.x2 < boxA.x1 || 
+			         boxA.y2 < boxB.y1 || 
+			         boxB.y2 < boxA.y1)
+		},
+		getCollidingElements(el) {
+			if (!el.visible) return []
+			return this.elements.filter(other => this.checkCollision(el, other))
+		},
+		getPixelPositionByEdge(edge) {
+			if (!this.selectedElement) return 0
+			const el = this.selectedElement
+			if (edge === 'top') return el.top
+			if (edge === 'bottom') return VP_H - el.top - el.h
+			if (edge === 'left') return el.left
+			if (edge === 'right') return VP_W - el.left - el.w
+			return 0
+		},
+		getCanonicalValue(prop) {
+			if (!this.selectedElement) return '0.00rem'
+			const el = this.selectedElement
+			let val = 0
+			if (prop.edge === 'top') val = el.top
+			else if (prop.edge === 'bottom') val = VP_H - el.top - el.h
+			else if (prop.edge === 'left') val = el.left
+			else if (prop.edge === 'right') val = VP_W - el.left - el.w
+			return (val / this.remPx).toFixed(2) + 'rem'
+		},
+		getCanonicalSizeValue() {
+			if (!this.selectedElement) return '0px'
+			const el = this.selectedElement
+			if (!el.def.sizeKey) return '0px'
+			const unit = el.def.sizeUnit || 'px'
+			let val = el.baseW
+			if (unit === '%') return (el.baseW / VP_W * 100).toFixed(2) + '%'
+			else if (unit === 'rem') return (el.baseW / this.remPx).toFixed(2) + 'rem'
+			return Math.round(val) + 'px'
 		}
 	}
 }
@@ -736,26 +1018,559 @@ export default {
 	letter-spacing: 0.05em;
 }
 
+/* Draggable elements - Border details */
 .hud-el {
 	position: absolute;
-	border: 2px solid transparent;
+	border: 2px dashed transparent;
 	box-sizing: border-box;
 	cursor: move;
-	opacity: 0.7;
-	transition: opacity 0.2s;
+	opacity: 0.9;
+	transition: border-color 0.15s, opacity 0.15s, box-shadow 0.15s, background-color 0.15s;
 	z-index: 10;
 }
 
-.hud-el:hover { opacity: 0.9; }
-.hud-el.--hidden { opacity: 0.15; pointer-events: none; }
-.hud-el.--active { border-style: dashed; z-index: 100; background: rgba(255,255,255,0.05); opacity: 1; }
+.hud-el:hover { 
+	opacity: 1; 
+	border-color: rgba(52, 152, 219, 0.45);
+}
 
+.hud-el.--hidden { opacity: 0.15; pointer-events: none; }
+
+.hud-el.--active { 
+	border-color: #3498db; 
+	border-style: dashed; 
+	z-index: 100; 
+	opacity: 1; 
+	background: rgba(255, 255, 255, 0.02);
+	box-shadow: 0 0 0 1px #000, inset 0 0 0 1px #000;
+}
+
+/* Phase 18C: Subtle Safe area and Collision warning outlines */
+.hud-el.--outside-safe:not(.--active) {
+	border-color: rgba(230, 126, 34, 0.5) !important;
+	border-style: dashed;
+	background: rgba(230, 126, 34, 0.03);
+}
+
+.hud-el.--colliding:not(.--active) {
+	border-color: rgba(231, 76, 60, 0.55) !important;
+	border-style: dashed;
+	background: rgba(231, 76, 60, 0.03);
+}
+
+.hud-el.--active.--colliding {
+	border-color: #e74c3c !important;
+	box-shadow: 0 0 0 1px #000, inset 0 0 0 1px #000, 0 0 8px rgba(231, 76, 60, 0.35);
+}
+
+.hud-el.--active.--outside-safe:not(.--colliding) {
+	border-color: #e67e22 !important;
+	box-shadow: 0 0 0 1px #000, inset 0 0 0 1px #000, 0 0 8px rgba(230, 126, 34, 0.35);
+}
+
+/* Mock components wrappers */
 .mock-content {
 	width: 100%;
 	height: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	font-family: var(--primary-font), 'Quantico', sans-serif;
+	font-size: 0.8rem;
+	overflow: hidden;
+}
+
+/* TOP BAR score board */
+.mock-top-bar {
+	width: 100%;
+	height: 100%;
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	background: var(--panel-bg);
+	border: 1px solid var(--panel-border);
+	border-radius: var(--panel-radius);
+	transform: skewX(var(--panel-skew));
+	overflow: hidden;
+	box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.mock-top-bar-team {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 16px;
+	font-weight: 700;
+}
+
+.mock-team-ct {
+	background: var(--ct-fill);
+	color: var(--ct-text-color);
+}
+
+.mock-team-t {
+	background: var(--t-fill);
+	color: var(--t-text-color);
+}
+
+.mock-top-bar-team .team-name {
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-top-bar-team .score {
+	font-size: 1.1rem;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-top-bar-center {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 0 20px;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+	color: #fff;
+}
+
+.mock-top-bar-center .timer {
+	font-size: 1.1rem;
+	font-weight: 700;
+}
+
+.mock-top-bar-center .round {
+	font-size: 0.6rem;
+	color: #8b949e;
+	text-transform: uppercase;
+}
+
+/* RADAR plate */
+.mock-radar {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	background: rgba(13, 17, 23, 0.85);
+	border: 1.5px solid var(--panel-border);
+	border-radius: 50%;
+	overflow: hidden;
+	box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.radar-plate {
+	position: absolute;
+	inset: 4px;
+	border: 1px solid rgba(255,255,255,0.06);
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(0,0,0,0) 30%, rgba(0,0,0,0.5) 100%);
+	overflow: hidden;
+}
+
+.radar-sweep {
+	position: absolute;
+	inset: 0;
+	background: conic-gradient(from 0deg, rgba(88, 166, 255, 0.15) 0deg, rgba(88, 166, 255, 0) 120deg);
+	border-radius: 50%;
+	animation: sweep-rotation 6s linear infinite;
+}
+
+@keyframes sweep-rotation {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+
+.radar-grid-vertical {
+	position: absolute;
+	left: 50%; top: 0; bottom: 0; width: 1px;
+	background: rgba(255,255,255,0.08);
+}
+
+.radar-grid-horizontal {
+	position: absolute;
+	top: 50%; left: 0; right: 0; height: 1px;
+	background: rgba(255,255,255,0.08);
+}
+
+.radar-blip {
+	position: absolute;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	box-shadow: 0 0 8px currentColor;
+}
+
+.radar-blip.--ct { background: var(--ct-fill); color: var(--ct-fill); }
+.radar-blip.--t { background: var(--t-fill); color: var(--t-fill); }
+.radar-blip.--bomb { background: #e74c3c; color: #e74c3c; width: 10px; height: 10px; clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+
+.mock-label-overlay {
+	position: absolute;
+	bottom: 12px;
+	left: 0; right: 0;
+	text-align: center;
+	font-weight: 700;
+	color: rgba(255,255,255,0.35);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	pointer-events: none;
+}
+
+/* SIDEBARS player rows */
+.mock-sidebar {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	justify-content: flex-end;
+}
+
+.mock-player-card {
+	background: var(--panel-bg);
+	border: 1px solid var(--panel-border);
+	border-radius: var(--panel-radius);
+	transform: skewX(var(--panel-skew));
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 10px;
+	position: relative;
+	overflow: hidden;
+	box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+.mock-player-card .hp-bar {
+	position: absolute;
+	left: 0; top: 0; bottom: 0;
+	opacity: 0.15;
+	z-index: 1;
+}
+
+.mock-sidebar.--left .hp-bar {
+	background: var(--ct-fill);
+	transform-origin: left;
+}
+
+.mock-sidebar.--right .hp-bar {
+	background: var(--t-fill);
+	right: 0; left: auto;
+	transform-origin: right;
+}
+
+.mock-player-card .player-name {
+	font-weight: 600;
+	color: #fff;
+	z-index: 2;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-player-card .player-hp {
+	font-size: 0.75rem;
+	font-weight: 700;
+	z-index: 2;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-sidebar.--left .player-hp { color: var(--ct-text-color); }
+.mock-sidebar.--right .player-hp { color: var(--t-text-color); }
+
+.mock-player-card .weapons {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+	z-index: 2;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-player-card .weapon {
+	font-size: 0.8rem;
+}
+
+/* FOCUSED PLAYER card */
+.mock-focused-player {
+	width: 100%;
+	height: 100%;
+	background: var(--panel-bg);
+	border: 1.5px solid var(--panel-border);
+	border-radius: var(--panel-radius);
+	transform: skewX(var(--panel-skew));
+	display: flex;
+	padding: 8px 12px;
+	gap: 12px;
+	box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+	overflow: hidden;
+}
+
+.avatar-placeholder {
+	width: 50px;
+	height: 100%;
+	background: rgba(255,255,255,0.05);
+	border: 1px solid var(--panel-border);
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.player-details {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.details-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.details-top .player-name {
+	font-weight: 700;
+	color: #fff;
+	font-size: 0.9rem;
+}
+
+.details-top .player-weapon {
+	font-weight: 600;
+	color: var(--ct-text-color);
+	font-size: 0.75rem;
+}
+
+.details-bottom {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 20px;
+	background: rgba(0,0,0,0.2);
+	border-radius: 3px;
+	padding: 0 8px;
+	position: relative;
+	overflow: hidden;
+}
+
+.details-bottom .hp-bar {
+	position: absolute;
+	left: 0; top: 0; bottom: 0;
+	background: var(--ct-fill);
+	opacity: 0.25;
+	z-index: 1;
+}
+
+.details-bottom .health-armor {
+	font-weight: 700;
+	color: #fff;
+	z-index: 2;
+	font-size: 0.75rem;
+}
+
+.details-bottom .ammo {
+	font-family: monospace;
+	font-weight: 700;
+	color: #adbac7;
+	z-index: 2;
+	font-size: 0.75rem;
+}
+
+/* PLAYERS ALIVE meter */
+.mock-players-alive {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: var(--panel-bg);
+	border: 1px solid var(--panel-border);
+	border-radius: var(--panel-radius);
+	transform: skewX(var(--panel-skew));
+	overflow: hidden;
+	box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+
+.mock-players-alive div {
+	flex: 1;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	font-size: 0.75rem;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-players-alive .ct-alive { background: var(--ct-fill); color: var(--ct-text-color); }
+.mock-players-alive .t-alive { background: var(--t-fill); color: var(--t-text-color); }
+.mock-players-alive .vs-label { flex: none; width: 30px; color: #8b949e; background: none; }
+
+/* EVENT BADGE */
+.mock-event-badge {
+	width: 100%;
+	height: 100%;
+	background: var(--panel-bg);
+	border: 1px solid var(--panel-border);
+	border-radius: var(--panel-radius);
+	transform: skewX(var(--panel-skew));
+	display: flex;
+	align-items: center;
+	padding: 0 10px;
+	gap: 8px;
+	box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.mock-event-badge .logo {
+	height: 24px;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-event-badge .text {
+	display: flex;
+	flex-direction: column;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-event-badge .title {
+	font-size: 0.65rem;
+	font-weight: 700;
+	color: #fff;
+	letter-spacing: 0.05em;
+}
+
+.mock-event-badge .subtitle {
+	font-size: 0.55rem;
+	color: #8b949e;
+}
+
+/* CURRENT MAP and VETO STRIP */
+.mock-current-map {
+	width: 100%;
+	height: 100%;
+	background: #0d1117;
+	border: 1.5px solid var(--panel-border);
+	border-radius: var(--panel-radius);
+	transform: skewX(var(--panel-skew));
+	overflow: hidden;
+	position: relative;
+	box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.mock-current-map .map-bg {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.8));
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: rgba(255,255,255,0.06);
+	font-size: 1.4rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-current-map .map-overlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 0 12px;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+	z-index: 2;
+}
+
+.mock-current-map .map-name {
+	font-weight: 700;
+	color: #fff;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+}
+
+.mock-current-map .series-score {
+	font-size: 0.65rem;
+	color: var(--t-text-color);
+	font-weight: 600;
+}
+
+/* SLEEK MAP VETO BAR */
+.mock-maps-sleek {
+	width: 100%;
+	height: 100%;
+	background: var(--panel-bg);
+	border: 1px solid var(--panel-border);
+	border-radius: var(--panel-radius);
+	transform: skewX(var(--panel-skew));
+	overflow: hidden;
+	display: flex;
+	box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+
+.veto-bar {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.veto-item {
+	flex: 1;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.65rem;
+	font-weight: 700;
+	color: #8b949e;
+	border-right: 1px solid var(--panel-border);
+}
+
+.veto-item:last-child { border-right: none; }
+
+.veto-item.--picked {
+	background: rgba(255,255,255,0.03);
+	color: #adbac7;
+}
+
+.veto-item.--active {
+	background: var(--ct-fill);
+	color: var(--ct-text-color);
+}
+
+/* SPONSOR PANELS */
+.mock-sponsor-panel {
+	width: 100%;
+	height: 100%;
+	background: var(--panel-bg);
+	border: 1px solid var(--panel-border);
+	border-left: 3px solid var(--t-border);
+	border-radius: var(--panel-radius);
+	transform: skewX(var(--panel-skew));
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 0 10px;
+	box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+
+.mock-sponsor-panel span {
+	display: block;
+	transform: skewX(calc(-1 * var(--panel-skew)));
+}
+
+.mock-sponsor-panel .title {
+	font-size: 0.7rem;
+	font-weight: 700;
+	color: #fff;
+}
+
+.mock-sponsor-panel .subtitle {
+	font-size: 0.55rem;
+	color: #8b949e;
+	text-transform: uppercase;
 }
 
 .mock-box {
@@ -809,10 +1624,32 @@ export default {
 	border-radius: 6px;
 	cursor: pointer;
 	color: #adbac7;
+	transition: background 0.15s, border-color 0.15s;
+	border: 1px solid transparent;
 }
 
 .element-item:hover { background: #21262d; color: #fff; }
 .element-item.--active { background: #3498db; color: #fff; }
+
+/* Out of Safe Area Warnings in list */
+.element-item.--warning:not(.--active) {
+	border-color: rgba(230, 126, 34, 0.4);
+	background: rgba(230, 126, 34, 0.05);
+	color: #e67e22;
+}
+.element-item.--warning:not(.--active):hover {
+	background: rgba(230, 126, 34, 0.1);
+}
+
+/* Collision Warnings in list */
+.element-item.--danger:not(.--active) {
+	border-color: rgba(231, 76, 60, 0.4);
+	background: rgba(231, 76, 60, 0.05);
+	color: #ea6060;
+}
+.element-item.--danger:not(.--active):hover {
+	background: rgba(231, 76, 60, 0.1);
+}
 
 .btn-icon { background: none; border: none; cursor: pointer; filter: grayscale(1); }
 .element-item.--active .btn-icon { filter: none; }
@@ -822,6 +1659,8 @@ export default {
 	border-top: 1px solid #30363d;
 	background: #0d1117;
 	border-radius: 0 0 8px 8px;
+	overflow-y: auto;
+	max-height: 480px;
 }
 
 .properties-panel h3 { margin: 0 0 16px 0; font-size: 0.95rem; color: #fff; }
@@ -830,4 +1669,12 @@ export default {
 .prop-group label { display: block; font-size: 0.8rem; color: #8b949e; margin-bottom: 8px; text-transform: uppercase; }
 
 .prop-row { display: flex; gap: 16px; font-family: monospace; color: #c9d1d9; }
+
+.coord-item {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+	padding: 2px 0;
+	border-bottom: 1px solid rgba(255,255,255,0.02);
+}
 </style>

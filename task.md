@@ -185,6 +185,19 @@ Tasks:
 - [x] Create `docs/architecture/config-migration.md` containing full deprecation architecture ✅
 - [x] Verify via a temporary developer test script or server startup checks ✅
 
+### Phase 12: 1:1 HUD Layout Editor & Safety Diagnostics (Phases 18A, 18B, 18C)
+
+- [x] Rebuild Layout Editor workspace around strict 1920x1080 virtual canvas with CS2 gameplay screenshots ✅
+- [x] Add togglable safety outlines: 40px/10px grid, center alignment lines, and 10% TV/Broadcast safe boundaries ✅
+- [x] Implement coordinate bounds clamping preventing elements from sliding off-screen ✅
+- [x] Lock horizontal dragging wiggles for center-anchored HUD blocks ✅
+- [x] Clean dead scale coordinates and deprecated fennec/lan66 option bindings ✅
+- [x] Construct high-fidelity HTML/CSS visual mockups inheriting active theme slants, radii, fonts, and colors ✅
+- [x] Implement lightweight AABB collision solver ignoring hidden/self elements and updating live ✅
+- [x] Implement 10% Broadcast safe-area warning outlines and status indicators ✅
+- [x] Construct properties diagnostics inspector showing anchor info, pixel & canonical coords, size, safe-zone, and overlap clashing lists ✅
+- [x] Maintain high performance without layout thrashing, DOM querying, watchers, or interval timers ✅
+
 ## Verification Checklist For Next Code Change
 
 - [ ] `npm start`
