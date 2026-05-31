@@ -16,6 +16,7 @@ import Maps from '/hud/maps/maps.vue'
 import MapsSleek from '/hud/maps-sleek/maps-sleek.vue'
 import { getPlayerDisplayName, getTeamLogoPath } from '/hud/helpers/player-resolver.js'
 import { applyResolvedCssVariables, getMigratedOptionKeys, resolveOption, RADAR_OPTION_DEFINITIONS, TOPBAR_OPTION_DEFINITIONS, SIDEBAR_POSITION_OPTION_DEFINITIONS, SIDEBAR_VISIBILITY_OPTION_DEFINITIONS, PLAYERS_ALIVE_OPTION_DEFINITIONS, FOCUSED_PLAYER_OPTION_DEFINITIONS, CURRENT_MAP_OPTION_DEFINITIONS, EVENT_BADGE_OPTION_DEFINITIONS, SPONSOR_OPTION_DEFINITIONS, MAPS_OPTION_DEFINITIONS, THEME_MATERIALS_OPTION_DEFINITIONS, THEME_COLORS_OPTION_DEFINITIONS, THEME_SHAPES_OPTION_DEFINITIONS, THEME_TYPOGRAPHY_OPTION_DEFINITIONS } from '/hud/core/resolve-option.js'
+import { options } from '/hud/core/state.js'
 
 export default {
 	components: {
@@ -131,8 +132,28 @@ export default {
 	},
 
 	mounted() {
-		this.applyCssVariableOverrides()
-		this.applyCustomFontFace()
+		// Set up dynamic robust deep watch on Eon's reactive global options
+		this.$watch(
+			() => options,
+			() => {
+				console.log('[HUD Shell Watcher] Options mutated:', JSON.stringify(options))
+				this.applyCssVariableOverrides()
+				this.applyCustomFontFace()
+			},
+			{ deep: true, immediate: true }
+		)
+
+		// Set up active scene intermission watch
+		this.$watch(
+			() => options['match.activeScene'],
+			(scene) => {
+				const isIntermission = ['intro', 'halftime', 'fulltime', 'over', 'analytics', 'radar'].includes(scene)
+				if (isIntermission && !this._vantaEffect) this.initVanta()
+				else if (!isIntermission && this._vantaEffect) this.destroyVanta()
+			},
+			{ immediate: true }
+		)
+
 		this.setScaleFactor()
 		this.setMapImageUrl()
 
@@ -148,26 +169,11 @@ export default {
 				this.posterLogoFailed = false
 			}
 		},
-		'$opts': {
-			handler() {
-				this.applyCssVariableOverrides()
-				this.applyCustomFontFace()
-			},
-			deep: true,
-			immediate: true,
-		},
 		'$map.sanitizedName': {
 			handler() {
 				this.setMapImageUrl()
 			},
 			immediate: true,
-		},
-		'$opts.match\.activeScene': {
-			handler(scene) {
-				const isIntermission = ['intro', 'halftime', 'fulltime', 'over', 'analytics', 'radar'].includes(scene)
-				if (isIntermission && !this._vantaEffect) this.initVanta()
-				else if (!isIntermission && this._vantaEffect) this.destroyVanta()
-			},
 		},
 		_vantaEffectKey() {
 			this.initVanta()
