@@ -53,12 +53,16 @@ const processWsQueue = (timestamp) => {
 			case 'state': return handleState(msg.body);
 			case 'gsi_update': return handleState(msg.body);
 			case 'static_data': return handleState(msg.body);
-			case 'config:update': 
+			case 'config:update':
 				if (msg.body.key) {
 					if (msg.body.value !== undefined && msg.body.value !== null && msg.body.value !== '') {
 						options[msg.body.key] = msg.body.value;
 					} else {
 						delete options[msg.body.key];
+					}
+					// TEMP DIAG: confirm websocket-on-message options identity and value
+					if (msg.body.key.startsWith('layout.radar')) {
+						console.log('[WS-onMessage] config:update radar key:', msg.body.key, '=', msg.body.value, '| options ref id:', options.__diagId ?? (options.__diagId = Math.random().toString(36).slice(2, 7)))
 					}
 				}
 				break;

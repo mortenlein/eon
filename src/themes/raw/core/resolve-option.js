@@ -135,6 +135,11 @@ export function applyResolvedCssVariables(definitions) {
 		const val = resolveCssOption(def.canonical, def.fallback)
 		if (val === undefined || val === null) return
 
+		// TEMP DIAG: confirm resolve-option sees the correct options object identity and values
+		if (def.canonical && def.canonical.startsWith('layout.radar')) {
+			console.log('[resolve-option] applyResolved', def.canonical, '=', val, '| options ref id:', options.__diagId ?? (options.__diagId = Math.random().toString(36).slice(2, 7)))
+		}
+
 		if (def.cssVars) {
 			def.cssVars.forEach(v => {
 				if (val === '') {
