@@ -20,6 +20,16 @@ import {
 	deleteLayoutPreset,
 	applyLayoutPresetToOptions
 } from './helpers/layout-preset-helper.js'
+import {
+	listPackages,
+	getPackage,
+	savePackage,
+	deletePackage,
+	applyPackage,
+	captureCurrentAsPackage,
+	getActivePackageStatus,
+	clearPackageState,
+} from './helpers/event-package-helper.js'
 
 export const registerConfigRoutes = (router, websocket) => {
 	router.get('/', (context) => {
@@ -388,6 +398,137 @@ export const registerConfigRoutes = (router, websocket) => {
 		} catch (err) {
 			context.status = 400
 			context.body = { error: 'Execution Error', message: err.message }
+		}
+	})
+
+	/* ── Event Packages CRUD (Phase 20A) ── */
+	router.get('/config/event-packages', async (context) => {
+		try {
+			context.body = listPackages()
+			context.status = 200
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
+	})
+
+	/* /active must be registered before /:id so "active" is not consumed as a package ID */
+	router.get('/config/event-packages/active', async (context) => {
+		try {
+			context.body = getActivePackageStatus()
+			context.status = 200
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
+	})
+
+	router.delete('/config/event-packages/active', async (context) => {
+		try {
+			clearPackageState()
+			context.status = 204
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
+	})
+
+	router.get('/config/event-packages/:id', async (context) => {
+		try {
+			const pkg = getPackage(context.params.id)
+			if (!pkg) {
+				context.status = 404
+				context.body = { error: `Package with ID "${context.params.id}" not found.` }
+				return
+			}
+			context.body = pkg
+			context.status = 200
+		} catch (err) {
+			context.status = 500
+			context.body = { error: 'Internal Server Error', message: err.message }
+		}
+	})
+
+	router.post('/config/event-packages', async (context) => {
+		try {
+			const incoming = context.request.body || {}
+			const slug = incoming.id || ('pkg-' + Math.random().toString(36).substring(2, 8))
+			const saved = savePackage(slug, incoming, { allowOverwrite: false })
+			context.body = saved
+			context.status = 201
+		} catch (err) {
+			if (err.code === 'PACKAGE_EXISTS') {
+				context.status = 409
+				context.body = { error: 'PACKAGE_EXISTS', id: err.id, message: err.message }
+			} else {
+				context.status = 400
+				context.body = { error: 'Validation Error', message: err.message }
+			}
+		}
+	})
+
+	router.put('/config/event-packages/:id', async (context) => {
+		try {
+			const id = context.params.id
+			const incoming = context.request.body || {}
+			const saved = savePackage(id, incoming, { allowOverwrite: true })
+			context.body = saved
+			context.status = 200
+		} catch (err) {
+			context.status = 400
+			context.body = { error: 'Validation Error', message: err.message }
+		}
+	})
+
+	router.delete('/config/event-packages/:id', async (context) => {
+		try {
+			const deleted = deletePackage(context.params.id)
+			if (!deleted) {
+				context.status = 404
+				context.body = { error: `Package with ID "${context.params.id}" not found.` }
+				return
+			}
+			context.status = 204
+		} catch (err) {
+			context.status = 403
+			context.body = { error: 'Forbidden', message: err.message }
+		}
+	})
+
+	/* capture-current must be registered before /:id/apply so the static segment
+	   is not consumed as an :id parameter by Koa Router */
+	router.post('/config/event-packages/capture-current', async (context) => {
+		try {
+			const incoming = context.request.body || {}
+			const result = captureCurrentAsPackage(incoming)
+			context.body = result
+			context.status = 201
+		} catch (err) {
+			if (err.code === 'PACKAGE_EXISTS') {
+				context.status = 409
+				context.body = { error: 'PACKAGE_EXISTS', id: err.id, message: err.message }
+			} else {
+				context.status = 400
+				context.body = { error: 'Validation Error', message: err.message }
+			}
+		}
+	})
+
+	router.post('/config/event-packages/:id/apply', async (context) => {
+		try {
+			const result = applyPackage(context.params.id)
+			await websocket.updateCaches()
+			websocket.broadcastRefresh()
+			context.status = 200
+			context.body = { success: true, warnings: result.warnings }
+		} catch (err) {
+			if (err.message.includes('not found')) {
+				context.status = 404
+				context.body = { error: 'Not Found', message: err.message }
+			} else {
+				context.status = 400
+				context.body = { error: 'Execution Error', message: err.message }
+			}
 		}
 	})
 }
