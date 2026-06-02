@@ -41,8 +41,8 @@
 	--radar-smoke-diameter: calc(57.6 / 1024 * 100%);
 
 	/* Sponsors */
-	--sponsor-panel-width: 12rem;
-	--sponsor-panel-height: 4.5rem;
+	--sponsor-panel-width: var(--lan66-sponsor-width, 12rem);
+	--sponsor-panel-height: var(--lan66-sponsor-height, 4.5rem);
 
 	/* Sidebars */
 	--sidebar-width: calc(var(--sidebar-player-width) + var(--sidebar-player-focused-player-highlight-width));

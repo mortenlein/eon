@@ -70,6 +70,7 @@ import SeriesEditor from '/config/components/SeriesEditor.vue'
 import MatchRulesEditor from '/config/components/MatchRulesEditor.vue'
 import SponsorsEditor from '/config/components/SponsorsEditor.vue'
 import ThemeDesigner from '/config/components/ThemeDesigner.vue'
+import PackagesEditor from '/config/components/PackagesEditor.vue'
 import PortabilityEditor from '/config/components/PortabilityEditor.vue'
 
 const iconPaths = {
@@ -80,6 +81,7 @@ const iconPaths = {
 	teams: ['M8 11a4 4 0 1 1 8 0', 'M3 20a7 7 0 0 1 14 0', 'M18 14a5 5 0 0 1 3 5'],
 	sponsors: ['M5 7h14v10H5z', 'M8 10h8', 'M8 14h5'],
 	options: ['M12 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8', 'M12 2v3', 'M12 19v3', 'M4.93 4.93l2.12 2.12', 'M16.95 16.95l2.12 2.12', 'M2 12h3', 'M19 12h3', 'M4.93 19.07l2.12-2.12', 'M16.95 7.05l2.12-2.12'],
+	packages: ['M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z', 'M3.27 6.96L12 12.01l8.73-5.05', 'M12 22.08V12'],
 	portability: ['M16 3l4 4l-4 4', 'M20 7h-9', 'M8 21l-4 -4l4 -4', 'M4 17h9'],
 }
 
@@ -115,6 +117,7 @@ export default {
 				{ id: 'teams', label: 'Teams Setup', icon: 'teams', component: TeamsEditor },
 				{ id: 'sponsors', label: 'Sponsors', icon: 'sponsors', component: SponsorsEditor },
 				{ id: 'theme-designer', label: 'Theme Designer', icon: 'options', component: ThemeDesigner },
+				{ id: 'packages', label: 'Packages', icon: 'packages', component: PackagesEditor },
 				{ id: 'options', label: 'HUD Options', icon: 'options', component: OptionsEditor },
 				{ id: 'portability', label: 'Import / Export', icon: 'portability', component: PortabilityEditor },
 			]

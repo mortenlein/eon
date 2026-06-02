@@ -137,7 +137,7 @@
 							
 							<!-- Sponsor Highlight Slot -->
 							<div class="hud-sponsor-tag">
-								<span>{{ activeTheme.event.sponsorFlavor || 'Eon Broadcast' }}</span>
+								<span>{{ activeTheme.event.sponsorFlavor || 'Eon' }}</span>
 							</div>
 						</div>
 					</div>

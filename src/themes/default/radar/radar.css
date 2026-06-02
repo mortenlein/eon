@@ -17,10 +17,4 @@ img.radar-image.--transparent-background {
 	filter: var(--filter-drop-shadow);
 }
 
-.radar {
-	position: absolute;
-	top: var(--lan66-radar-top);
-	left: var(--lan66-radar-left);
-}
-
 

@@ -81,7 +81,7 @@
 .hud-stage .top-bar {
 	width: 62% !important;
 	left: 19% !important;
-	top: 1.5% !important;
+	top: var(--lan66-top-bar-top, 1.5%) !important;
 	position: absolute !important;
 }
 
@@ -643,11 +643,11 @@
 }
 
 .hud-viewport.--style-compact .sidebar.--left {
-	left: 0;
+	left: var(--lan66-sidebar-left, 0);
 }
 
 .hud-viewport.--style-compact .sidebar.--right {
-	right: 0;
+	right: var(--lan66-sidebar-right, 0);
 }
 
 .hud-viewport.--style-compact .score .inner,

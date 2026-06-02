@@ -49,6 +49,10 @@
 						<input type="checkbox" v-model="smartGuidesEnabled">
 						<span>🧲 Smart Guides</span>
 					</label>
+					<label class="toggle-control" title="Show/Hide Live HUD Reference Iframe">
+						<input type="checkbox" v-model="showLiveHUDReference">
+						<span>📺 Live HUD Reference</span>
+					</label>
 				</div>
 				
 				<div class="grid-size-selector" style="display: flex; align-items: center; gap: 8px;">
@@ -79,7 +83,7 @@
 					/>
 					
 					<!-- Live HUD Overlay Frame -->
-					<iframe src="/hud/?transparent" class="hud-bg"></iframe>
+					<iframe v-if="showLiveHUDReference" src="/hud/?transparent" class="hud-bg"></iframe>
 					
 					<!-- Technical Alignment Grid -->
 					<div v-if="showGrid" class="tech-grid"></div>
@@ -104,160 +108,133 @@
 					</div>
 					
 					<!-- Draggable High-Fidelity Elements -->
-					<div 
-						v-for="el in sortedElements" 
-						:key="el.def.id"
-						:class="[
-							'hud-el', 
-							{ 
-								'--active': selectedId === el.def.id, 
-								'--hidden': !el.visible,
-								'--outside-safe': showSafeArea && checkOutsideSafe(el),
-								'--colliding': getCollidingElements(el).length > 0
-							}
-						]"
-						:style="{
-							top: `${el.top}px`,
-							left: `${el.left}px`,
-							width: `${el.w}px`,
-							height: `${el.h}px`
-						}"
-						@mousedown.stop="startDrag($event, el, 'move')"
-					>
-						<div class="mock-content" :style="{ transformOrigin: getTransformOrigin(el.def.anchor.h) }">
+					<template v-if="!showLiveHUDReference">
+						<div 
+							v-for="el in sortedElements" 
+							:key="el.def.id"
+							:class="[
+								'hud-el', 
+								{ 
+									'--active': selectedId === el.def.id, 
+									'--hidden': !el.visible,
+									'--outside-safe': showSafeArea && checkOutsideSafe(el),
+									'--colliding': getCollidingElements(el).length > 0
+								}
+							]"
+							:style="{
+								top: `${el.top}px`,
+								left: `${el.left}px`,
+								width: `${el.w}px`,
+								height: `${el.h}px`
+							}"
+							@mousedown.stop="startDrag($event, el, 'move')"
+						>
+							<div class="mock-content" :style="{ transformOrigin: getTransformOrigin(el.def.anchor.h) }">
+								
+								<!-- 1. TOP BAR -->
+								<div v-if="el.def.id === 'top-bar'" class="mock-top-bar">
+									<div class="mock-top-bar-team mock-team-ct">
+										<span class="team-name">CT</span>
+									</div>
+									<div class="mock-top-bar-center">
+										<span class="timer">TOP BAR</span>
+									</div>
+									<div class="mock-top-bar-team mock-team-t">
+										<span class="team-name">T</span>
+									</div>
+								</div>
+
+								<!-- 2. RADAR -->
+								<div v-else-if="el.def.id === 'radar'" class="mock-radar">
+									<div class="radar-plate">
+										<div class="radar-grid-vertical"></div>
+										<div class="radar-grid-horizontal"></div>
+									</div>
+									<div class="mock-label-overlay">RADAR</div>
+								</div>
+
+								<!-- 3. LEFT SIDEBAR -->
+								<div v-else-if="el.def.id === 'sidebar-left'" class="mock-sidebar --left">
+									<div v-for="i in 5" :key="i" class="mock-player-card">
+										<div class="hp-bar" style="width: 100%;"></div>
+										<span class="player-name">CT Player {{ i }}</span>
+									</div>
+								</div>
+
+								<!-- 4. RIGHT SIDEBAR -->
+								<div v-else-if="el.def.id === 'sidebar-right'" class="mock-sidebar --right">
+									<div v-for="i in 5" :key="i" class="mock-player-card">
+										<span class="player-name">T Player {{ i }}</span>
+										<div class="hp-bar" style="width: 100%;"></div>
+									</div>
+								</div>
+
+								<!-- 5. FOCUSED PLAYER -->
+								<div v-else-if="el.def.id === 'focused-player'" class="mock-focused-player">
+									<div class="player-details">
+										<div class="details-top" style="justify-content: center;">
+											<span class="player-name">FOCUSED PLAYER ACTIVE VIEW</span>
+										</div>
+										<div class="details-bottom">
+											<div class="hp-bar" style="width: 100%;"></div>
+										</div>
+									</div>
+								</div>
+
+								<!-- 6. PLAYERS ALIVE -->
+								<div v-else-if="el.def.id === 'players-alive'" class="mock-players-alive">
+									<div class="ct-alive">CT</div>
+									<div class="vs-label">ALIVE</div>
+									<div class="t-alive">T</div>
+								</div>
+
+								<!-- 7. EVENT BADGE -->
+								<div v-else-if="el.def.id === 'event-badge'" class="mock-event-badge">
+									<div class="text" style="align-items: center; width: 100%;">
+										<span class="title">EVENT BADGE</span>
+									</div>
+								</div>
+
+								<!-- 8. CURRENT MAP -->
+								<div v-else-if="el.def.id === 'current-map'" class="mock-current-map">
+									<div class="map-overlay" style="justify-content: center; background: rgba(0,0,0,0.5);">
+										<span class="map-name">CURRENT MAP</span>
+									</div>
+								</div>
+
+								<!-- 9. SLEEK MAPS -->
+								<div v-else-if="el.def.id === 'maps-sleek'" class="mock-maps-sleek">
+									<div class="veto-bar">
+										<span class="veto-item --active" style="width: 100%; border: none;">MAPS VETO</span>
+									</div>
+								</div>
+
+								<!-- 10. SPONSORS LEFT/RIGHT -->
+								<div v-else-if="el.def.id.startsWith('sponsor-')" class="mock-sponsor-panel" style="justify-content: center; align-items: center;">
+									<span class="title">SPONSOR SLOT</span>
+								</div>
+
+								<!-- FALLBACK WIREFRAME BOX -->
+								<div v-else class="mock-box" :style="{ backgroundColor: el.def.color }">
+									{{ el.def.label }}
+								</div>
+							</div>
 							
-							<!-- 1. TOP BAR -->
-							<div v-if="el.def.id === 'top-bar'" class="mock-top-bar">
-								<div class="mock-top-bar-team mock-team-ct">
-									<span class="team-name">CT TEAM</span>
-									<span class="score">12</span>
-								</div>
-								<div class="mock-top-bar-center">
-									<span class="timer">1:40</span>
-									<span class="round">Round 23</span>
-								</div>
-								<div class="mock-top-bar-team mock-team-t">
-									<span class="score">10</span>
-									<span class="team-name">T TEAM</span>
-								</div>
-							</div>
-
-							<!-- 2. RADAR -->
-							<div v-else-if="el.def.id === 'radar'" class="mock-radar">
-								<div class="radar-plate">
-									<div class="radar-sweep"></div>
-									<div class="radar-grid-vertical"></div>
-									<div class="radar-grid-horizontal"></div>
-									<div class="radar-blip --ct" style="top: 32%; left: 38%;"></div>
-									<div class="radar-blip --t" style="top: 68%; left: 58%;"></div>
-									<div class="radar-blip --bomb" style="top: 48%; left: 48%;"></div>
-								</div>
-								<div class="mock-label-overlay">Radar</div>
-							</div>
-
-							<!-- 3. LEFT SIDEBAR -->
-							<div v-else-if="el.def.id === 'sidebar-left'" class="mock-sidebar --left">
-								<div v-for="i in 5" :key="i" class="mock-player-card">
-									<div class="hp-bar" style="width: 80%;"></div>
-									<span class="player-hp">80</span>
-									<span class="player-name">Player {{ i }}</span>
-									<div class="weapons">
-										<span class="weapon">🔫</span>
-										<span class="weapon">💣</span>
-									</div>
-								</div>
-							</div>
-
-							<!-- 4. RIGHT SIDEBAR -->
-							<div v-else-if="el.def.id === 'sidebar-right'" class="mock-sidebar --right">
-								<div v-for="i in 5" :key="i" class="mock-player-card">
-									<div class="weapons">
-										<span class="weapon">💣</span>
-										<span class="weapon">🔫</span>
-									</div>
-									<span class="player-name">Player {{ i + 5 }}</span>
-									<span class="player-hp">100</span>
-									<div class="hp-bar" style="width: 100%;"></div>
-								</div>
-							</div>
-
-							<!-- 5. FOCUSED PLAYER -->
-							<div v-else-if="el.def.id === 'focused-player'" class="mock-focused-player">
-								<div class="avatar-placeholder">👤</div>
-								<div class="player-details">
-									<div class="details-top">
-										<span class="player-name">FOCUSED_OBSERVER</span>
-										<span class="player-weapon">AK-47</span>
-									</div>
-									<div class="details-bottom">
-										<div class="hp-bar" style="width: 85%;"></div>
-										<span class="health-armor">❤️ 85  🛡️ 100</span>
-										<span class="ammo">30 / 90</span>
-									</div>
-								</div>
-							</div>
-
-							<!-- 6. PLAYERS ALIVE -->
-							<div v-else-if="el.def.id === 'players-alive'" class="mock-players-alive">
-								<div class="ct-alive">5 ALIVE</div>
-								<div class="vs-label">VS</div>
-								<div class="t-alive">4 ALIVE</div>
-							</div>
-
-							<!-- 7. EVENT BADGE -->
-							<div v-else-if="el.def.id === 'event-badge'" class="mock-event-badge">
-								<img class="logo" src="/hud/img/branding/logo-ubg.png" alt="Logo" />
-								<div class="text">
-									<span class="title">EON Broadcast</span>
-									<span class="subtitle">Live Stage HUD</span>
-								</div>
-							</div>
-
-							<!-- 8. CURRENT MAP -->
-							<div v-else-if="el.def.id === 'current-map'" class="mock-current-map">
-								<div class="map-bg">de_inferno</div>
-								<div class="map-overlay">
-									<span class="map-name">de_inferno</span>
-									<span class="series-score">CT 1 - 0 T</span>
-								</div>
-							</div>
-
-							<!-- 9. SLEEK MAPS -->
-							<div v-else-if="el.def.id === 'maps-sleek'" class="mock-maps-sleek">
-								<div class="veto-bar">
-									<span class="veto-item --picked">Inferno</span>
-									<span class="veto-item --picked">Mirage</span>
-									<span class="veto-item --active">Nuke</span>
-									<span class="veto-item">Anubis</span>
-								</div>
-							</div>
-
-							<!-- 10. SPONSORS LEFT/RIGHT -->
-							<div v-else-if="el.def.id.startsWith('sponsor-')" class="mock-sponsor-panel">
-								<span class="title">Eon Broadcast Partner</span>
-								<span class="subtitle">Official Tournament Sponsor</span>
-							</div>
-
-							<!-- FALLBACK WIREFRAME BOX -->
-							<div v-else class="mock-box" :style="{ backgroundColor: el.def.color }">
-								{{ el.def.label }}
-							</div>
+							<!-- Resize Handles -->
+							<template v-if="el.def.resizable && selectedId === el.def.id">
+								<div 
+									class="resize-handle --x" 
+									:style="{ [el.def.anchor.h === 'left' || el.def.anchor.h === 'center' ? 'right' : 'left']: '-6px' }"
+									@mousedown.stop="startDrag($event, el, 'resize-x')"
+								></div>
+								<div 
+									v-if="!el.def.keepAspect"
+									class="resize-handle --y" 
+									@mousedown.stop="startDrag($event, el, 'resize-y')"
+								></div>
+							</template>
 						</div>
-						
-						<!-- Resize Handles -->
-						<template v-if="el.def.resizable && selectedId === el.def.id">
-							<div 
-								class="resize-handle --x" 
-								:style="{ [el.def.anchor.h === 'left' || el.def.anchor.h === 'center' ? 'right' : 'left']: '-6px' }"
-								@mousedown.stop="startDrag($event, el, 'resize-x')"
-							></div>
-							<div 
-								v-if="!el.def.keepAspect"
-								class="resize-handle --y" 
-								@mousedown.stop="startDrag($event, el, 'resize-y')"
-							></div>
-						</template>
-					</div>
+					</template>
 				</div>
 			</div>
 
@@ -283,8 +260,9 @@
 						<div style="display: flex; align-items: center; gap: 8px;">
 							<span v-if="el.visible && getCollidingElements(el).length > 0" title="Collision detected" style="font-size: 0.75rem;">💥</span>
 							<span v-else-if="el.visible && showSafeArea && checkOutsideSafe(el)" title="Outside Safe Area" style="font-size: 0.75rem;">⚠️</span>
-							<button 
-								class="btn-icon" 
+							<button
+								v-if="el.def.visibleKey"
+								class="btn-icon"
 								@click.stop="toggleVisibility(el)"
 								:title="el.visible ? 'Hide' : 'Show'"
 							>
@@ -403,6 +381,7 @@
 			</aside>
 		</div>
 	</div>
+</template>
 
 <script>
 import { state, actions } from '/config/store.js'
@@ -493,8 +472,7 @@ const DEFS = [
 		baseW: 210, baseH: 20,
 		anchor: { v: 'top', h: 'center' },
 		props: [ { key: 'layout.mapsSleek.top', edge: 'top' }, { key: 'layout.mapsSleek.left', edge: 'left' } ],
-		resizable: true, sizeKey: 'style.mapsSleek.scale', sizeUnit: '',
-		visibleKey: 'layout.maps.visible'
+		resizable: true, sizeKey: 'style.mapsSleek.scale', sizeUnit: ''
 	},
 	{
 		id: 'event-badge', label: 'Event Badge',
@@ -528,6 +506,7 @@ export default {
 			showCenterLines: true,
 			showSafeArea: true,
 			smartGuidesEnabled: true,
+			showLiveHUDReference: false,
 			activeSnapX: null,
 			activeSnapY: null
 		}
@@ -666,7 +645,15 @@ export default {
 
 				if (def.anchor.h === 'left') left = positions.left ?? 0
 				else if (def.anchor.h === 'right') left = VP_W - (positions.right ?? 0) - w
-				else left = (VP_W - w) / 2
+				else {
+					// center anchor: if a left prop has a saved value, it is the center X (HUD uses translateX(-50%))
+					const leftProp = def.props.find(p => p.edge === 'left')
+					if (leftProp && state.options[leftProp.key] != null) {
+						left = positions.left - w / 2
+					} else {
+						left = (VP_W - w) / 2
+					}
+				}
 
 				const visibleVal = state.options[def.visibleKey]
 				const visible = visibleVal !== false && visibleVal !== 'none'
@@ -880,9 +867,9 @@ export default {
 				let val = 0
 				if (prop.edge === 'top') val = el.top
 				else if (prop.edge === 'bottom') val = VP_H - el.top - el.h
-				else if (prop.edge === 'left') val = el.left
+				else if (prop.edge === 'left') val = (el.def.anchor.h === 'center') ? el.left + el.w / 2 : el.left
 				else if (prop.edge === 'right') val = VP_W - el.left - el.w
-				
+
 				const remVal = (val / this.remPx).toFixed(2) + 'rem'
 				state.options[prop.key] = remVal
 				partial[prop.key] = remVal
@@ -1253,7 +1240,7 @@ export default {
 			let val = 0
 			if (prop.edge === 'top') val = el.top
 			else if (prop.edge === 'bottom') val = VP_H - el.top - el.h
-			else if (prop.edge === 'left') val = el.left
+			else if (prop.edge === 'left') val = (el.def.anchor.h === 'center') ? el.left + el.w / 2 : el.left
 			else if (prop.edge === 'right') val = VP_W - el.left - el.w
 			return (val / this.remPx).toFixed(2) + 'rem'
 		},

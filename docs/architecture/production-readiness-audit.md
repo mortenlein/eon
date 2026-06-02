@@ -1,4 +1,4 @@
-# Eon Broadcast Platform: Production-Readiness Audit
+# Eon Platform: Production-Readiness Audit
 
 This document presents a comprehensive production-readiness audit of the Eon Counter-Strike 2 broadcast operations stack. It assesses Eon's architectural stability, runtime resilience, configuration governance, visual safety, and operational usability under high-stakes live tournament conditions.
 
