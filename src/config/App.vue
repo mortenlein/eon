@@ -72,6 +72,7 @@ import SponsorsEditor from '/config/components/SponsorsEditor.vue'
 import ThemeDesigner from '/config/components/ThemeDesigner.vue'
 import PackagesEditor from '/config/components/PackagesEditor.vue'
 import PortabilityEditor from '/config/components/PortabilityEditor.vue'
+import TeamDiagnostics from '/config/components/TeamDiagnostics.vue'
 
 const iconPaths = {
 	live: ['M6 12h12', 'M12 6v12', 'M8.5 8.5h7v7h-7z'],
@@ -83,6 +84,7 @@ const iconPaths = {
 	options: ['M12 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8', 'M12 2v3', 'M12 19v3', 'M4.93 4.93l2.12 2.12', 'M16.95 16.95l2.12 2.12', 'M2 12h3', 'M19 12h3', 'M4.93 19.07l2.12-2.12', 'M16.95 7.05l2.12-2.12'],
 	packages: ['M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z', 'M3.27 6.96L12 12.01l8.73-5.05', 'M12 22.08V12'],
 	portability: ['M16 3l4 4l-4 4', 'M20 7h-9', 'M8 21l-4 -4l4 -4', 'M4 17h9'],
+	diagnostics: ['M12 22s8-4 8-10V5l-8-3l-8 3v7c0 6 8 10 8 10', 'M12 8v4', 'M12 16h.01'],
 }
 
 const NavIcon = {
@@ -118,6 +120,7 @@ export default {
 				{ id: 'sponsors', label: 'Sponsors', icon: 'sponsors', component: SponsorsEditor },
 				{ id: 'theme-designer', label: 'Theme Designer', icon: 'options', component: ThemeDesigner },
 				{ id: 'packages', label: 'Packages', icon: 'packages', component: PackagesEditor },
+				{ id: 'team-diagnostics', label: 'Team Diagnostics', icon: 'diagnostics', component: TeamDiagnostics },
 				{ id: 'options', label: 'HUD Options', icon: 'options', component: OptionsEditor },
 				{ id: 'portability', label: 'Import / Export', icon: 'portability', component: PortabilityEditor },
 			]

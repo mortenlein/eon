@@ -110,7 +110,9 @@ const getMockMatch = () => ({
 	currentMap: { name: 'Anubis', image: '/hud/img/maps/de_anubis.png', homeScore: 9, awayScore: 8, finished: false }
 })
 
-const getBundle = async (matchId, teamId = null) => {
+export const getKomplettligaenConfig = readConfig
+
+export const getKomplettligaenBundle = async (matchId, teamId = null) => {
 	// If UI Dev Mode mock match
 	if ((!matchId || String(matchId).startsWith('mock-')) && isUiDevMode) {
 		return {
@@ -261,7 +263,7 @@ export const registerKomplettligaenRoutes = (router, websocket) => {
 		const config = await readConfig()
 		context.body = {
 			config,
-			data: await getBundle(config.matchId, context.query.teamId),
+			data: await getKomplettligaenBundle(config.matchId, context.query.teamId),
 		}
 	})
 
@@ -273,7 +275,7 @@ export const registerKomplettligaenRoutes = (router, websocket) => {
 			return
 		}
 
-		context.body = await getBundle(matchId, context.query.teamId)
+		context.body = await getKomplettligaenBundle(matchId, context.query.teamId)
 	})
 
 	router.post('/config/komplettligaen/refresh', async (context) => {

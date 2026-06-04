@@ -12,6 +12,7 @@ import { initSettings, getSettings, getThemeTree } from './settings.js'
 import { registerConfigRoutes } from './config.js'
 import { registerDependencyRoutes } from './dependencies.js'
 import { registerGsiRoutes } from './gsi.js'
+import { registerDiagnosticsRoutes } from './diagnostics.js'
 import { registerHudRoutes, concatStaticFileFromThemeTreeRecursively } from './hud.js'
 import { registerKomplettligaenRoutes } from './komplettligaen.js'
 import { registerLicensesRoutes } from './licenses.js'
@@ -60,6 +61,7 @@ const run = async () => {
 	// 2. Initialize principal router for API routes
 	const router = new KoaRouter()
 	registerConfigRoutes(router, websocket)
+	registerDiagnosticsRoutes(router)
 	registerDependencyRoutes(router)
 	registerGsiRoutes(router, websocket)
 	registerHudRoutes(router)
