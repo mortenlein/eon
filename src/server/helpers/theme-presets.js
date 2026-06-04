@@ -10,7 +10,6 @@ export const EVENT_THEME_PRESETS = [
 			name: 'Eon Championship 2026',
 			subtitle: 'LIVE Broadcast HUD',
 			logo: '/hud/img/branding/logo-ubg.png',
-			sponsorFlavor: 'Championship Telemetry',
 			accentColor: '#58a6ff'
 		},
 		tokens: {
@@ -39,7 +38,6 @@ export const EVENT_THEME_PRESETS = [
 			name: 'Eon Winter Cup',
 			subtitle: 'Ice & Steel Division',
 			logo: '/hud/img/branding/logo-ubg.png',
-			sponsorFlavor: 'Precision Play',
 			accentColor: '#3498db'
 		},
 		tokens: {
@@ -68,7 +66,6 @@ export const EVENT_THEME_PRESETS = [
 			name: 'Eon LAN Arena',
 			subtitle: 'Local Area Network Tournament',
 			logo: '/hud/img/branding/logo-ubg.png',
-			sponsorFlavor: 'Local Hero Support',
 			accentColor: '#ff5a00'
 		},
 		tokens: {
@@ -97,7 +94,6 @@ export const EVENT_THEME_PRESETS = [
 			name: 'Eon Championship Finals',
 			subtitle: 'The Grand Finale 2026',
 			logo: '/hud/img/branding/logo-ubg.png',
-			sponsorFlavor: 'Champions Arena',
 			accentColor: '#d4af37'
 		},
 		tokens: {
@@ -126,7 +122,6 @@ export const EVENT_THEME_PRESETS = [
 			name: 'Minimal League',
 			subtitle: 'Clean View Overlays',
 			logo: '/hud/img/branding/logo-ubg.png',
-			sponsorFlavor: 'Sleek Support',
 			accentColor: '#7f8c8d'
 		},
 		tokens: {
@@ -155,7 +150,6 @@ export const EVENT_THEME_PRESETS = [
 			name: 'Eon Cyber Arena',
 			subtitle: 'Synthwave Night Division',
 			logo: '/hud/img/branding/logo-ubg.png',
-			sponsorFlavor: 'Hyper Reality Sponsor',
 			accentColor: '#ff007f'
 		},
 		tokens: {
@@ -184,7 +178,6 @@ export const EVENT_THEME_PRESETS = [
 			name: 'Eon Local Club Cup',
 			subtitle: 'Grassroots Championship',
 			logo: '/hud/img/branding/logo-ubg.png',
-			sponsorFlavor: 'Club Supporter',
 			accentColor: '#2ecc71'
 		},
 		tokens: {

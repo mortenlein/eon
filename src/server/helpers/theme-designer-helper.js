@@ -241,16 +241,25 @@ export function applyThemeToOptions(themeId) {
 			'series.name.center': theme.event.name,
 			'series.name.left': theme.event.subtitle,
 			'series.logoUrl': theme.event.logo,
-			'sponsors.left.title': theme.event.sponsorFlavor,
-			'sponsors.right.title': theme.event.sponsorFlavor
 		}
-		
+
 		for (const [key, val] of Object.entries(mapping)) {
 			if (val !== undefined && val !== null) {
 				if (!masterConfig.options[key]) {
 					masterConfig.options[key] = {}
 				}
 				masterConfig.options[key].value = val
+			}
+		}
+
+		// Only write sponsor titles when sponsorFlavor is explicitly provided and non-empty.
+		// Built-in presets omit sponsorFlavor to prevent fake sponsor panels from appearing.
+		if (theme.event.sponsorFlavor) {
+			for (const sponsorKey of ['sponsors.left.title', 'sponsors.right.title']) {
+				if (!masterConfig.options[sponsorKey]) {
+					masterConfig.options[sponsorKey] = {}
+				}
+				masterConfig.options[sponsorKey].value = theme.event.sponsorFlavor
 			}
 		}
 	}
