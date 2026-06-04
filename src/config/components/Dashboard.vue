@@ -335,7 +335,10 @@
 					<div class="session-panel-side" style="display: flex; flex-direction: column; gap: 20px;">
 						<!-- Create Session Form -->
 						<div style="background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 16px;">
-							<h3 style="font-size: 0.9rem; font-weight: 600; color: #adbac7; margin: 0 0 12px 0; text-transform: uppercase;">Create Match Session</h3>
+							<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+								<h3 style="font-size: 0.9rem; font-weight: 600; color: #adbac7; margin: 0; text-transform: uppercase;">Create Match Session</h3>
+								<button class="btn-ghost" style="padding: 3px 8px; font-size: 0.72rem;" @click="autofillFromMatch" :disabled="sessionLoading || !komplettligaen.matchId" title="Fill from configured KL match">Fill from KL Match</button>
+							</div>
 							<div class="session-form">
 								<div class="form-row">
 									<div>
@@ -526,6 +529,7 @@ export default {
 			komplettligaenStatus: '',
 			komplettligaenError: false,
 			cacheStatus: null, // Holds cache diagnostics (Phase 13)
+			komplettligaenMatchData: null, // Last fetched KL match (for session autofill)
 			sessionsList: [],
 			activeSessionData: null,
 			activeTimeline: [],
@@ -627,6 +631,7 @@ export default {
 				const data = await res.json()
 				if (!res.ok || data.error) throw new Error(data.error || 'Fetch failed')
 				this.komplettligaenStatus = `${data.match.home.name} vs ${data.match.away.name}`
+				this.komplettligaenMatchData = data.match
 				await this.loadCacheStatus()
 			} catch (err) {
 				this.komplettligaenStatus = err.message || 'Fetch failed'
@@ -741,6 +746,34 @@ export default {
 		previewOption(key, value) {
 			state.options[key] = value
 			actions.broadcast(key, value)
+		},
+		async autofillFromMatch() {
+			let match = this.komplettligaenMatchData
+			if (!match) {
+				if (!this.komplettligaen.matchId) {
+					this.sessionError = 'No KL match configured. Enter a GG Arena Match ID above first.'
+					return
+				}
+				this.sessionLoading = true
+				this.sessionError = ''
+				try {
+					const res = await fetch(`/api/komplettligaen/preview?matchId=${encodeURIComponent(this.komplettligaen.matchId)}`)
+					const data = await res.json()
+					if (!res.ok || data.error) throw new Error(data.error || 'Fetch failed')
+					match = data.match
+					this.komplettligaenMatchData = match
+				} catch (err) {
+					this.sessionError = `Could not fetch KL match: ${err.message}`
+					return
+				} finally {
+					this.sessionLoading = false
+				}
+			}
+			this.sessionForm.homeTeam = match.home?.name || ''
+			this.sessionForm.awayTeam = match.away?.name || ''
+			this.sessionForm.eventName = match.division || 'Komplettligaen'
+			if (match.bestOf) this.sessionForm.format = `BO${match.bestOf}`
+			this.sessionForm.externalMatchId = String(match.id || '')
 		},
 		async loadSessions() {
 			try {

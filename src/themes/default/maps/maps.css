@@ -108,3 +108,17 @@
 .map-card.--current .map-status {
 	color: var(--counter-terrorists-fill);
 }
+
+.map-card.--placeholder .map-thumb {
+	filter: grayscale(1) opacity(0.4);
+}
+
+.map-card.--placeholder .map-name {
+	color: rgba(255, 255, 255, 0.3);
+	font-style: italic;
+}
+
+.map-card.--placeholder .map-status {
+	color: rgba(255, 255, 255, 0.25);
+	font-style: italic;
+}

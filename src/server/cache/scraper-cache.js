@@ -60,10 +60,8 @@ export async function writeCache(cacheName, payload, source = 'api') {
 		try {
 			// Attempt to atomically rename/move the temp file to the final destination
 			await fs.rename(tempPath, filePath);
-		} catch (renameErr) {
-			// On Windows, fs.rename can fail if the destination file exists and is locked/has open handles.
-			// So try unlinking the destination first, and then rename the temp file.
-			console.warn(`[Cache Warning] Atomic rename failed for "${cacheName}": ${renameErr.message}. Attempting delete-and-rename fallback.`);
+		} catch (_renameErr) {
+			// Windows EPERM: destination file has open handles; use delete-and-rename fallback.
 			try {
 				await fs.unlink(filePath);
 			} catch (unlinkErr) {
@@ -72,6 +70,7 @@ export async function writeCache(cacheName, payload, source = 'api') {
 				}
 			}
 			await fs.rename(tempPath, filePath);
+			// Fallback succeeded — no warning needed.
 		}
 		return true;
 	} catch (err) {

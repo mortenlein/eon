@@ -1111,7 +1111,7 @@ body {
 
 .kl-games-lists .game {
 	display: grid;
-	grid-template-columns: 48px minmax(0, 1fr) 46px;
+	grid-template-columns: 48px minmax(0, 1fr) 64px;
 	align-items: center;
 	gap: 6px;
 	min-height: 23px;
@@ -1141,9 +1141,11 @@ body {
 
 .kl-games-lists .game strong {
 	justify-self: end;
+	overflow: hidden;
 	font-size: 12px;
 	font-weight: 950;
 	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
 }
 
 .result {
@@ -1288,7 +1290,7 @@ body {
 
 .fixture-game {
 	display: grid;
-	grid-template-columns: 74px 34px minmax(0, 1fr) 58px;
+	grid-template-columns: 74px 34px minmax(0, 1fr) 70px;
 	align-items: center;
 	gap: 9px;
 	min-height: 42px;
@@ -1323,10 +1325,12 @@ body {
 
 .fixture-game .score {
 	justify-self: end;
+	overflow: hidden;
 	color: #f7fbff;
 	font-size: 16px;
 	font-weight: 950;
 	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
 }
 
 /* Win Probability Graph */
