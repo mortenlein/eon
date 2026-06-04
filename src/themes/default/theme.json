@@ -507,6 +507,12 @@
                                                              "label":  "LAN badge title size; e.g. `0.98rem`",
                                                              "value":  "0.98rem"
                                                          },
+                    "style.eventBadge.titleSize":  {
+                                                       "type":  "text",
+                                                       "section":  "Event Badge",
+                                                       "label":  "Event Badge title font size (e.g. 0.98rem, 1.4rem)",
+                                                       "value":  "0.98rem"
+                                                   },
                     "css.lan66-event-badge-meta-size":  {
                                                             "type":  "text",
                                                             "section":  "HUD Layout",
