@@ -9,6 +9,10 @@ export const handleState = (body) => {
 		additionalState.unixTimestamp = body.unixTimestamp
 	}
 
+	if (body.uiDevMode !== undefined) {
+		additionalState.uiDevMode = body.uiDevMode
+	}
+
 	if (body.bombsites) Object.assign(bombsites, body.bombsites)
 	if (body.radars) Object.assign(radars, body.radars)
 

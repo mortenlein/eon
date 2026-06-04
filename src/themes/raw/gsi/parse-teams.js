@@ -61,22 +61,23 @@ const makeTeam = (side, gsiTeamObject, teamNameOverrides) => {
 export const parseTeams = () => {
 	const teamNameOverrides = getTeamNameOverrides()
 
+	const getSortKey = (team) => {
+		const firstSlot = team.players?.[0]?.observerSlot
+		if (firstSlot !== undefined && firstSlot !== null) return firstSlot
+		return team.side === 2 ? 1 : 10
+	}
+
 	const sorted = [
-		makeTeam(2, gsiState.map.team_t, teamNameOverrides),
-		makeTeam(3, gsiState.map.team_ct, teamNameOverrides),
-	].sort((a, b) => a.players[0]?.observerSlot - b.players[0]?.observerSlot)
+		makeTeam(2, gsiState.map?.team_t, teamNameOverrides),
+		makeTeam(3, gsiState.map?.team_ct, teamNameOverrides),
+	].sort((a, b) => getSortKey(a) - getSortKey(b))
 
 	// Simple team name overrides (takes priority over everything)
 	const leftName = options['teams.leftTeamName']?.trim()
 	const rightName = options['teams.rightTeamName']?.trim()
 
-	console.log('[Teams] Overrides:', { leftName, rightName });
-	console.log('[Teams] Before Overrides:', sorted.map(t => t.name));
-
 	if (leftName && sorted[0]) sorted[0].name = leftName
 	if (rightName && sorted[1]) sorted[1].name = rightName
-
-	console.log('[Teams] After Overrides:', sorted.map(t => t.name));
 
 	return sorted
 }

@@ -1,4 +1,5 @@
 {
+	"name": "raw",
 	"options": {
 		"preferences.isCsgo": {
 			"type": "boolean",
@@ -39,31 +40,31 @@
 		"teams.teamNameOverrides": {
 			"type": "textarea",
 			"section": "Teams",
-			"label": "List of SteamID64s and team names for overrides; see https://github.com/drweissbrot/cs-hud/blob/master/docs/team-name-overrides.md"
+			"label": "Team name overrides"
 		},
  
 		"teams.playerNameOverrides": {
 			"type": "textarea",
 			"section": "Teams",
-			"label": "List of SteamID64s and their player name for overrides; see https://github.com/drweissbrot/cs-hud/blob/master/docs/player-name-overrides.md"
+			"label": "Player name overrides"
 		},
  
 		"teams.playerSubtitleOverrides": {
 			"type": "textarea",
 			"section": "Teams",
-			"label": "List of SteamID64s and subtitle text shown below player names, e.g. real names"
+			"label": "Player subtitle overrides"
 		},
  
 		"teams.hiddenPlayers": {
 			"type": "textarea",
 			"section": "Teams",
-			"label": "List of names or SteamID64s of players that should not be shown in the HUD (e.g. coaches); see https://github.com/drweissbrot/cs-hud/blob/master/docs/hiding-players.md"
+			"label": "Hidden players"
 		},
 
 		"teams.hideCoachesByName": {
 			"type": "boolean",
 			"section": "Teams",
-			"label": "Hide all playes who have the word \"coach\" in their nickname; see https://github.com/drweissbrot/cs-hud/blob/master/docs/hiding-players.md"
+			"label": "Hide players with \"coach\" in their name"
 		}
 	}
 }

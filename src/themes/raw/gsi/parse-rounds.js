@@ -24,7 +24,7 @@ export const parseRounds = () => {
 		: mpMaxrounds + Math.floor((gsiState.map.round - mpMaxrounds) / mpOvertimeMaxrounds) * mpOvertimeMaxrounds
 
 	return Object.entries(gsiState.map.round_wins || {}).map(([roundNumber, reason]) => {
-		const winningSide = reason.startsWith('ct_win') ? 3 : 2
+		const winningSide = reason.startsWith('ct_win') ? 'CT' : 'T'
 
 		return {
 			reason,
@@ -32,7 +32,7 @@ export const parseRounds = () => {
 
 			plainReason: getPlainReason(reason),
 			roundNumber: Number(roundNumber) + roundNumberOffset,
-			winningTeam: teams.find((team) => team.side === winningSide),
+			winningTeam: teams.find((team) => team.side === (winningSide === 'CT' ? 3 : 2)),
 		}
 	})
 }

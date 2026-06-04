@@ -13,12 +13,15 @@ import { registerConfigRoutes } from './config.js'
 import { registerDependencyRoutes } from './dependencies.js'
 import { registerGsiRoutes } from './gsi.js'
 import { registerHudRoutes, concatStaticFileFromThemeTreeRecursively } from './hud.js'
+import { registerKomplettligaenRoutes } from './komplettligaen.js'
 import { registerLicensesRoutes } from './licenses.js'
 import { registerRadarRoutes } from './radar.js'
 import { registerVersionRoutes } from './version.js'
+import { registerSessionRoutes } from './sessions/session-routes.js'
 import { Websocket } from './websocket.js'
 import send from 'koa-send'
 import { builtinRootDirectory } from './helpers/paths.js'
+import { isUiDevMode } from './dev-mode.js'
 
 Error.stackTraceLimit = 64
 
@@ -26,6 +29,7 @@ const run = async () => {
 	await initSettings()
 	const { settings } = await getSettings()
 
+	const host = process.env.HOST || settings.host || '0.0.0.0'
 	const host = process.env.HOST || settings.host || '0.0.0.0'
 	const port = process.env.PORT || settings.port || 31982
 
@@ -37,6 +41,7 @@ const run = async () => {
 	app.use(bodyParser({
 		strict: true,
 		enableTypes: ['json'],
+		jsonLimit: '12mb',
 	}))
 
 	const websocket = new Websocket(server)
@@ -59,9 +64,11 @@ const run = async () => {
 	registerDependencyRoutes(router)
 	registerGsiRoutes(router, websocket)
 	registerHudRoutes(router)
+	registerKomplettligaenRoutes(router, websocket)
 	registerLicensesRoutes(router)
 	registerRadarRoutes(router)
 	registerVersionRoutes(router)
+	registerSessionRoutes(router)
 
 	app.use(router.routes())
 	app.use(router.allowedMethods())
@@ -79,8 +86,9 @@ const run = async () => {
 				await send(context, file, { root })
 				if (context.body) {
 					context.status = 200
-					if (file.endsWith('.js')) context.type = 'application/javascript'
-					if (file.endsWith('.css')) context.type = 'text/css'
+					if (file.endsWith('.vue')) context.type = 'text/plain'
+					else if (file.endsWith('.js')) context.type = 'application/javascript'
+					else if (file.endsWith('.css')) context.type = 'text/css'
 				}
 			} 
 			else if (urlPath.startsWith('/radar/')) {
@@ -100,6 +108,12 @@ const run = async () => {
 					context.body = Buffer.isBuffer(body[0]) ? Buffer.concat(body) : body.join('\n')
 					context.status = 200
 				}
+			}
+			else {
+				// Fallback to serving from the public directory
+				const root = join(builtinRootDirectory, 'public')
+				await send(context, urlPath.replace(/^\//, ''), { root })
+				if (context.body) context.status = 200
 			}
 		} catch (err) {
 			// Silent 404
@@ -127,6 +141,45 @@ const run = async () => {
 	} else {
 		console.info(`\n[Server] Bound to host: ${host}`)
 	}
+	if (isUiDevMode) {
+		console.info('UI dev mode enabled: serving static match state and ignoring live GSI posts.')
+	}
+
+	// 4. Graceful Shutdown & Unhandled Exception Logging
+	process.on('uncaughtException', (error) => {
+		console.error('[FATAL] Uncaught Exception:', error);
+		shutdown(1);
+	});
+
+	process.on('unhandledRejection', (reason, promise) => {
+		console.error('[FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+	});
+
+	const shutdown = (code = 0) => {
+		console.info('Shutting down Eon server cleanly...');
+		
+		try {
+			websocket.websocket.close(() => {
+				console.info('Websocket server closed.');
+				server.close(() => {
+					console.info('HTTP server closed.');
+					process.exit(code);
+				});
+			});
+		} catch (err) {
+			console.error('Error during graceful shutdown:', err);
+			process.exit(code);
+		}
+
+		// Force exit after timeout if closing hangs
+		setTimeout(() => {
+			console.warn('Shutdown timed out, forcing exit.');
+			process.exit(code);
+		}, 3000);
+	};
+
+	process.on('SIGINT', () => shutdown(0));
+	process.on('SIGTERM', () => shutdown(0));
 }
 
 run().then(() => {}).catch(console.error)

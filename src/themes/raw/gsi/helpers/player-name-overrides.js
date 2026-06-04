@@ -1,4 +1,5 @@
 import { options } from '/hud/core/state.js'
+import { getPlayerDisplayName } from '/hud/helpers/player-resolver.js'
 
 export const getPlayerNameOverrides = () => {
 	const playerNameOverrides = new Map()
@@ -17,7 +18,11 @@ export const getPlayerNameOverrides = () => {
 			|| ! segments[1]
 		) continue
 
-		playerNameOverrides.set(segments[0], segments.slice(1).join(' '))
+		const steamId = segments[0]
+		const overriddenName = getPlayerDisplayName(steamId, '', opt)
+		if (overriddenName) {
+			playerNameOverrides.set(steamId, overriddenName)
+		}
 	}
 
 	return playerNameOverrides

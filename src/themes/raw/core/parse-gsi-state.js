@@ -9,7 +9,20 @@ import { parseRounds } from '/hud/gsi/parse-rounds.js'
 import { parseTeams } from '/hud/gsi/parse-teams.js'
 
 export const parseGsiState = () => {
-	if (! gsiState?.map) return
+	if (! gsiState?.map) {
+		players.splice(0, players.length)
+		players.focused = undefined
+		teams.splice(0, teams.length)
+		grenades.splice(0, grenades.length)
+
+		// Clean dynamic objects reactively
+		Object.keys(bomb).forEach(key => delete bomb[key])
+		Object.keys(misc).forEach(key => delete misc[key])
+		Object.keys(map).forEach(key => delete map[key])
+		Object.keys(round).forEach(key => delete round[key])
+
+		return
+	}
 
 	players.splice(0, players.length, ...parsePlayers())
 	players.focused = gsiState.player?.steamid ? players.find((player) => player.steam64Id === gsiState.player.steamid) : undefined

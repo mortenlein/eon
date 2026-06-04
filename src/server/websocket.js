@@ -2,6 +2,7 @@ import { WebSocketServer, WebSocket } from 'ws'
 
 import { additionalState, gsiState } from './state.js'
 import { getSettings } from './settings.js'
+import { isUiDevMode } from './dev-mode.js'
 
 export class Websocket {
 	constructor(server) {
@@ -52,6 +53,7 @@ export class Websocket {
 		return {
 			additionalState,
 			gsiState,
+			uiDevMode: isUiDevMode,
 
 			bombsites: this.bombsitesCache,
 			options: this.optionsCache,
@@ -89,6 +91,7 @@ export class Websocket {
 		this.broadcastToWebsockets('gsi_update', {
 			gsiState,
 			additionalState,
+			uiDevMode: isUiDevMode,
 			unixTimestamp: Date.now(),
 		})
 	}

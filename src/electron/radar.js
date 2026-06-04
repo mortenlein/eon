@@ -6,6 +6,11 @@ app.on('ready', () => {
 		backgroundColor: '#212121',
 		width: 1280,
 		height: 720,
+		webPreferences: {
+			contextIsolation: true,
+			nodeIntegration: false,
+			sandbox: true,
+		},
 	})
 
 	browserWindow.loadURL(`http://${process.env.HOST || 'localhost'}:${process.env.PORT || 31982}/radar`)

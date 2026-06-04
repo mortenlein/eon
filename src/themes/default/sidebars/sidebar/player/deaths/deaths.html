@@ -1,0 +1,8 @@
+<Transition>
+	<div v-if="! $round.isFreezetime" class="deaths">
+		<div :class="['label', colorClass]">D</div>
+		<Digits digits="2" :value="player.deaths" />
+	</div>
+</Transition>
+
+
