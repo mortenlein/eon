@@ -268,6 +268,33 @@
                                                                              "section":  "Preferences",
                                                                              "label":  "Maximum HP that will be highlighted in red (e.g. 20)"
                                                                          },
+                    "preferences.roundResultBanner.enabled":  {
+                                                                  "type":  "boolean",
+                                                                  "value":  true,
+                                                                  "section":  "Preferences",
+                                                                  "label":  "Show round result banner after each round ends (replaces legacy round-won poster when enabled)"
+                                                              },
+                    "preferences.roundResultBanner.durationMs":  {
+                                                                     "type":  "number",
+                                                                     "fallback":  3500,
+                                                                     "section":  "Preferences",
+                                                                     "label":  "How long (ms) the round result banner stays visible (default 3500)"
+                                                                 },
+                    "preferences.roundResultBanner.position":  {
+                                                                   "type":  "select",
+                                                                   "section":  "Preferences",
+                                                                   "label":  "Round result banner position",
+                                                                   "options":  [
+                                                                                   "top-center",
+                                                                                   "center"
+                                                                               ]
+                                                               },
+                    "preferences.roundResultBanner.showReason":  {
+                                                                     "type":  "boolean",
+                                                                     "section":  "Preferences",
+                                                                     "label":  "Show round win reason on banner (Bomb defused, Elimination, etc.)",
+                                                                     "fallback":  true
+                                                                 },
                     "css.radar-width":  {
                                             "type":  "select",
                                             "section":  "Style Overrides",

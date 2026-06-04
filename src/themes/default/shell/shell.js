@@ -1,3 +1,4 @@
+import RoundResultBanner from '/hud/round-result-banner/round-result-banner.vue'
 import Corners from '/hud/corners/corners.vue'
 import FocusedPlayer from '/hud/focused-player/focused-player.vue'
 import MvpCard from '/hud/mvp-card/mvp-card.vue'
@@ -20,6 +21,7 @@ import { options } from '/hud/core/state.js'
 
 export default {
 	components: {
+		RoundResultBanner,
 		Corners,
 		FocusedPlayer,
 		MvpCard,

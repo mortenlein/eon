@@ -250,9 +250,9 @@
 			<WinProbGraph />
 		</div>
 		
-		<!-- Round Won Poster Overlay -->
+		<!-- Round Won Poster Overlay (legacy — suppressed when RoundResultBanner is enabled) -->
 		<Transition name="kl-fade">
-			<div v-if="$round.phase === 'over' && $round.winningSide" class="round-won-poster-overlay">
+			<div v-if="$round.phase === 'over' && $round.winningSide && !$opts['preferences.roundResultBanner.enabled']" class="round-won-poster-overlay">
 				<div :class="['round-won-poster-card', $round.winningSide === 'CT' ? '--ct' : '--t']">
 					<div class="glow-effect"></div>
 					<div class="poster-content">
@@ -274,6 +274,9 @@
 			</div>
 		</Transition>
 		
+		<!-- Round Result Banner — Layer 3: Informational Overlay -->
+		<RoundResultBanner v-if="$map.name" :match="komplettligaenMatch" />
+
 		<SvgFilters />
 		<Sponsors />
 
