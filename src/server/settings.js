@@ -33,8 +33,12 @@ export const normalizeSettingsOptions = (settings) => {
 	for (const [key, data] of Object.entries(settings.options)) {
 		const canonicalKey = LEGACY_TO_CANONICAL[key]
 		if (canonicalKey) {
-			// Trigger a one-time deprecation warning for the loaded legacy key
-			if (!warnedLegacyKeys.has(key)) {
+			// Only warn when the canonical key has no user-provided value yet.
+			// Suppresses noise from inherited legacy default definitions when userspace
+			// already uses the canonical key — while still warning for genuinely
+			// unresolved legacy keys (e.g. imported old configs).
+			const canonicalAlreadyHasValue = normalizedOptions[canonicalKey]?.value !== undefined
+			if (!warnedLegacyKeys.has(key) && !canonicalAlreadyHasValue) {
 				warnedLegacyKeys.add(key)
 				const meta = deprecatedMeta[key]
 				if (meta) {
