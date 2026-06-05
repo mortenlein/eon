@@ -9,6 +9,9 @@
 	font-size: 1.5rem;
 	font-weight: 750;
 	white-space: nowrap;
+	overflow: hidden;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
 }
 
 .label {
@@ -26,6 +29,8 @@
 .value {
 	min-width: 2ch;
 	text-align: right;
+	overflow: hidden;
+	text-overflow: clip;
 }
 
 .v-enter-active {

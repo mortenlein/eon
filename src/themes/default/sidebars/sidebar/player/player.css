@@ -93,6 +93,9 @@
 
 .hud-viewport.--style-classic,
 .hud-viewport.--style-compact {
+	--sidebar-kills-width: 5.1rem;
+	--sidebar-deaths-width: 5.1rem;
+	--sidebar-player-additional-stats-width: 16rem;
 	--sidebar-player-width: calc(
 		var(--sidebar-start-and-end-width) +
 		var(--sidebar-start-and-end-width) +

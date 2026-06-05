@@ -98,6 +98,49 @@ const makePlayer = ({
 	weapons: makeWeapons({ primary, secondary, grenades, bomb }),
 })
 
+const compactHudStressNames = [
+	'ultra_long_steam_override_entry_alpha_999',
+	'CounterSide Anchor With Extremely Long Name',
+	'ADR-300 Rating-2.49 Stat Stress Name',
+	'LAN66 Broadcast Layout Regression Sentinel',
+	'Name So Long It Must Ellipsize Cleanly',
+	'right_side_steam_override_entry_very_long',
+	'Counter-Strike Player With Sponsor Prefix',
+	'Three Digit ADR And Two Digit KDA Tester',
+	'Compact HUD Numeric Collision Detector',
+	'Final Long Player Name For Sidebar Stress',
+]
+
+const applyCompactHudStressFixture = (state, additionalState = null) => {
+	const players = Object.values(state.allplayers || {})
+	players.forEach((player, index) => {
+		player.name = compactHudStressNames[index] || player.name
+		player.match_stats.kills = 20 + index
+		player.match_stats.assists = 10 + (index % 9)
+		player.match_stats.deaths = 18 + (index % 8)
+		player.match_stats.rating = (2.49 - index * 0.08).toFixed(2)
+		player.match_stats.score = player.match_stats.kills * 2 + player.match_stats.assists
+		player.state.round_totaldmg = 120 + index * 11
+		player.state.money = 16000 - index * 700
+	})
+
+	if (additionalState?.roundDamages) {
+		const roundNumber = state.map?.round ?? 17
+		for (const player of players) {
+			additionalState.roundDamages[player.steamid] = {
+				...(additionalState.roundDamages[player.steamid] || {}),
+				[roundNumber]: 100 + (Number(player.observer_slot) || 0) * 17,
+			}
+		}
+	}
+
+	state.round.phase = 'freezetime'
+	state.phase_countdowns.phase = 'freezetime'
+	state.phase_countdowns.phase_ends_in = '12.0'
+	state.map.team_t.name = 'Terrorists'
+	state.map.team_ct.name = 'Counter-Terrorists'
+}
+
 export const getDevGsiState = () => {
 	const players = [
 		makePlayer({
@@ -262,7 +305,7 @@ export const getDevGsiState = () => {
 		}),
 	]
 
-	return {
+	const state = {
 		provider: {
 			name: 'Eon UI Dev Mode',
 			appid: 730,
@@ -345,6 +388,12 @@ export const getDevGsiState = () => {
 			},
 		},
 	}
+
+	if (process.env.EON_UI_STRESS_FIXTURE === 'compact-hud') {
+		applyCompactHudStressFixture(state)
+	}
+
+	return state
 }
 
 export const getDevAdditionalState = () => {
@@ -364,7 +413,7 @@ export const getDevAdditionalState = () => {
 		}
 	}
 
-	return {
+	const additionalState = {
 		lastKnownBombPlantedCountdown: {},
 		lastKnownMapName: 'de_mirage',
 		lastKnownPlayerObserverSlot,
@@ -376,4 +425,16 @@ export const getDevAdditionalState = () => {
 		roundKillStats: {},
 		mvpDisplay: null,
 	}
+
+	if (process.env.EON_UI_STRESS_FIXTURE === 'compact-hud') {
+		for (let index = 1; index <= 10; index++) {
+			const steamid = `765611980000000${String(index).padStart(2, '0')}`
+			additionalState.roundDamages[steamid] = {
+				...(additionalState.roundDamages[steamid] || {}),
+				17: 100 + (index - 1) * 17,
+			}
+		}
+	}
+
+	return additionalState
 }
