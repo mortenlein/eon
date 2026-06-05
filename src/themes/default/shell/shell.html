@@ -257,8 +257,8 @@
 					<div class="glow-effect"></div>
 					<div class="poster-content">
 						<img
-							v-if="winningTeamName"
-							:src="getTeamLogoPath(winningTeamName)"
+							v-if="winningTeamLogo"
+							:src="winningTeamLogo"
 							class="poster-team-logo"
 							alt=""
 							@error="posterLogoFailed = true"

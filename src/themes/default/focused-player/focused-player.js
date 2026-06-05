@@ -1,5 +1,6 @@
 import { teamColorClass } from '/hud/helpers/team-color-class.js'
 import { getTeamLogoPath } from '/hud/helpers/player-resolver.js'
+import { buildHudTeamIdentityContext, resolveTeamIdentities } from '/hud/helpers/team-identity-resolver.js'
 import { resolveOption } from '/hud/core/resolve-option.js'
 
 export default {
@@ -28,6 +29,21 @@ export default {
 
 		colorClass() {
 			return teamColorClass(this.player?.team)
+		},
+
+		resolvedTeamIdentity() {
+			if (!this.player?.team) return null
+			const context = buildHudTeamIdentityContext({
+				teams: this.$teams,
+				options: this.$opts,
+				match: this.$root?.komplettligaenMatch,
+			})
+			const resolved = resolveTeamIdentities(context)
+			return this.player.team.side === 3 ? resolved.teams.CT : resolved.teams.T
+		},
+
+		teamLogoSrc() {
+			return this.resolvedTeamIdentity?.final.logo || getTeamLogoPath(this.resolvedTeamIdentity?.final.name || this.player?.team?.name)
 		},
 
 		isLowHealth() {
@@ -83,6 +99,9 @@ export default {
 			handler() {
 				this.logoFailed = false
 			}
+		},
+		teamLogoSrc() {
+			this.logoFailed = false
 		}
 	},
 

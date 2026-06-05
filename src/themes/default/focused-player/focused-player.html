@@ -4,8 +4,8 @@
 			<div class="fp-main">
 				<div class="fp-identity">
 					<img
-						v-if="player.team?.name"
-						:src="getTeamLogoPath(player.team.name)"
+						v-if="teamLogoSrc"
+						:src="teamLogoSrc"
 						class="fp-team-logo"
 						alt=""
 						@error="logoFailed = true"
