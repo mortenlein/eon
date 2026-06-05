@@ -10,6 +10,8 @@ export const registerDependencyRoutes = (router) => {
 
 	serveFontsourceFont(router, 'noto-sans')
 	serveFontsourceFont(router, 'quantico')
+	serveFontsourceFont(router, 'space-grotesk')
+	serveFontsourceFont(router, 'jetbrains-mono')
 
 	router.get('/dependencies/vue3-sfc-loader-options.js', sendStaticFile('src/assets/vue3-sfc-loader-options.js'))
 }

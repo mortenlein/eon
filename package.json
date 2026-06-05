@@ -20,8 +20,10 @@
     "gsi:simulate": "node scripts/gsi-simulator.js"
   },
   "dependencies": {
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/noto-sans": "^5.2.10",
     "@fontsource/quantico": "^5.2.7",
+    "@fontsource/space-grotesk": "^5.2.10",
     "@koa/router": "^14.0.0",
     "koa": "^3.0.1",
     "koa-bodyparser": "^4.4.1",

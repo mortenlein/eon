@@ -1,25 +1,43 @@
 import { reactive, watch } from '/dependencies/vue.js'
+import { NAV_GROUP_BY_ITEM_ID, migrateLegacyCategory } from '/config/nav-config.js'
+
+const rawStoredCategory = localStorage.getItem('eon-config-category')
+const initialCategory = migrateLegacyCategory(rawStoredCategory)
 
 export const state = reactive({
 	// Configuration Data
 	options: {},
 	sections: [],
 	theme: 'default',
-	
+
 	// UI State
-	activeCategory: localStorage.getItem('eon-config-category') || 'dashboard',
+	activeCategory: initialCategory,
 	showAdvancedSettings: localStorage.getItem('eon-config-advanced') === 'true',
 	saveState: 'idle', // idle, saving, saved, error
-	alerts: [], // Caster Alerts
-	
+	lastSavedAt: null, // epoch ms, set by actions.save on success
+	alerts: [],        // Caster Alerts
+
 	// Sync State
 	socket: null,
 	isSynced: false,
 })
 
+// If we migrated from a legacy category id, rewrite localStorage immediately
+// so the next load skips the migration path.
+if (rawStoredCategory !== initialCategory) {
+	localStorage.setItem('eon-config-category', initialCategory)
+}
+
 // Persistence for UI preferences
 watch(() => state.activeCategory, (val) => localStorage.setItem('eon-config-category', val))
 watch(() => state.showAdvancedSettings, (val) => localStorage.setItem('eon-config-advanced', val))
+
+// Derived: nav group id for the currently active item. Computed by watcher so
+// it stays a plain reactive field consumable from templates without composition.
+state.activeGroup = NAV_GROUP_BY_ITEM_ID[state.activeCategory] || ''
+watch(() => state.activeCategory, (id) => {
+	state.activeGroup = NAV_GROUP_BY_ITEM_ID[id] || ''
+})
 
 function warnIfLegacy(key) {
 	if (!key) return
@@ -51,7 +69,7 @@ export const actions = {
 		try {
 			const res = await fetch('/config/options')
 			const json = await res.json()
-			
+
 			const options = {}
 			for (const opt of json) {
 				options[opt.key] = opt.value ?? opt.fallback ?? null
@@ -114,6 +132,7 @@ export const actions = {
 				body: JSON.stringify(payload),
 			})
 			state.saveState = 'saved'
+			state.lastSavedAt = Date.now()
 			setTimeout(() => { if (state.saveState === 'saved') state.saveState = 'idle' }, 2000)
 		} catch (err) {
 			state.saveState = 'error'
