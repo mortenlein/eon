@@ -13,7 +13,7 @@ The tokens, utility classes, and the `Chip` atom land together with the new shel
 | `src/config/styles/fonts.css` | Six `@import` lines pulling self-hosted `@fontsource` CSS. No external runtime requests. |
 | `src/config/styles/tokens.css` | `:root` variables prefixed `--eon-*`. |
 | `src/config/styles/components.css` | Tokenized `.eon-*` utility classes. |
-| `src/config/components/atoms/Chip.vue` | Pulsing status chip. The only SFC atom in 24A; others use the utility classes. |
+| `src/config/components/atoms/Chip.vue` | Pulsing status chip. The only SFC atom in 24A; others use the utility classes. Imported directly (`import Chip from '/config/components/atoms/Chip.vue'`) — no barrel until a second atom justifies one. |
 
 These three stylesheets are loaded once via `src/config/index.css` `@import` declarations, in the order `fonts → tokens → components`.
 

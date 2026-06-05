@@ -29,7 +29,7 @@
 <script>
 import { state } from '/config/store.js'
 import { NAV_GROUPS, ICON_PATHS } from '/config/nav-config.js'
-import { Chip } from '/config/components/atoms/index.js'
+import Chip from '/config/components/atoms/Chip.vue'
 import { useReadiness } from '/config/composables/useReadiness.js'
 
 const SCENE_META = {

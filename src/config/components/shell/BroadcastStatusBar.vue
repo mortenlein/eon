@@ -31,7 +31,7 @@
 
 <script>
 import { state } from '/config/store.js'
-import { Chip } from '/config/components/atoms/index.js'
+import Chip from '/config/components/atoms/Chip.vue'
 import { useReadiness } from '/config/composables/useReadiness.js'
 
 const SCENE_META = {
