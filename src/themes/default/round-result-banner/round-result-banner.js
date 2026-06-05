@@ -1,4 +1,5 @@
 import { getTeamLogoPath } from '/hud/helpers/player-resolver.js'
+import { buildHudTeamIdentityContext, resolveTeamIdentities } from '/hud/helpers/team-identity-resolver.js'
 
 const REASON_LABELS = {
 	'bomb-defused': 'Bomb defused',
@@ -95,8 +96,9 @@ export default {
 			this.seenRoundId = roundKey
 
 			this.winningSide = this.$round.winningSide
-			this.teamName = this._resolveTeamName()
-			this.teamLogo = this._resolveTeamLogo()
+			const winningIdentity = this._resolveWinningTeamIdentity()
+			this.teamName = winningIdentity?.final.name || this.winningSide
+			this.teamLogo = winningIdentity?.final.logo || null
 			this.winReason = this._deriveWinReason()
 			this.roundImportance = this._deriveRoundImportance()
 			this.narrativeScore = narrativeScoreFor(this.roundImportance)
@@ -107,71 +109,17 @@ export default {
 			this._timer = setTimeout(() => { this.visible = false }, this.durationMs)
 		},
 
-		_resolveTeamName() {
+		_resolveWinningTeamIdentity() {
 			const side = this.$round.winningSide
 			if (!side) return null
 
-			const numericSide = side === 'CT' ? 3 : 2
-			const teamIndex = this.$teams?.findIndex(t => t.side === numericSide) ?? -1
-			const team = teamIndex >= 0 ? this.$teams[teamIndex] : null
-
-			// 1. Config override — same priority as top-bar (already baked into team.name
-			//    by parseTeams, but check directly to be explicit)
-			const override = teamIndex === 0
-				? this.$opts['teams.leftTeamName']
-				: this.$opts['teams.rightTeamName']
-			if (override?.trim()) return override
-
-			// 2. KL/GG Arena match identity (prop, same data source as top-bar)
-			if (this.match) {
-				const isSwapped = this.$opts['preferences.topBar.swapScrapedTeams']
-				const homeName = this.match.home?.name
-				const awayName = this.match.away?.name
-
-				// Name-match path: CS2 team name matches KL team name (reliable when configured)
-				const gsiName = team?.name
-				if (!isGenericTeamName(gsiName) && gsiName === homeName) return homeName
-				if (!isGenericTeamName(gsiName) && gsiName === awayName) return awayName
-
-				// Index-based path: same mapping as top-bar (index 0 = home, 1 = away unless swapped)
-				if (teamIndex === 0) return (isSwapped ? awayName : homeName) || null
-				if (teamIndex === 1) return (isSwapped ? homeName : awayName) || null
-			}
-
-			// 3. Raw GSI name — only if it's a real identity, not a generic side label
-			const gsiName = team?.name
-			if (gsiName && !isGenericTeamName(gsiName)) return gsiName
-
-			// 4. Side placeholder
-			return side
-		},
-
-		_resolveTeamLogo() {
-			const side = this.$round.winningSide
-			if (!side) return null
-
-			const numericSide = side === 'CT' ? 3 : 2
-			const teamIndex = this.$teams?.findIndex(t => t.side === numericSide) ?? -1
-			const team = teamIndex >= 0 ? this.$teams[teamIndex] : null
-
-			if (this.match) {
-				const isSwapped = this.$opts['preferences.topBar.swapScrapedTeams']
-				const homeName = this.match.home?.name
-				const awayName = this.match.away?.name
-
-				const gsiName = team?.name
-				if (!isGenericTeamName(gsiName) && gsiName === homeName) return this.match.home?.logo || null
-				if (!isGenericTeamName(gsiName) && gsiName === awayName) return this.match.away?.logo || null
-
-				const [homeEntry, awayEntry] = isSwapped
-					? [this.match.away, this.match.home]
-					: [this.match.home, this.match.away]
-
-				if (teamIndex === 0) return homeEntry?.logo || null
-				if (teamIndex === 1) return awayEntry?.logo || null
-			}
-
-			return getTeamLogoPath(this.teamName)
+			const context = buildHudTeamIdentityContext({
+				teams: this.$teams,
+				options: this.$opts,
+				match: this.match,
+			})
+			const resolved = resolveTeamIdentities(context)
+			return side === 'CT' ? resolved.teams.CT : resolved.teams.T
 		},
 
 		_deriveWinReason() {
@@ -221,15 +169,6 @@ function narrativeScoreFor(importance) {
 	if (importance === 'critical') return 50
 	if (importance === 'important') return 20
 	return 0
-}
-
-// CS2 sends these as team names when no real name is configured — treat as empty identity
-const GENERIC_TEAM_NAMES = new Set([
-	'terrorists', 'counter-terrorists', 'terrorist', 'ct', 't',
-])
-
-function isGenericTeamName(name) {
-	return !name || GENERIC_TEAM_NAMES.has(name.toLowerCase())
 }
 
 /**
