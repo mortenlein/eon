@@ -24,7 +24,12 @@
 		</div>
 
 		<div class="eon-tele-canvas-wrap">
-			<iframe src="/hud/?transparent" class="eon-tele-hud" title="HUD preview"></iframe>
+			<iframe
+				src="/hud/?transparent"
+				class="eon-tele-hud"
+				title="HUD preview"
+				@load="hudLoaded = true"
+			></iframe>
 			<canvas
 				ref="canvas"
 				@mousedown="startDraw"
@@ -32,6 +37,11 @@
 				@mouseup="stopDraw"
 				@mouseleave="stopDraw"
 			></canvas>
+			<div v-if="!hudLoaded" class="eon-tele-loading">
+				<div class="eon-tele-spinner"></div>
+				<div class="eon-tele-loading-text">Loading HUD preview…</div>
+				<div class="eon-tele-loading-sub">First load takes a moment — kept warm after that.</div>
+			</div>
 		</div>
 
 		<p class="eon-tele-note">
@@ -45,6 +55,7 @@
 import { state, actions } from '/config/store.js'
 
 export default {
+	name: 'TelestratorPage',
 	setup() {
 		return { state, actions }
 	},
@@ -56,11 +67,15 @@ export default {
 			lastX: 0,
 			lastY: 0,
 			colors: ['#ff5a00', '#3498db', '#2ecc71', '#f1c40f', '#ffffff', '#e74c3c', '#9b59b6', '#000000'],
+			hudLoaded: false,
 		}
 	},
 	mounted() {
 		this.resizeCanvas()
 		window.addEventListener('resize', this.resizeCanvas)
+	},
+	activated() {
+		this.resizeCanvas()
 	},
 	beforeUnmount() {
 		window.removeEventListener('resize', this.resizeCanvas)
@@ -206,5 +221,47 @@ export default {
 	font-size: var(--eon-fs-notes);
 	color: var(--eon-tx3);
 	margin: 0;
+}
+
+.eon-tele-loading {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	background: rgba(9, 9, 12, 0.78);
+	color: var(--eon-tx);
+	pointer-events: auto;
+	z-index: 2;
+}
+
+.eon-tele-loading-text {
+	font-family: var(--eon-font-primary);
+	font-size: var(--eon-fs-title);
+	font-weight: 600;
+	color: var(--eon-tx);
+}
+
+.eon-tele-loading-sub {
+	font-family: var(--eon-font-mono);
+	font-size: var(--eon-fs-notes);
+	color: var(--eon-tx3);
+	max-width: 320px;
+	text-align: center;
+}
+
+.eon-tele-spinner {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	border: 2px solid var(--eon-bd);
+	border-top-color: var(--eon-accl);
+	animation: eon-tele-spin 0.8s linear infinite;
+}
+
+@keyframes eon-tele-spin {
+	to { transform: rotate(360deg); }
 }
 </style>

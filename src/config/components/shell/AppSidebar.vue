@@ -75,7 +75,7 @@ export default {
 <style scoped>
 .eon-sidebar {
 	grid-column: 1;
-	grid-row: 2 / 4;
+	grid-row: 3;
 	background: var(--eon-s1);
 	border-right: 1px solid var(--eon-bd);
 	display: flex;

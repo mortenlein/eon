@@ -5,8 +5,10 @@
 		<AppSidebar />
 		<main class="eon-main">
 			<div class="eon-main-inner">
-				<component :is="activeComponent" v-if="activeComponent" />
-				<div v-else class="eon-missing">Unknown page: {{ state.activeCategory }}</div>
+				<keep-alive :include="['TelestratorPage']">
+					<component :is="activeComponent" v-if="activeComponent" />
+				</keep-alive>
+				<div v-if="!activeComponent" class="eon-missing">Unknown page: {{ state.activeCategory }}</div>
 			</div>
 		</main>
 		<div class="eon-caster-alerts">
