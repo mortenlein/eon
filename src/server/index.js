@@ -61,7 +61,7 @@ const run = async () => {
 	// 2. Initialize principal router for API routes
 	const router = new KoaRouter()
 	registerConfigRoutes(router, websocket)
-	registerDiagnosticsRoutes(router)
+	registerDiagnosticsRoutes(router, websocket)
 	registerDependencyRoutes(router)
 	registerGsiRoutes(router, websocket)
 	registerHudRoutes(router)

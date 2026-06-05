@@ -1,6 +1,28 @@
 <template>
 	<div class="dashboard">
 		<div class="control-grid">
+			<div class="card --span-2 reliability-card">
+				<div class="card-header">
+					<h2>Broadcast Reliability</h2>
+					<button class="btn-ghost" @click="loadReliabilitySummary">Refresh</button>
+				</div>
+				<div v-if="reliabilitySummary" class="reliability-grid">
+					<div v-for="item in reliabilityItems" :key="item.key" :class="['reliability-item', `--${item.status}`]">
+						<span class="reliability-label">{{ item.label }}</span>
+						<strong>{{ item.value }}</strong>
+						<small>{{ item.detail }}</small>
+					</div>
+				</div>
+				<div v-if="reliabilitySummary?.warnings?.length" class="reliability-warnings">
+					<span>Warnings: {{ reliabilitySummary.warningCount }}</span>
+					<ul>
+						<li v-for="warning in reliabilitySummary.warnings.slice(0, 4)" :key="warning">{{ warning }}</li>
+					</ul>
+				</div>
+				<div v-else-if="reliabilitySummary" class="reliability-ok">No readiness warnings reported.</div>
+				<div v-else class="reliability-ok">Readiness summary not loaded yet.</div>
+			</div>
+
 			<!-- Telestrator Board -->
 			<div class="card --span-2">
 				<div class="card-header">
@@ -514,6 +536,54 @@ export default {
 		activeSessionDuration() {
 			const sec = this.activeSessionData?.stats?.matchTotals?.durationSeconds || 0
 			return `${Math.floor(sec / 60)}m ${Math.floor(sec % 60)}s`
+		},
+		reliabilityItems() {
+			const summary = this.reliabilitySummary
+			if (!summary) return []
+			return [
+				{
+					key: 'gsi',
+					label: 'GSI',
+					value: summary.gsi.connected ? 'Connected' : 'Waiting',
+					detail: summary.gsi.uiDevMode ? 'UI dev mode' : (summary.gsi.mapName || 'No map'),
+					status: summary.gsi.connected ? 'pass' : 'warn',
+				},
+				{
+					key: 'kl',
+					label: 'GG Arena',
+					value: summary.komplettligaen.loaded ? 'Loaded' : 'Missing',
+					detail: summary.komplettligaen.matchId || 'No match ID',
+					status: summary.komplettligaen.loaded ? 'pass' : 'warn',
+				},
+				{
+					key: 'identity',
+					label: 'Team Identity',
+					value: summary.teamIdentity.healthy ? 'Healthy' : `${summary.teamIdentity.warningCount} warnings`,
+					detail: `${summary.teamIdentity.ct.name} vs ${summary.teamIdentity.t.name}`,
+					status: summary.teamIdentity.healthy ? 'pass' : 'warn',
+				},
+				{
+					key: 'package',
+					label: 'Package',
+					value: summary.package.active ? 'Active' : 'None',
+					detail: summary.package.name || 'No package applied',
+					status: summary.package.active && summary.package.warningCount === 0 ? 'pass' : 'warn',
+				},
+				{
+					key: 'clients',
+					label: 'HUD Clients',
+					value: String(summary.hudClients.connected),
+					detail: 'WebSocket clients',
+					status: summary.hudClients.connected > 0 ? 'pass' : 'warn',
+				},
+				{
+					key: 'cache',
+					label: 'Cache',
+					value: summary.cache.exists ? (summary.cache.stale ? 'Stale' : 'Ready') : 'Missing',
+					detail: summary.cache.source || 'No cache source',
+					status: summary.cache.exists && !summary.cache.stale ? 'pass' : 'warn',
+				},
+			]
 		}
 	},
 	data() {
@@ -529,6 +599,7 @@ export default {
 			komplettligaenStatus: '',
 			komplettligaenError: false,
 			cacheStatus: null, // Holds cache diagnostics (Phase 13)
+			reliabilitySummary: null,
 			komplettligaenMatchData: null, // Last fetched KL match (for session autofill)
 			sessionsList: [],
 			activeSessionData: null,
@@ -649,6 +720,16 @@ export default {
 				}
 			} catch (err) {
 				console.warn('Failed to load cache status:', err)
+			}
+		},
+		async loadReliabilitySummary() {
+			try {
+				const res = await fetch('/api/diagnostics/broadcast-readiness')
+				if (res.ok) {
+					this.reliabilitySummary = await res.json()
+				}
+			} catch (err) {
+				console.warn('Failed to load broadcast readiness summary:', err)
 			}
 		},
 		async resetCache() {
@@ -923,6 +1004,7 @@ export default {
 		canvas.height = rect.height
 		this.loadKomplettligaen()
 		this.loadCacheStatus() // Fetch initial cache diagnostics
+		this.loadReliabilitySummary()
 		this.loadSessions()
 		this.loadActiveSession()
 		this.sessionPollInterval = setInterval(() => {
@@ -962,6 +1044,80 @@ export default {
 }
 
 .card-header h2 { font-size: 1.1rem; font-weight: 600; color: #fff; margin: 0; }
+
+.reliability-card {
+	border-color: #30363d;
+}
+
+.reliability-grid {
+	display: grid;
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.reliability-item {
+	min-width: 0;
+	background: #0d1117;
+	border: 1px solid #30363d;
+	border-radius: 8px;
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.reliability-item.--pass {
+	border-color: rgba(46, 204, 113, 0.42);
+}
+
+.reliability-item.--warn {
+	border-color: rgba(241, 196, 15, 0.42);
+}
+
+.reliability-label,
+.reliability-item small {
+	color: #8b949e;
+	font-size: 0.76rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.reliability-item strong {
+	color: #f0f3f6;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.reliability-warnings {
+	margin-top: 14px;
+	color: #f1c40f;
+	font-size: 0.86rem;
+}
+
+.reliability-warnings ul {
+	margin: 8px 0 0;
+	padding-left: 18px;
+}
+
+.reliability-ok {
+	margin-top: 12px;
+	color: #2ecc71;
+	font-size: 0.86rem;
+}
+
+@media (max-width: 1180px) {
+	.reliability-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 760px) {
+	.reliability-grid {
+		grid-template-columns: 1fr;
+	}
+}
 
 .draw-tools { display: flex; align-items: center; gap: 16px; }
 
