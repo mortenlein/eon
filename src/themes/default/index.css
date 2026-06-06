@@ -371,7 +371,6 @@
 	--sidebar-grenades-half-width: 3.0rem;
 	--sidebar-round-kills-width: 0.9rem;
 	--sidebar-primary-and-secondary-width: 4.5rem;
-	--sidebar-player-focused-player-highlight-width: 0.25rem;
 	--sidebar-player-width: calc(
 		var(--sidebar-deaths-width) +
 		var(--sidebar-grenades-half-width) +

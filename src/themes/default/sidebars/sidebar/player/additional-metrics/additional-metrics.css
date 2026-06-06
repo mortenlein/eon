@@ -65,7 +65,6 @@
 
 .hud-viewport.--style-compact .additional-stats-inner {
 	grid-template-columns: repeat(3, minmax(2.7rem, 1fr)) minmax(4.2rem, 1.45fr);
-	gap: 0 0.18rem;
 	padding: 0 0.3rem;
 }
 
