@@ -94,12 +94,18 @@
 	padding: 0 0.9rem;
 }
 
+/*
+ * Inner edge (meets player card) matches the player card's outward slant
+ * exactly: 0.35rem for slanted, 1rem for diagonal. Outer edge mirrors so
+ * the widget reads as a balanced parallelogram aligned with the row.
+ */
+
 .hud-viewport.--style-slanted .additional-stats.--left .additional-stats-inner {
 	background:
 		linear-gradient(90deg, rgba(var(--counter-terrorists-fill-rgb), 0.22) 0%, rgba(var(--black-rgb), 0.84) 38%, rgba(var(--black-rgb), 0.84) 100%),
 		linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.015)),
 		rgba(var(--black-rgb), 0.82);
-	clip-path: polygon(0.7rem 0, 100% 0, calc(100% - 0.35rem) 100%, 0 100%);
+	clip-path: polygon(0.35rem 0, 100% 0, calc(100% - 0.35rem) 100%, 0 100%);
 }
 
 .hud-viewport.--style-slanted .additional-stats.--right .additional-stats-inner {
@@ -107,7 +113,7 @@
 		linear-gradient(270deg, rgba(var(--terrorists-fill-rgb), 0.22) 0%, rgba(var(--black-rgb), 0.84) 38%, rgba(var(--black-rgb), 0.84) 100%),
 		linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.015)),
 		rgba(var(--black-rgb), 0.82);
-	clip-path: polygon(0 0, calc(100% - 0.7rem) 0, 100% 100%, 0.35rem 100%);
+	clip-path: polygon(0 0, calc(100% - 0.35rem) 0, 100% 100%, 0.35rem 100%);
 }
 
 .hud-viewport.--style-diagonal .additional-stats.--left .additional-stats-inner {
@@ -115,7 +121,7 @@
 		linear-gradient(110deg, rgba(var(--counter-terrorists-fill-rgb), 0.26), rgba(10, 12, 24, 0.84) 36%, rgba(var(--terrorists-fill-rgb), 0.14)),
 		rgba(var(--black-rgb), 0.8);
 	border-color: rgba(255, 255, 255, 0.18);
-	clip-path: polygon(1.2rem 0, 100% 0, calc(100% - 1rem) 100%, 0 100%);
+	clip-path: polygon(1rem 0, 100% 0, calc(100% - 1rem) 100%, 0 100%);
 }
 
 .hud-viewport.--style-diagonal .additional-stats.--right .additional-stats-inner {
@@ -123,7 +129,7 @@
 		linear-gradient(250deg, rgba(var(--terrorists-fill-rgb), 0.26), rgba(10, 12, 24, 0.84) 36%, rgba(var(--counter-terrorists-fill-rgb), 0.14)),
 		rgba(var(--black-rgb), 0.8);
 	border-color: rgba(255, 255, 255, 0.18);
-	clip-path: polygon(0 0, calc(100% - 1.2rem) 0, 100% 100%, 1rem 100%);
+	clip-path: polygon(0 0, calc(100% - 1rem) 0, 100% 100%, 1rem 100%);
 }
 
 /*
