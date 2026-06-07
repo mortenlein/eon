@@ -250,6 +250,7 @@
 	--skew-160: var(--theme-shapes-skew-complement);
 	--ui-radius: var(--theme-shapes-radius);
 	--radar-width: 21%;
+	--focused-player-width: 45%;
 }
 
 .hud-viewport.--style-slanted .hud-stage .top-bar {
@@ -426,7 +427,7 @@
 	--lan66-panel-border: var(--theme-materials-panel-border);
 	--lan66-accent-soft: rgba(var(--green-rgb), 0.24);
 	--radar-width: 22%;
-	--focused-player-width: 42%;
+	--focused-player-width: 37.8%;
 	--top-bar-score-font-size: 2.7rem;
 	--sidebar-player-row-height: 2.85rem;
 	--sidebar-vertical-spacing: 0.34rem;
@@ -721,6 +722,7 @@
 	--skew-20: var(--theme-shapes-skew-angle);
 	--skew-160: var(--theme-shapes-skew-complement);
 	--ui-radius: var(--theme-shapes-radius);
+	--focused-player-width: 45%;
 }
 .hud-viewport.--style-abstract {
 	--theme-shapes-skew-angle: 10deg;
