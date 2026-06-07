@@ -33,8 +33,16 @@ export const RADAR_OPTION_DEFINITIONS = [
 	},
 	{canonical: 'layout.radar.width',
 		aliases: ['css.radar-width'],
-		cssVars: ['--radar-width', '--layout-radar-width'],
-		fallback: '21%',
+		// Only set --layout-radar-width. The per-preset CSS sets --radar-width
+		// at .hud-viewport.--style-X which beats inline :root in the cascade,
+		// so any inline override of --radar-width is dead on arrival. radar.css
+		// reads var(--layout-radar-width, var(--radar-width)) instead — the
+		// user-set override wins, otherwise the preset default applies.
+		cssVars: ['--layout-radar-width'],
+		// No fallback so applyResolvedCssVariables skips when the user hasn't
+		// customized — keeping the preset default active. Set to a string
+		// only when the user explicitly configures a value.
+		fallback: null,
 		lifecycle: {
 			introducedIn: 'v1.5.0',
 			canonicalSince: 'v1.5.0',

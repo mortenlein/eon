@@ -250,7 +250,6 @@
 	--skew-160: var(--theme-shapes-skew-complement);
 	--ui-radius: var(--theme-shapes-radius);
 	--radar-width: 21%;
-	--focused-player-width: 40%;
 }
 
 .hud-viewport.--style-slanted .hud-stage .top-bar {
@@ -722,7 +721,6 @@
 	--skew-20: var(--theme-shapes-skew-angle);
 	--skew-160: var(--theme-shapes-skew-complement);
 	--ui-radius: var(--theme-shapes-radius);
-	--focused-player-width: 40%;
 }
 .hud-viewport.--style-abstract {
 	--theme-shapes-skew-angle: 10deg;
