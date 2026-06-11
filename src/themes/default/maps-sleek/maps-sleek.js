@@ -14,9 +14,6 @@ export default {
 		isCurrent(map) {
 			if (!this.match?.currentMap) return false
 			return this.match.currentMap.name === map.name
-		},
-		mapRowStyle(map) {
-			return {}
 		}
 	}
 }
