@@ -2,6 +2,8 @@
 
 Eon is a broadcast HUD for Counter-Strike 2 — the on-screen overlay you see on a tournament stream: team scores, round timer, player health/economy sidebars, a live radar, win probability, and sponsor/intermission scenes. It is built for LAN productions, online leagues, and observer stations where a caster or producer runs the broadcast from a control panel while OBS or vMix captures the overlay.
 
+![The Eon broadcast HUD: top bar with team scores and round timer, radar, team sidebars, and focused player card](screenshots/HUD.png)
+
 Everything runs locally. CS2 pushes live match data to Eon over Valve's Game State Integration (GSI); Eon enriches that state (win probability, economy metrics, caster alerts, highlight detection) and streams it over websockets to three surfaces:
 
 - **HUD** (`/hud`) — the viewer-facing overlay, rendered as a transparent browser page you capture in OBS/vMix or launch as a click-through Electron window
@@ -21,6 +23,26 @@ No remote services are required for normal operation — the only optional netwo
 - Theme system with override chain `userspace -> default -> raw`: operator customizations live in `userspace`, the broadcast look in `default`, and the GSI parser/websocket foundation in `raw`
 - Electron launchers for overlay, config, and radar windows
 - UI dev mode that serves a frozen in-round state so you can work on layout without CS2 running
+
+## Control Panel
+
+The operator drives the broadcast from the config SPA at `/config`:
+
+**Live Control** — broadcast readiness, live match preview, scene switching, telestrator, and Komplettligaen match setup:
+
+![Live Control page](screenshots/01_LiveControl.png)
+
+**Layout Editor** — position and toggle HUD elements:
+
+![Layout Editor page](screenshots/02_LayoutEditor.png)
+
+**Series & Maps** — series format (BO1/BO3/BO5), map picks, and per-map scores:
+
+![Series & Maps page](screenshots/03_SeriesMaps.png)
+
+**Theme Designer** — event theme presets, branding, colors, and typography, with live HUD preview:
+
+![Theme Designer page](screenshots/04_ThemeDesigner.png)
 
 ## Quick Start
 
