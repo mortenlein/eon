@@ -24,7 +24,36 @@ export const registerHudRoutes = (router) => {
 	// HUD routing moved to fallback middleware in index.js for better reliability
 }
 
+// Assembling a HUD asset walks the theme tree and reads several files from disk
+// per request. Theme/userspace files are effectively static during a broadcast,
+// so we cache the assembled result and invalidate it whenever the operator
+// changes config/themes (which always triggers a refresh broadcast). This turns
+// a multi-read-per-request hot path into a single map lookup for repeat loads
+// and reconnects.
+const themeAssetCache = new Map()
+
+export const clearThemeAssetCache = () => {
+	themeAssetCache.clear()
+}
+
 export const concatStaticFileFromThemeTreeRecursively = async (path, concatTree, themeTree) => {
+	// Only the entry call (empty accumulator) is cacheable; recursive calls carry
+	// partial state and must run uncached.
+	if (concatTree.length) {
+		return buildConcatFromThemeTree(path, concatTree, themeTree)
+	}
+
+	const cacheKey = `${themeTree.join('>')}::${path}`
+	if (themeAssetCache.has(cacheKey)) {
+		return themeAssetCache.get(cacheKey)
+	}
+
+	const result = await buildConcatFromThemeTree(path, concatTree, themeTree)
+	themeAssetCache.set(cacheKey, result)
+	return result
+}
+
+const buildConcatFromThemeTree = async (path, concatTree, themeTree) => {
 	if (! themeTree.length) {
 		if (concatTree.length) return concatTree
 
@@ -88,7 +117,7 @@ export const concatStaticFileFromThemeTreeRecursively = async (path, concatTree,
 		return concatTree
 	}
 
-	return concatStaticFileFromThemeTreeRecursively(path, concatTree, themeTree)
+	return buildConcatFromThemeTree(path, concatTree, themeTree)
 }
 
 const sanitizePath = (root, path) => {

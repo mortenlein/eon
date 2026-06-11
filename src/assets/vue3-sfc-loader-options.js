@@ -13,7 +13,7 @@ export const sfcLoaderOptions = {
 	},
 
 	getFile: async (url) => {
-		const res = await fetch(`${url}?v=1712953000`)
+		const res = await fetch(`${url}?v=1717590100`)
 		if (! res.ok) throw Object.assign(new Error(res.statusText + ' ' + url), { res })
 
 		// #65: this enables using query params

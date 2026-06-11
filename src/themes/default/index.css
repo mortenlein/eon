@@ -371,7 +371,6 @@
 	--sidebar-grenades-half-width: 3.0rem;
 	--sidebar-round-kills-width: 0.9rem;
 	--sidebar-primary-and-secondary-width: 4.5rem;
-	--sidebar-player-focused-player-highlight-width: 0.25rem;
 	--sidebar-player-width: calc(
 		var(--sidebar-deaths-width) +
 		var(--sidebar-grenades-half-width) +
@@ -427,7 +426,7 @@
 	--lan66-panel-border: var(--theme-materials-panel-border);
 	--lan66-accent-soft: rgba(var(--green-rgb), 0.24);
 	--radar-width: 22%;
-	--focused-player-width: 42%;
+	--focused-player-width: 33.6%;
 	--top-bar-score-font-size: 2.7rem;
 	--sidebar-player-row-height: 2.85rem;
 	--sidebar-vertical-spacing: 0.34rem;

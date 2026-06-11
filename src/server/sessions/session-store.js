@@ -52,6 +52,71 @@ function writeJsonAtomic(filePath, data) {
 	}
 }
 
+// ── Summary write coalescing ──
+// Every recorded timeline event used to read + atomically rewrite summary.json
+// synchronously on the request thread, which is costly under high-rate GSI
+// ingestion. Instead we keep the active session's summary in memory and flush it
+// on a short debounce. Counters stay accurate (accumulated in memory); on-disk
+// summary.json is at most SUMMARY_FLUSH_MS stale, which is fine for progress
+// telemetry. Pending writes are flushed on session end and process exit so
+// nothing is lost.
+const SUMMARY_FLUSH_MS = 1500
+const summaryCache = new Map()       // sessionId -> summary object (authoritative while cached)
+const summaryDirs = new Map()        // sessionId -> session directory path
+const summaryFlushTimers = new Map() // sessionId -> debounce timer
+
+function loadSummaryCached(sessionId, sPath) {
+	if (summaryCache.has(sessionId)) return summaryCache.get(sessionId)
+
+	let summary = {}
+	try {
+		const summaryPath = path.join(sPath, 'summary.json')
+		if (fs.existsSync(summaryPath)) {
+			summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'))
+		}
+	} catch (err) {
+		console.warn(`[SessionStore] Failed to load summary for ${sessionId}, starting fresh:`, err.message)
+	}
+
+	summaryCache.set(sessionId, summary)
+	summaryDirs.set(sessionId, sPath)
+	return summary
+}
+
+function scheduleSummaryFlush(sessionId) {
+	if (summaryFlushTimers.has(sessionId)) return
+	const timer = setTimeout(() => flushSummary(sessionId), SUMMARY_FLUSH_MS)
+	if (timer.unref) timer.unref()
+	summaryFlushTimers.set(sessionId, timer)
+}
+
+function flushSummary(sessionId) {
+	const timer = summaryFlushTimers.get(sessionId)
+	if (timer) {
+		clearTimeout(timer)
+		summaryFlushTimers.delete(sessionId)
+	}
+
+	const summary = summaryCache.get(sessionId)
+	const sPath = summaryDirs.get(sessionId)
+	if (!summary || !sPath) return
+
+	try {
+		writeJsonAtomic(path.join(sPath, 'summary.json'), summary)
+	} catch (err) {
+		console.warn(`[SessionStore] Failed to flush summary for ${sessionId}:`, err.message)
+	}
+}
+
+function flushAllSummaries() {
+	for (const sessionId of summaryCache.keys()) {
+		flushSummary(sessionId)
+	}
+}
+
+// Flush any pending summary writes on process exit (sync writes are safe here).
+process.on('exit', flushAllSummaries)
+
 /**
  * Finds a session path on disk by ID or Slug.
  * Returns null if not found.
@@ -302,7 +367,10 @@ export function endActiveSession() {
 			data: {}
 		}
 		appendTimelineEvent(meta.id, endEvent)
-		
+
+		// Persist any pending summary counters before the session goes inactive.
+		flushSummary(meta.id)
+
 		// Write end snapshot
 		try {
 			const mapObj = gsiState.map || {}
@@ -410,8 +478,12 @@ export function readSession(sessionId) {
 		if (!sPath) return null
 		
 		const metadata = JSON.parse(fs.readFileSync(path.join(sPath, 'metadata.json'), 'utf8'))
-		const summary = JSON.parse(fs.readFileSync(path.join(sPath, 'summary.json'), 'utf8'))
-		
+		// Prefer the in-memory summary when present so reads reflect not-yet-flushed
+		// counters (keyed by both id and slug to cover either lookup form).
+		const summary = summaryCache.get(sessionId)
+			?? summaryCache.get(metadata.id)
+			?? JSON.parse(fs.readFileSync(path.join(sPath, 'summary.json'), 'utf8'))
+
 		return { metadata, summary }
 	} catch (err) {
 		console.warn(`[SessionStore] Failed to read session ${sessionId}:`, err)
@@ -429,22 +501,19 @@ export function appendTimelineEvent(sessionId, event) {
 		
 		const timelinePath = path.join(sPath, 'timeline.jsonl')
 		fs.appendFileSync(timelinePath, JSON.stringify(event) + '\n', 'utf8')
-		
-		// Update summary statistics
-		const summaryPath = path.join(sPath, 'summary.json')
-		if (fs.existsSync(summaryPath)) {
-			const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'))
-			summary.eventsRecorded = (summary.eventsRecorded || 0) + 1
-			
-			const nowStr = new Date().toISOString()
-			if (!summary.firstGsiAt) {
-				summary.firstGsiAt = nowStr
-			}
-			summary.lastGsiAt = nowStr
-			
-			writeJsonAtomic(summaryPath, summary)
+
+		// Update summary statistics in memory; the write is debounced.
+		const summary = loadSummaryCached(sessionId, sPath)
+		summary.eventsRecorded = (summary.eventsRecorded || 0) + 1
+
+		const nowStr = new Date().toISOString()
+		if (!summary.firstGsiAt) {
+			summary.firstGsiAt = nowStr
 		}
-		
+		summary.lastGsiAt = nowStr
+
+		scheduleSummaryFlush(sessionId)
+
 		return true
 	} catch (err) {
 		console.warn(`[SessionStore] Failed to append timeline event to session ${sessionId}:`, err)
@@ -476,14 +545,11 @@ export function updateSessionSummary(sessionId, patch = {}) {
 	try {
 		const sPath = getSessionPath(sessionId)
 		if (!sPath) return false
-		
-		const summaryPath = path.join(sPath, 'summary.json')
-		if (fs.existsSync(summaryPath)) {
-			const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'))
-			const updated = { ...summary, ...patch }
-			writeJsonAtomic(summaryPath, updated)
-			return true
-		}
+
+		const summary = loadSummaryCached(sessionId, sPath)
+		Object.assign(summary, patch)
+		scheduleSummaryFlush(sessionId)
+		return true
 	} catch (err) {
 		console.warn(`[SessionStore] Failed to update session summary for ${sessionId}:`, err)
 	}

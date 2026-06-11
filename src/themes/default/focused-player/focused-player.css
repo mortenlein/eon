@@ -260,7 +260,7 @@ img.overlay-bottom {
 }
 
 .hud-viewport.--style-slanted .focused-player {
-	--fp-width: 42%;
+	--fp-width: 33.6%;
 	--fp-height: 8.25rem;
 }
 
@@ -377,7 +377,7 @@ img.overlay-bottom {
 }
 
 .hud-viewport.--style-diagonal .focused-player {
-	--fp-width: 41%;
+	--fp-width: 32.8%;
 	--fp-height: 8rem;
 }
 
@@ -398,7 +398,7 @@ img.overlay-bottom {
 }
 
 .hud-viewport.--style-rounded .focused-player {
-	--fp-width: 39%;
+	--fp-width: 31.2%;
 	--fp-height: 7.7rem;
 	--fp-name-size: 2rem;
 }
