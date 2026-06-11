@@ -17,6 +17,9 @@ live-hud-check*.png
 temp-hud-debug.png
 *.zip
 
+# Control-plane secret (auto-generated per install)
+src/themes/userspace/control-token.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -27,9 +30,17 @@ temp-hud-debug.png
 *.njsproj
 *.sln
 *.sw?
-tmp/6d10f785cd004bf426a16c2970552e5c.mp4
+tmp/
 maps256398_raw.json
 match256398_raw.json
 signups256398.json
 stats256398_raw.json
 implementation_plan.md
+
+# Agent working files (local only)
+.claude/
+.agent-session-notes/
+scratch/
+handoff.md
+report.md
+task.md
