@@ -44,6 +44,22 @@ The operator drives the broadcast from the config SPA at `/config`:
 
 ![Theme Designer page](screenshots/04_ThemeDesigner.png)
 
+## Intermission Scenes
+
+Viewer-facing league scenes backed by Komplettligaen match/table data:
+
+**Waiting screen** — compact series scorecard shown between maps or before the match:
+
+![Komplettligaen waiting screen with series score](screenshots/05_WaitingScreen.png)
+
+**Match overview** — series score with league table and the teams' upcoming and recent games:
+
+![Komplettligaen match overview with league table](screenshots/06_KL-Overview.png)
+
+**Results** — final series result with per-map scores and player stats for both teams:
+
+![Komplettligaen results screen with map results and player stats](screenshots/07_KL-Results.png)
+
 ## Quick Start
 
 ```powershell
