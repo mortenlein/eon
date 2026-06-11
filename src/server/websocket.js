@@ -3,12 +3,19 @@ import { WebSocketServer, WebSocket } from 'ws'
 import { additionalState, gsiState } from './state.js'
 import { getSettings } from './settings.js'
 import { isUiDevMode } from './dev-mode.js'
+import { isAuthorizedControlSocket } from './auth.js'
+import { clearThemeAssetCache } from './hud.js'
 
 export class Websocket {
 	constructor(server) {
 		this.websocket = new WebSocketServer({ server })
 
-		this.websocket.on('connection', (client) => {
+		this.websocket.on('connection', (client, request) => {
+			// Read-only state is pushed to every client (so overlays render on any
+			// machine), but only trusted clients (loopback or valid token) may
+			// inject draw:/config: control events into the broadcast.
+			client._eonTrusted = isAuthorizedControlSocket(request)
+
 			this.sendState(client)
 
 			client.on('message', (data) => {
@@ -16,6 +23,7 @@ export class Websocket {
 					const { event, body } = JSON.parse(data)
 					// Relay drawing and config events to all clients
 					if (event && (event.startsWith('draw:') || event.startsWith('config:'))) {
+						if (!client._eonTrusted) return
 						this.broadcastToWebsockets(event, body)
 					}
 				} catch (err) {
@@ -34,6 +42,10 @@ export class Websocket {
 	}
 
 	async updateCaches() {
+		// Theme/config changed — drop the assembled-asset cache so HUD clients pick
+		// up the new files on their next load/refresh.
+		clearThemeAssetCache()
+
 		const { bombsites, radars, settings } = await getSettings()
 
 		this.bombsitesCache = bombsites
@@ -97,6 +109,8 @@ export class Websocket {
 	}
 
 	broadcastRefresh() {
+		// A refresh always implies the operator changed something on disk.
+		clearThemeAssetCache()
 		this.broadcastToWebsockets('refresh', {})
 	}
 }

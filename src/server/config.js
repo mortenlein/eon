@@ -125,6 +125,12 @@ export const registerConfigRoutes = (router, websocket) => {
 		context.status = 204
 	})
 
+	// Uploads are served back from the same origin under /hud/, so anything
+	// script-bearing (SVG in particular) would be a stored-XSS vector against the
+	// HUD/config origin. Restrict to raster formats and cap the decoded size.
+	const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5 MB
+	const MAX_FONT_BYTES = 5 * 1024 * 1024  // 5 MB
+
 	router.post('/config/upload-image', async (context) => {
 		const { filename, base64 } = context.request.body
 		if (!filename || !base64) {
@@ -133,16 +139,21 @@ export const registerConfigRoutes = (router, websocket) => {
 		}
 		try {
 			const ext = String(filename).split('.').pop().toLowerCase()
-			if (!['png', 'jpg', 'jpeg', 'svg', 'gif'].includes(ext)) {
+			if (!['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
 				context.status = 400
-				context.body = { error: 'Unsupported file type' }
+				context.body = { error: 'Unsupported file type. Use PNG, JPG, GIF, or WEBP (SVG is rejected for security).' }
 				return
 			}
 			const newName = `upload-${Date.now()}.${ext}`
 			const filepath = join(userspaceDirectory, newName)
-			
+
 			const base64Data = base64.split(',')[1] || base64
 			const buffer = Buffer.from(base64Data, 'base64')
+			if (buffer.length > MAX_IMAGE_BYTES) {
+				context.status = 413
+				context.body = { error: `Image exceeds the ${Math.round(MAX_IMAGE_BYTES / (1024 * 1024))} MB limit.` }
+				return
+			}
 			await writeFile(filepath, buffer)
 
 			context.body = { url: `/hud/${newName}` }
@@ -179,6 +190,11 @@ export const registerConfigRoutes = (router, websocket) => {
 
 			const base64Data = base64.split(',')[1] || base64
 			const buffer = Buffer.from(base64Data, 'base64')
+			if (buffer.length > MAX_FONT_BYTES) {
+				context.status = 413
+				context.body = { error: `Font exceeds the ${Math.round(MAX_FONT_BYTES / (1024 * 1024))} MB limit.` }
+				return
+			}
 			await mkdir(fontsDirectory, { recursive: true })
 			await writeFile(filepath, buffer)
 

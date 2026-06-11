@@ -23,6 +23,7 @@ import { Websocket } from './websocket.js'
 import send from 'koa-send'
 import { builtinRootDirectory } from './helpers/paths.js'
 import { isUiDevMode } from './dev-mode.js'
+import { isAuthorizedControl, getControlToken } from './auth.js'
 
 Error.stackTraceLimit = 64
 
@@ -30,7 +31,10 @@ const run = async () => {
 	await initSettings()
 	const { settings } = await getSettings()
 
-	const host = process.env.HOST || settings.host || '0.0.0.0'
+	// Default to loopback only. Exposing the control surface on a shared/venue
+	// network is opt-in via HOST=0.0.0.0 (or settings.host) and should be paired
+	// with the control token below.
+	const host = process.env.HOST || settings.host || '127.0.0.1'
 	const port = process.env.PORT || settings.port || 31982
 
 	const app = new Koa()
@@ -53,6 +57,27 @@ const run = async () => {
 		if ((path === '/config' || path === '/hud' || path === '/radar') && !path.endsWith('/')) {
 			context.status = 301
 			context.redirect(`${path}/`)
+			return
+		}
+		await next()
+	})
+
+	// 1b. Control-plane gate.
+	// Mutating requests (anything that isn't a safe read) must come from loopback
+	// or carry a valid control token. GSI ingestion is exempt — it has its own
+	// token auth and CS2 posts from loopback.
+	app.use(async (context, next) => {
+		const method = context.method
+		const isSafe = method === 'GET' || method === 'HEAD' || method === 'OPTIONS'
+		const path = context.path
+		const isGsi = path === '/gsi' || path.startsWith('/api/gsi')
+
+		if (!isSafe && !isGsi && !isAuthorizedControl(context)) {
+			context.status = 401
+			context.body = {
+				error: 'Unauthorized',
+				message: 'Control actions require a loopback connection or a valid X-Eon-Token header.',
+			}
 			return
 		}
 		await next()
@@ -134,26 +159,36 @@ const run = async () => {
 		}
 	}
 
+	const exposedToNetwork = host !== '127.0.0.1' && host !== 'localhost' && host !== '::1'
+
 	console.info(`\n[Server] cs-hud active at:`)
 	console.info(` > Local:    http://localhost:${port}`)
-	addresses.forEach(addr => console.info(` > Network:  http://${addr}:${port}`))
-	if (host === '0.0.0.0') {
-		console.info(`\n[Server] Bound to all interfaces (0.0.0.0)`)
+	if (exposedToNetwork) {
+		addresses.forEach(addr => console.info(` > Network:  http://${addr}:${port}`))
+	}
+	if (exposedToNetwork) {
+		console.info(`\n[Server] Bound to ${host} — control surface reachable from the network.`)
+		console.info(`[Server] Remote control actions require this token (X-Eon-Token header or ?token=):`)
+		console.info(`         ${getControlToken()}`)
 	} else {
-		console.info(`\n[Server] Bound to host: ${host}`)
+		console.info(`\n[Server] Bound to loopback (${host}). Set HOST=0.0.0.0 to expose on the network.`)
 	}
 	if (isUiDevMode) {
 		console.info('UI dev mode enabled: serving static match state and ignoring live GSI posts.')
 	}
 
 	// 4. Graceful Shutdown & Unhandled Exception Logging
+	//
+	// Broadcast resilience: a single uncaught exception (e.g. an unexpected shape
+	// in a live GSI payload) must NOT take the HUD server down mid-broadcast.
+	// We log loudly and keep serving. Only an explicit signal or a truly
+	// unrecoverable condition should stop the process.
 	process.on('uncaughtException', (error) => {
-		console.error('[FATAL] Uncaught Exception:', error);
-		shutdown(1);
+		console.error('[NON-FATAL] Uncaught Exception (server kept alive):', error);
 	});
 
 	process.on('unhandledRejection', (reason, promise) => {
-		console.error('[FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+		console.error('[NON-FATAL] Unhandled Rejection (server kept alive) at:', promise, 'reason:', reason);
 	});
 
 	const shutdown = (code = 0) => {

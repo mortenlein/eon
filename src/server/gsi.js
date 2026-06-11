@@ -86,7 +86,15 @@ try {
 }
 
 
-const gsiToken = process.env.GSI_TOKEN || '7ATvXUzTfBYyMLrA'
+// The bundled gamestate_integration_eon.cfg ships with this same default so the
+// tool works out of the box on a loopback-only setup. It is NOT a secret — it
+// lives in the repo. Set GSI_TOKEN (and match it in the cfg) before exposing the
+// server on a shared or public network.
+const DEFAULT_GSI_TOKEN = '7ATvXUzTfBYyMLrA'
+const gsiToken = process.env.GSI_TOKEN || DEFAULT_GSI_TOKEN
+if (!process.env.GSI_TOKEN) {
+	console.warn('[Security] GSI_TOKEN not set — using the bundled default token. Fine for loopback use; set GSI_TOKEN (and update gamestate_integration_eon.cfg) before exposing the server on a network.')
+}
 let lastGsiMeta = {
 	acceptedAtUnixTimestamp: 0,
 	authFailedAtUnixTimestamp: 0,
