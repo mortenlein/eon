@@ -10,6 +10,7 @@ import { getCacheMetadata } from './cache/scraper-cache.js'
 import { LEGACY_TO_CANONICAL } from './helpers/canonical-map.js'
 import { processGsiFrame, recordGsiStale } from './sessions/timeline-recorder.js'
 import { getActiveSession, readSession } from './sessions/session-store.js'
+import { maybePushApexPlay } from './apexplay-bridge.js'
 
 const serverStartedAt = new Date().toISOString()
 
@@ -109,6 +110,9 @@ let lastBroadcastTs = 0
 let broadcastTimer = null
 
 const throttleBroadcast = (websocket) => {
+	// Forward live scores to ApexPlay (no-op unless configured). Self-throttled by content.
+	maybePushApexPlay(gsiState)
+
 	const now = Date.now()
 	const elapsed = now - lastBroadcastTs
 
