@@ -56,3 +56,15 @@ test('player-highlight spotlight card (CLUTCH 1v3)', async ({ page }) => {
 	await page.waitForTimeout(700)
 	await page.screenshot({ path: path.join(OUT, 'preview-03-clutch.png') })
 })
+
+test('player-highlight spotlight card (big damage)', async ({ page }) => {
+	await hudReady(page)
+	// Ghost: CT, steamid ...007 - spotlight for a big-damage round
+	await page.evaluate(() =>
+		window.dispatchEvent(new CustomEvent('socket:draw:highlight', {
+			detail: { show: true, steamid: '76561198000000007', tag: '231 DMG' },
+		})))
+	await expect(page.locator('.player-highlight')).toBeVisible()
+	await page.waitForTimeout(700)
+	await page.screenshot({ path: path.join(OUT, 'preview-04-damage.png') })
+})
