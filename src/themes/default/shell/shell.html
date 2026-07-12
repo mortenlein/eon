@@ -282,6 +282,8 @@
 
 		<Radar v-if="$map.name" />
 		<MapWinner v-if="$map.name" />
+		<!-- Custom scoreboard: hidden until eon-director sends draw:scoreboard -->
+		<Scoreboard v-if="$map.name" />
 		<!-- MVP Card Temporarily hidden: <MvpCard v-if="$map.name" /> -->
 		<TopBar v-if="$map.name" :match="komplettligaenMatch" />
 		<PlayersAlive v-if="$map.name" />

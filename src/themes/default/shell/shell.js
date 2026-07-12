@@ -4,6 +4,7 @@ import FocusedPlayer from '/hud/focused-player/focused-player.vue'
 import MvpCard from '/hud/mvp-card/mvp-card.vue'
 import MapWinner from '/hud/map-winner/map-winner.vue'
 import PlayersAlive from '/hud/players-alive/players-alive.vue'
+import Scoreboard from '/hud/scoreboard/scoreboard.vue'
 import Radar from '/hud/radar/radar.vue'
 import SeriesGraph from '/hud/series-graph/series-graph.vue'
 import Sidebars from '/hud/sidebars/sidebars.vue'
@@ -28,6 +29,7 @@ export default {
 		MvpCard,
 		MapWinner,
 		PlayersAlive,
+		Scoreboard,
 		Radar,
 		SeriesGraph,
 		Sidebars,
