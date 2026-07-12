@@ -1,0 +1,17 @@
+<Transition name="player-highlight-pop">
+	<div v-if="visible && player" :class="['player-highlight', sideClass]">
+		<div class="ph-card">
+			<div class="ph-accent"></div>
+			<div class="ph-body">
+				<div class="ph-tag">{{ tag }}</div>
+				<div class="ph-name">{{ player.name }}</div>
+				<div class="ph-stats">
+					<div class="ph-stat --kills"><span>{{ player.kills }}</span><label>K</label></div>
+					<div class="ph-stat"><span>{{ player.assists }}</span><label>A</label></div>
+					<div class="ph-stat"><span>{{ player.deaths }}</span><label>D</label></div>
+					<div class="ph-stat"><span>{{ player.adr }}</span><label>ADR</label></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</Transition>

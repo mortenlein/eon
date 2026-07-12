@@ -1,0 +1,103 @@
+/* player-highlight.css - the director-triggered player spotlight card. A
+   compact lower-centre card that pops in on a multi-kill/clutch, side-coloured,
+   with a big reason tag over the player's name + K/A/D/ADR. Prefixed selectors
+   (player-highlight/ph-) because theme styles are global; vh sizing holds at any
+   broadcast resolution. */
+
+.player-highlight {
+	--ph-accent: var(--color-ct, #5b9bd5);
+
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 16vh;
+	z-index: 65;
+	display: flex;
+	justify-content: center;
+	pointer-events: none;
+	font-family: var(--font-primary, 'Quantico', sans-serif);
+}
+
+.player-highlight.--t { --ph-accent: var(--color-t, #e0a53b); }
+.player-highlight.--ct { --ph-accent: var(--color-ct, #5b9bd5); }
+
+.ph-card {
+	display: flex;
+	align-items: stretch;
+	min-width: 34vh;
+	border-radius: 1vh;
+	overflow: hidden;
+	background: linear-gradient(180deg, rgba(13, 21, 34, 0.97), rgba(8, 13, 22, 0.97));
+	box-shadow: 0 1.4vh 4.5vh rgba(0, 0, 0, 0.55), inset 0 0 0 0.12vh rgba(255, 255, 255, 0.07);
+}
+
+/* the side-coloured spine down the left edge */
+.ph-accent {
+	width: 0.7vh;
+	background: var(--ph-accent);
+	box-shadow: 0 0 2.4vh var(--ph-accent);
+}
+
+.ph-body { padding: 1.6vh 2.4vh 1.6vh 2vh; }
+
+.ph-tag {
+	font-size: 1.7vh;
+	font-weight: 800;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--ph-accent);
+	line-height: 1;
+}
+
+.ph-name {
+	margin-top: 0.6vh;
+	font-size: 3.2vh;
+	font-weight: 800;
+	letter-spacing: 0.01em;
+	color: #f6faff;
+	line-height: 1.05;
+	white-space: nowrap;
+}
+
+.ph-stats {
+	display: flex;
+	gap: 2.4vh;
+	margin-top: 1.2vh;
+	padding-top: 1.1vh;
+	border-top: 0.14vh solid rgba(255, 255, 255, 0.08);
+}
+
+.ph-stat {
+	display: flex;
+	align-items: baseline;
+	gap: 0.5vh;
+	font-variant-numeric: tabular-nums;
+}
+
+.ph-stat span {
+	font-size: 2.1vh;
+	font-weight: 800;
+	color: #eaf1fb;
+}
+
+.ph-stat.--kills span { color: var(--ph-accent); }
+
+.ph-stat label {
+	font-size: 1.1vh;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: rgba(226, 236, 250, 0.45);
+}
+
+/* ── pop-in / fade-out ────────────────────────────────────────────────── */
+.player-highlight-pop-enter-active { transition: opacity 0.24s ease; }
+.player-highlight-pop-leave-active { transition: opacity 0.3s ease; }
+.player-highlight-pop-enter-active .ph-card {
+	transition: transform 0.34s cubic-bezier(0.16, 1.1, 0.3, 1), opacity 0.24s ease;
+}
+.player-highlight-pop-leave-active .ph-card { transition: transform 0.3s ease, opacity 0.3s ease; }
+.player-highlight-pop-enter-from,
+.player-highlight-pop-leave-to { opacity: 0; }
+.player-highlight-pop-enter-from .ph-card { transform: translateY(2.4vh) scale(0.92); opacity: 0; }
+.player-highlight-pop-leave-to .ph-card { transform: translateY(1.2vh) scale(0.98); opacity: 0; }
