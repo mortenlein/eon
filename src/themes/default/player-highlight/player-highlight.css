@@ -1,44 +1,122 @@
-/* player-highlight.css - the director-triggered player spotlight card. A
-   compact lower-centre card that pops in on a multi-kill/clutch, side-coloured,
-   with a big reason tag over the player's name + K/A/D/ADR. Prefixed selectors
-   (player-highlight/ph-) because theme styles are global; vh sizing holds at any
-   broadcast resolution. */
+/* player-highlight.css - centred spotlight: a real CS2 agent model in a frame
+   above the card, celebrating, side-coloured. The root stays mounted (so the
+   WebGL canvas survives show/hide); visibility is the .--shown class. Prefixed
+   selectors (theme styles are global); vh sizing holds at any resolution. */
 
 .player-highlight {
 	--ph-accent: var(--color-ct, #5b9bd5);
 
 	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 16vh;
+	inset: 0;
 	z-index: 65;
 	display: flex;
+	flex-direction: column;
+	align-items: center;
 	justify-content: center;
+	gap: 0;
 	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.8s ease; /* slow mystic fade in/out */
 	font-family: var(--font-primary, 'Quantico', sans-serif);
 }
 
-.player-highlight.--t { --ph-accent: var(--color-t, #e0a53b); }
-.player-highlight.--ct { --ph-accent: var(--color-ct, #5b9bd5); }
+.player-highlight { --ph-glow: #14233a; }
+.player-highlight.--t { --ph-accent: var(--color-t, #e0a53b); --ph-glow: #38270e; }
+.player-highlight.--ct { --ph-accent: var(--color-ct, #5b9bd5); --ph-glow: #122f4d; }
+.player-highlight.--shown { opacity: 1; }
 
+/* ── the 3D model stage: a studio backdrop the agent stands on ───────────── */
+.ph-stage {
+	position: relative;
+	width: 34vh;
+	height: 32vh;
+	border-radius: 1.2vh 1.2vh 0 0;
+	overflow: hidden;
+	transform: translateY(2.4vh) scale(0.97);
+	opacity: 0;
+	transition: transform 0.9s cubic-bezier(0.16, 1.05, 0.3, 1), opacity 0.8s ease;
+	/* studio backdrop: side-tinted backlight + floor pool over a vertical fade */
+	background:
+		radial-gradient(72% 60% at 50% 52%, var(--ph-glow), transparent 74%),
+		radial-gradient(44% 15% at 50% 95%, color-mix(in srgb, var(--ph-accent) 30%, transparent), transparent 72%),
+		radial-gradient(66% 52% at 50% 40%, rgba(255, 255, 255, 0.04), transparent 74%),
+		linear-gradient(180deg, #0a111a 0%, #0d1622 46%, #060a10 100%);
+	box-shadow: inset 0 0 0 0.12vh rgba(255, 255, 255, 0.07),
+		inset 0 -3vh 4vh rgba(0, 0, 0, 0.45);
+}
+
+/* a faint spotlight cone + floor ellipse the agent stands in */
+.ph-stage::after {
+	content: '';
+	position: absolute;
+	left: 50%;
+	bottom: 1.4vh;
+	width: 20vh;
+	height: 3.2vh;
+	transform: translateX(-50%);
+	border-radius: 50%;
+	background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55), transparent 75%);
+}
+
+.player-highlight.--shown .ph-stage { transform: translateY(0) scale(1); opacity: 1; }
+
+.ph-canvas { position: relative; width: 100%; height: 100%; display: block; z-index: 1; }
+
+/* the Cycles hero (turntable video or still): slow push-in + breathe on top of
+   the baked rotation so it reads alive */
+.ph-render {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center 12%;
+	z-index: 1;
+	transform-origin: 50% 38%;
+	animation: ph-breathe 8s ease-in-out infinite alternate;
+	filter: drop-shadow(0 1.2vh 2.4vh rgba(0, 0, 0, 0.5));
+}
+
+@keyframes ph-breathe {
+	from { transform: scale(1.02) translateY(0); }
+	to { transform: scale(1.05) translateY(-0.3vh); }
+}
+
+/* mystic smoke canvas: soft plumes drifting up, screen-blended over the hero */
+.ph-smoke {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 2;
+	mix-blend-mode: screen;
+	filter: blur(7px);
+	opacity: 0.85;
+	pointer-events: none;
+}
+
+/* ── the card ───────────────────────────────────────────────────────────── */
 .ph-card {
 	display: flex;
 	align-items: stretch;
-	min-width: 34vh;
-	border-radius: 1vh;
+	width: 34vh;
+	border-radius: 0 0 1.2vh 1.2vh;
 	overflow: hidden;
-	background: linear-gradient(180deg, rgba(13, 21, 34, 0.97), rgba(8, 13, 22, 0.97));
-	box-shadow: 0 1.4vh 4.5vh rgba(0, 0, 0, 0.55), inset 0 0 0 0.12vh rgba(255, 255, 255, 0.07);
+	background: linear-gradient(180deg, rgba(13, 21, 34, 0.98), rgba(8, 13, 22, 0.98));
+	box-shadow: 0 1.6vh 4.5vh rgba(0, 0, 0, 0.55), inset 0 0 0 0.12vh rgba(255, 255, 255, 0.07);
+	transform: translateY(2.4vh) scale(0.92);
+	opacity: 0;
+	transition: transform 0.34s cubic-bezier(0.16, 1.1, 0.3, 1), opacity 0.24s ease;
 }
 
-/* the side-coloured spine down the left edge */
+.player-highlight.--shown .ph-card { transform: translateY(0) scale(1); opacity: 1; }
+
 .ph-accent {
 	width: 0.7vh;
 	background: var(--ph-accent);
 	box-shadow: 0 0 2.4vh var(--ph-accent);
 }
 
-.ph-body { padding: 1.6vh 2.4vh 1.6vh 2vh; }
+.ph-body { padding: 1.4vh 2.4vh 1.5vh 2vh; }
 
 .ph-tag {
 	font-size: 1.7vh;
@@ -53,7 +131,6 @@
 	margin-top: 0.6vh;
 	font-size: 3.2vh;
 	font-weight: 800;
-	letter-spacing: 0.01em;
 	color: #f6faff;
 	line-height: 1.05;
 	white-space: nowrap;
@@ -62,26 +139,14 @@
 .ph-stats {
 	display: flex;
 	gap: 2.4vh;
-	margin-top: 1.2vh;
-	padding-top: 1.1vh;
+	margin-top: 1.1vh;
+	padding-top: 1vh;
 	border-top: 0.14vh solid rgba(255, 255, 255, 0.08);
 }
 
-.ph-stat {
-	display: flex;
-	align-items: baseline;
-	gap: 0.5vh;
-	font-variant-numeric: tabular-nums;
-}
-
-.ph-stat span {
-	font-size: 2.1vh;
-	font-weight: 800;
-	color: #eaf1fb;
-}
-
+.ph-stat { display: flex; align-items: baseline; gap: 0.5vh; font-variant-numeric: tabular-nums; }
+.ph-stat span { font-size: 2.1vh; font-weight: 800; color: #eaf1fb; }
 .ph-stat.--kills span { color: var(--ph-accent); }
-
 .ph-stat label {
 	font-size: 1.1vh;
 	font-weight: 700;
@@ -89,15 +154,3 @@
 	text-transform: uppercase;
 	color: rgba(226, 236, 250, 0.45);
 }
-
-/* ── pop-in / fade-out ────────────────────────────────────────────────── */
-.player-highlight-pop-enter-active { transition: opacity 0.24s ease; }
-.player-highlight-pop-leave-active { transition: opacity 0.3s ease; }
-.player-highlight-pop-enter-active .ph-card {
-	transition: transform 0.34s cubic-bezier(0.16, 1.1, 0.3, 1), opacity 0.24s ease;
-}
-.player-highlight-pop-leave-active .ph-card { transition: transform 0.3s ease, opacity 0.3s ease; }
-.player-highlight-pop-enter-from,
-.player-highlight-pop-leave-to { opacity: 0; }
-.player-highlight-pop-enter-from .ph-card { transform: translateY(2.4vh) scale(0.92); opacity: 0; }
-.player-highlight-pop-leave-to .ph-card { transform: translateY(1.2vh) scale(0.98); opacity: 0; }

@@ -40,8 +40,8 @@ test('player-highlight spotlight card (ACE)', async ({ page }) => {
 		window.dispatchEvent(new CustomEvent('socket:draw:highlight', {
 			detail: { show: true, steamid: '76561198000000008', roundKills: 5, tag: 'ACE' },
 		})))
-	await expect(page.locator('.player-highlight')).toBeVisible()
-	await page.waitForTimeout(700)
+	await expect(page.locator('.player-highlight.--shown')).toBeVisible()
+	await page.waitForTimeout(5000) // let the 12MB agent model load + render a gesture frame
 	await page.screenshot({ path: path.join(OUT, 'preview-02-highlight.png') })
 })
 
@@ -53,7 +53,7 @@ test('player-highlight spotlight card (CLUTCH 1v3)', async ({ page }) => {
 			detail: { show: true, steamid: '76561198000000001', tag: 'CLUTCH 1v3' },
 		})))
 	await expect(page.locator('.player-highlight')).toBeVisible()
-	await page.waitForTimeout(700)
+	await page.waitForTimeout(5000) // lazy-loaded T agent model + a settled gesture frame
 	await page.screenshot({ path: path.join(OUT, 'preview-03-clutch.png') })
 })
 
@@ -65,6 +65,6 @@ test('player-highlight spotlight card (big damage)', async ({ page }) => {
 			detail: { show: true, steamid: '76561198000000007', tag: '231 DMG' },
 		})))
 	await expect(page.locator('.player-highlight')).toBeVisible()
-	await page.waitForTimeout(700)
+	await page.waitForTimeout(5000) // lazy-loaded agent model + a settled gesture frame
 	await page.screenshot({ path: path.join(OUT, 'preview-04-damage.png') })
 })
