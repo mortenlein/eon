@@ -209,6 +209,58 @@
 	animation: ph-flash-out 0.4s ease-out both;
 }
 
+/* MVP: royal violet - the end-of-match crown */
+.player-highlight.--fx-mvp { --ph-accent: #c9a2ff; --ph-glow: #2a1650; }
+
+.player-highlight.--fx-mvp.--shown .ph-flash {
+	background: radial-gradient(60% 60% at 50% 38%, rgba(240, 228, 255, 0.95), rgba(186, 140, 255, 0.5) 55%, transparent 80%);
+	animation: ph-flash-out 0.9s ease-out both;
+}
+
+.player-highlight.--fx-mvp.--shown .ph-stage {
+	animation: ph-mvp-ascend 1.1s cubic-bezier(0.16, 1.1, 0.3, 1) both;
+}
+
+@keyframes ph-mvp-ascend {
+	0% { transform: translateY(6vh) scale(0.9); filter: blur(6px) brightness(2); opacity: 0; }
+	60% { transform: translateY(-0.6vh) scale(1.02); filter: blur(0) brightness(1.2); opacity: 1; }
+	100% { transform: translateY(0) scale(1); filter: brightness(1); }
+}
+
+.player-highlight.--fx-mvp.--shown .ph-card {
+	animation: ph-card-punch 0.6s 0.35s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+	box-shadow: 0 1.6vh 4.5vh rgba(0, 0, 0, 0.55), 0 0 3.5vh rgba(186, 140, 255, 0.3),
+		inset 0 0 0 0.12vh rgba(220, 195, 255, 0.4);
+}
+
+.player-highlight.--fx-mvp .ph-tag {
+	background: linear-gradient(100deg, #c9a2ff 20%, #ffffff 38%, #c9a2ff 52%);
+	background-size: 220% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	animation: ph-shine 2.4s linear infinite;
+	font-size: 2.1vh;
+}
+
+/* KNIFE: cold steel - slash-wipe entrance */
+.player-highlight.--fx-knife { --ph-accent: #dfe7f2; --ph-glow: #2c333d; }
+
+.player-highlight.--fx-knife.--shown .ph-stage {
+	animation: ph-knife-cut 0.5s cubic-bezier(0.3, 1.3, 0.4, 1) both;
+}
+
+@keyframes ph-knife-cut {
+	0% { transform: scaleY(0.02) scaleX(1.15); filter: brightness(3); opacity: 0; }
+	45% { transform: scaleY(1.05) scaleX(0.99); filter: brightness(1.4); opacity: 1; }
+	100% { transform: scale(1); filter: brightness(1); }
+}
+
+.player-highlight.--fx-knife.--shown .ph-flash {
+	background: linear-gradient(38deg, transparent 42%, rgba(255, 250, 252, 0.9) 50%, transparent 58%);
+	animation: ph-flash-out 0.35s ease-out both;
+}
+
 /* DAMAGE entrance: heavy drop with an impact shake and dust-warm flash */
 .player-highlight.--fx-damage.--shown .ph-stage {
 	animation: ph-damage-drop 0.7s cubic-bezier(0.3, 1.2, 0.4, 1) both;
@@ -287,4 +339,98 @@
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
 	color: rgba(226, 236, 250, 0.45);
+}
+
+/* ── exit choreography: .--leaving overrides the entrance per kind ────────── */
+/* default/plain: gentle sink-and-fade */
+.player-highlight.--shown.--leaving .ph-stage {
+	animation: ph-exit-fade 0.7s ease-in both;
+}
+
+.player-highlight.--shown.--leaving .ph-card {
+	animation: ph-exit-card 0.5s ease-in both;
+}
+
+@keyframes ph-exit-fade {
+	to { transform: translateY(1.6vh) scale(0.98); opacity: 0; filter: blur(3px); }
+}
+
+@keyframes ph-exit-card {
+	to { transform: translateY(2.4vh); opacity: 0; }
+}
+
+/* ACE: dissolve upward into embers - brightens, lifts and burns out */
+.player-highlight.--fx-ace.--shown.--leaving .ph-stage {
+	animation: ph-ace-exit 0.85s cubic-bezier(0.4, 0, 0.9, 0.4) both;
+}
+
+@keyframes ph-ace-exit {
+	0% { transform: scale(1); filter: brightness(1); opacity: 1; }
+	45% { filter: brightness(1.9) saturate(1.3); opacity: 1; }
+	100% { transform: translateY(-2.5vh) scale(1.07); filter: brightness(2.6) blur(8px); opacity: 0; }
+}
+
+/* MVP: royal ascension - floats up and dissolves in light */
+.player-highlight.--fx-mvp.--shown.--leaving .ph-stage {
+	animation: ph-mvp-exit 0.9s cubic-bezier(0.4, 0, 0.8, 0.4) both;
+}
+
+@keyframes ph-mvp-exit {
+	0% { transform: scale(1); opacity: 1; }
+	100% { transform: translateY(-4vh) scale(1.04); filter: brightness(2.4) blur(7px); opacity: 0; }
+}
+
+/* CLUTCH: flatline - heartbeat dies, colour drains, sinks into darkness */
+.player-highlight.--fx-clutch.--shown.--leaving .ph-stage {
+	animation: ph-clutch-exit 0.95s ease-in both;
+}
+
+.player-highlight.--fx-clutch.--shown.--leaving .ph-card {
+	animation: ph-clutch-exit-card 0.95s ease-in both;
+}
+
+@keyframes ph-clutch-exit {
+	0% { filter: brightness(1) saturate(1); opacity: 1; }
+	55% { filter: brightness(0.5) saturate(0.2); opacity: 1; }
+	100% { transform: translateY(2.5vh) scale(0.97); filter: brightness(0.05) saturate(0); opacity: 0; }
+}
+
+@keyframes ph-clutch-exit-card {
+	0% { opacity: 1; }
+	100% { transform: translateY(2vh); filter: saturate(0); opacity: 0; }
+}
+
+/* MULTI: glitch out - electric stutter then snapped away */
+.player-highlight.--fx-multi.--shown.--leaving .ph-stage {
+	animation: ph-multi-exit 0.5s steps(1, end) both;
+}
+
+@keyframes ph-multi-exit {
+	0% { transform: translateX(0); opacity: 1; }
+	20% { transform: translateX(-0.8vh) skewX(-4deg); opacity: 0.85; }
+	38% { transform: translateX(0.9vh) skewX(3deg); opacity: 0.6; filter: brightness(1.8); }
+	55% { transform: translateX(-1.4vh) skewX(-6deg); opacity: 0.4; }
+	72% { transform: translateX(2.2vh) skewX(5deg); opacity: 0.2; filter: brightness(2.2); }
+	100% { transform: translateX(7vh) skewX(10deg); opacity: 0; }
+}
+
+/* KNIFE: cut to black - collapses along the slash line */
+.player-highlight.--fx-knife.--shown.--leaving .ph-stage {
+	animation: ph-knife-exit 0.5s cubic-bezier(0.6, 0, 0.8, 0.4) both;
+}
+
+@keyframes ph-knife-exit {
+	0% { transform: scale(1); filter: brightness(1); opacity: 1; }
+	40% { filter: brightness(2.4); opacity: 1; }
+	100% { transform: scaleY(0.02) scaleX(1.1); filter: brightness(3); opacity: 0; }
+}
+
+/* DAMAGE: burn-out drop - falls away with heat blur */
+.player-highlight.--fx-damage.--shown.--leaving .ph-stage {
+	animation: ph-damage-exit 0.65s cubic-bezier(0.5, 0, 0.9, 0.5) both;
+}
+
+@keyframes ph-damage-exit {
+	0% { transform: translateY(0); opacity: 1; }
+	100% { transform: translateY(5vh) scale(0.96); filter: brightness(1.6) blur(5px); opacity: 0; }
 }

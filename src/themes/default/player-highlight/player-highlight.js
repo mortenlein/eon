@@ -9,6 +9,17 @@ const MODELS = {
 	t: '/hud/player-highlight/models/t.glb',
 	ct: '/hud/player-highlight/models/ct.glb',
 }
+
+// Rendered agent roster per side (files in renders/<key>.png/.webm). Each player
+// hashes to a stable agent so the same player always gets "their" operator.
+// Extended as the render farm finishes agents.
+const AGENTS = {
+	ct: ['ct-fbi', 'ct-sas', 'ct-swat', 'ct-st6', 'ct-heavy', 'ct-gendarmerie', 'ct-diver'],
+	t: ['t-phoenix', 't-professional', 't-leet', 't-balkan', 't-jumpsuit', 't-jungleraider', 't-phoenixheavy'],
+}
+
+// exit choreography duration per FX kind (ms) - CSS animations match these
+const EXIT_MS = { ace: 850, clutch: 950, multi: 500, damage: 650, mvp: 900, knife: 500, plain: 700 }
 // weapons attach to the rig's weapon_hand_r bone (the in-game convention) and
 // ride the baked idle animation. Local offset/rotation tuned in the preview rig
 // (?phW=px,py,pz,rxDeg,ryDeg,rzDeg overrides live).
@@ -57,7 +68,7 @@ export default {
 		// still-image fallback). The animated WebGL model stays behind ?phThree.
 		// showSeq bumps per spotlight so re-baked renders can never serve stale
 		// from the browser cache (a long-lived HUD page never reloads).
-		return { visible: false, steamid: null, tag: '', roundKills: 0, threeMode: false, videoOk: true, showSeq: 0 }
+		return { visible: false, leaving: false, steamid: null, tag: '', roundKills: 0, threeMode: false, videoOk: true, showSeq: 0 }
 	},
 
 	computed: {
@@ -72,22 +83,33 @@ export default {
 			const side = this.player?.side
 			return side === 3 ? '--ct' : side === 2 ? '--t' : ''
 		},
-		// achievement family drives the FX identity + entrance choreography
+		// achievement family drives the FX identity + entrance/exit choreography
 		fxKind() {
 			const t = this.tag || ''
+			if (/^MVP/i.test(t)) return 'mvp'
 			if (/^ACE/i.test(t)) return 'ace'
 			if (/^CLUTCH/i.test(t)) return 'clutch'
+			if (/KNIFE/i.test(t)) return 'knife'
 			if (/KILL$/i.test(t)) return 'multi'
 			if (/DMG$/i.test(t)) return 'damage'
 			return 'plain'
 		},
+		// stable per-player agent pick from the rendered roster
+		agentKey() {
+			const list = AGENTS[this.sideKey] || []
+			if (!list.length) return this.sideKey
+			let h = 0
+			const s = this.steamid || ''
+			for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+			return list[h % list.length]
+		},
 		renderSrc() {
 			// per-show cache-buster: render files keep the same URL when re-baked,
 			// and a long-lived HUD page would otherwise show stale art forever
-			return `/hud/player-highlight/renders/${this.sideKey}.png?v=${this._bootTs || 0}-${this.showSeq}`
+			return `/hud/player-highlight/renders/${this.agentKey}.png?v=${this._bootTs || 0}-${this.showSeq}`
 		},
 		videoSrc() {
-			return `/hud/player-highlight/renders/${this.sideKey}.webm?v=${this._bootTs || 0}-${this.showSeq}`
+			return `/hud/player-highlight/renders/${this.agentKey}.webm?v=${this._bootTs || 0}-${this.showSeq}`
 		},
 	},
 
@@ -107,20 +129,29 @@ export default {
 	mounted() {
 		this._onDraw = (event) => {
 			const body = event.detail || {}
-			if (this._hideTimer) { clearTimeout(this._hideTimer); this._hideTimer = null }
-			if (body.show === false) { this.visible = false; return }
-			this.steamid = body.steamid != null ? String(body.steamid) : null
-			this.tag = body.tag || 'HIGHLIGHT'
-			this.roundKills = body.roundKills || 0
-			this.showSeq++
-			this.visible = true
-			// re-arm the FX engine so back-to-back spotlights get their own identity
-			this.stopSmoke()
-			this.$nextTick(() => this.startSmoke())
-			if (body.durationMs > 0) this._hideTimer = setTimeout(() => { this.visible = false }, body.durationMs)
+			if (this._egQueue && !body._fromQueue) return // endgame sequence owns the card
+			if (body.show === false) { this.beginExit(); return }
+			this.showCard(body)
+		}
+		// end-of-match showcase: a chain of cards played back to back, each with
+		// its full entrance + exit choreography (draw:endgame {cards:[...]})
+		this._onEndgame = (event) => {
+			const cards = (event.detail && event.detail.cards) || []
+			if (!cards.length) return
+			this._egQueue = cards.slice()
+			const next = () => {
+				const card = this._egQueue && this._egQueue.shift()
+				if (!card) { this._egQueue = null; this.beginExit(); return }
+				this.showCard({ ...card, _fromQueue: true })
+				this._egTimer = setTimeout(() => {
+					this.beginExit(() => setTimeout(next, 350))
+				}, card.holdMs || 6000)
+			}
+			next()
 		}
 		this._bootTs = Date.now()
 		window.addEventListener('socket:draw:highlight', this._onDraw)
+		window.addEventListener('socket:draw:endgame', this._onEndgame)
 		// ?phYaw=<deg> overrides facing for both sides (live orientation tuning)
 		const q = new URLSearchParams(window.location.search)
 		this._yawOverride = q.has('phYaw') ? parseFloat(q.get('phYaw')) * D2R : null
@@ -137,12 +168,47 @@ export default {
 
 	beforeUnmount() {
 		window.removeEventListener('socket:draw:highlight', this._onDraw)
+		window.removeEventListener('socket:draw:endgame', this._onEndgame)
 		if (this._hideTimer) clearTimeout(this._hideTimer)
+		if (this._exitTimer) clearTimeout(this._exitTimer)
+		if (this._egTimer) clearTimeout(this._egTimer)
 		this.stopSmoke()
 		this.disposeThree()
 	},
 
 	methods: {
+		// show a spotlight card (from a live event or the endgame queue)
+		showCard(body) {
+			if (this._hideTimer) { clearTimeout(this._hideTimer); this._hideTimer = null }
+			if (this._exitTimer) { clearTimeout(this._exitTimer); this._exitTimer = null }
+			this.leaving = false
+			this._exitAt = 0
+			this.steamid = body.steamid != null ? String(body.steamid) : null
+			this.tag = body.tag || 'HIGHLIGHT'
+			this.roundKills = body.roundKills || 0
+			this.showSeq++
+			this.visible = true
+			// re-arm the FX engine so back-to-back spotlights get their own identity
+			this.stopSmoke()
+			this.$nextTick(() => this.startSmoke())
+			if (body.durationMs > 0) this._hideTimer = setTimeout(() => this.beginExit(), body.durationMs)
+		},
+
+		// per-kind exit choreography: flag `leaving` (CSS plays the exit), tell the
+		// FX engine (ember burst / flatline / final bolt), then actually hide
+		beginExit(done) {
+			if (!this.visible || this.leaving) { if (done) done(); return }
+			this.leaving = true
+			this._exitAt = performance.now() / 1000
+			const ms = EXIT_MS[this.fxKind] || 700
+			this._exitTimer = setTimeout(() => {
+				this.visible = false
+				this.leaving = false
+				this._exitAt = 0
+				if (done) done()
+			}, ms)
+		},
+
 		// ── per-achievement FX engine: two canvases (rear = rays/glow behind the
 		//    hero, front = smoke/sparks/embers/lightning) with a distinct identity
 		//    per kind. ACE is the crown jewel: gold god-rays, shockwave rings,
@@ -161,8 +227,10 @@ export default {
 
 			const THEMES = {
 				ace: { tint: '255,200,80', tint2: '255,240,190', smoke: 8, rays: 7, rings: true, sparks: 46, embers: 26 },
+				mvp: { tint: '186,140,255', tint2: '240,228,255', smoke: 10, rays: 9, rings: true, sparks: 30, embers: 18 },
 				clutch: { tint: '255,72,64', tint2: '255,150,130', smoke: 20, pulse: 1.15, embers: 10 },
 				multi: { tint: '120,190,255', tint2: '220,240,255', smoke: 8, bolts: true, sparks: 22 },
+				knife: { tint: '210,220,235', tint2: '255,245,248', smoke: 6, slashes: true, sparks: 16 },
 				damage: { tint: '255,140,50', tint2: '255,210,150', smoke: 14, embers: 20 },
 				plain: { tint: null, tint2: '205,220,245', smoke: 16 },
 			}
@@ -190,6 +258,8 @@ export default {
 			let sparks = mkSparks()
 			let lastBurst = t0
 			let bolt = null, boltUntil = 0, nextBolt = t0 + 0.3
+			let slash = null, slashUntil = 0, nextSlash = t0 + 0.15
+			let exitFxDone = false
 
 			const tick = () => {
 				this._smokeRaf = requestAnimationFrame(tick)
@@ -197,6 +267,23 @@ export default {
 				const el = t - t0
 				fc.clearRect(0, 0, W, H)
 				if (bc) bc.clearRect(0, 0, W, H)
+
+				// exit choreography hooks: fire once when beginExit() stamps _exitAt
+				const exiting = this._exitAt > 0
+				if (exiting && !exitFxDone) {
+					exitFxDone = true
+					if (kind === 'ace' || kind === 'mvp') sparks = sparks.concat(mkSparks(), mkSparks()) // ember explosion
+					if (kind === 'multi') { // one last violent bolt
+						bolt = [[0.5, -0.02], [0.44, 0.2], [0.55, 0.38], [0.47, 0.6], [0.52, 0.8]]
+						boltUntil = t + 0.16
+					}
+					if (kind === 'knife') { // farewell cross-slash
+						slash = [[0.05, 0.1, 0.95, 0.75], [0.92, 0.08, 0.1, 0.8]]
+						slashUntil = t + 0.18
+					}
+				}
+				// clutch flatline: heartbeat dies during the exit
+				const pulseScale = exiting && th.pulse ? Math.max(0, 1 - (t - this._exitAt) / 0.7) : 1
 
 				// ── rear canvas ──
 				if (bc && th.rays) {
@@ -224,7 +311,7 @@ export default {
 					const beat = Math.pow(Math.max(0, Math.sin(ph * Math.PI * 2)), 10)
 						+ 0.55 * Math.pow(Math.max(0, Math.sin((ph - 0.14) * Math.PI * 2)), 10)
 					const g = bc.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, W * 0.55)
-					g.addColorStop(0, `rgba(${tint},${0.10 + 0.20 * beat})`)
+					g.addColorStop(0, `rgba(${tint},${(0.10 + 0.20 * beat) * pulseScale})`)
 					g.addColorStop(1, 'rgba(0,0,0,0)')
 					bc.fillStyle = g
 					bc.fillRect(0, 0, W, H)
@@ -304,6 +391,32 @@ export default {
 						bolt.forEach(([bx, by], i) => (i ? fc.lineTo(bx * W, by * H) : fc.moveTo(bx * W, by * H)))
 						fc.stroke()
 						fc.shadowBlur = 0
+					}
+				}
+				// knife: razor slash streaks flashing across the stage
+				if (th.slashes || (slash && t < slashUntil)) {
+					if (th.slashes && t > nextSlash && (!slash || t >= slashUntil)) {
+						const fromLeft = rnd() > 0.5
+						slash = [[fromLeft ? -0.05 : 1.05, 0.1 + rnd() * 0.3, fromLeft ? 1.05 : -0.05, 0.5 + rnd() * 0.35]]
+						slashUntil = t + 0.09
+						nextSlash = t + 1.6 + rnd() * 1.8
+					}
+					if (slash && t < slashUntil) {
+						for (const [x1, y1, x2, y2] of slash) {
+							const grad = fc.createLinearGradient(x1 * W, y1 * H, x2 * W, y2 * H)
+							grad.addColorStop(0, 'rgba(255,255,255,0)')
+							grad.addColorStop(0.5, `rgba(${th.tint2},0.95)`)
+							grad.addColorStop(1, 'rgba(255,255,255,0)')
+							fc.strokeStyle = grad
+							fc.lineWidth = 2.2
+							fc.shadowColor = 'rgb(255,80,90)'
+							fc.shadowBlur = 8
+							fc.beginPath()
+							fc.moveTo(x1 * W, y1 * H)
+							fc.lineTo(x2 * W, y2 * H)
+							fc.stroke()
+							fc.shadowBlur = 0
+						}
 					}
 				}
 			}
