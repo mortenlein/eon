@@ -94,6 +94,8 @@ export default {
 		this._klTimer = setInterval(() => this.loadKl(), 60000)
 		this._onDraw = (event) => {
 			const body = event.detail || {}
+			// user gate: hide-requests always honoured, show-requests only when enabled
+			if (body.show !== false && this.$opts['director.scoreboard.enabled'] === false) return
 			this.visible = typeof body.show === 'boolean' ? body.show : ! this.visible
 
 			if (this._hideTimer) {

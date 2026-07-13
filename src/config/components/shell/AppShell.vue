@@ -42,9 +42,11 @@ import OptionsEditor from '/config/components/OptionsEditor.vue'
 import TeamDiagnostics from '/config/components/TeamDiagnostics.vue'
 import PortabilityEditor from '/config/components/PortabilityEditor.vue'
 import TelestratorPage from '/config/components/TelestratorPage.vue'
+import DirectorPage from '/config/components/DirectorPage.vue'
 
 const COMPONENT_MAP = {
 	Dashboard,
+	DirectorPage,
 	LayoutEditor,
 	SeriesEditor,
 	MatchRulesEditor,

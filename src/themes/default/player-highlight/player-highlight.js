@@ -131,6 +131,7 @@ export default {
 			const body = event.detail || {}
 			if (this._egQueue && !body._fromQueue) return // endgame sequence owns the card
 			if (body.show === false) { this.beginExit(); return }
+			if (this.$opts['director.cards.enabled'] === false) return // user turned cards off
 			this.showCard(body)
 		}
 		// end-of-match showcase: a chain of cards played back to back, each with
@@ -138,6 +139,8 @@ export default {
 		this._onEndgame = (event) => {
 			const cards = (event.detail && event.detail.cards) || []
 			if (!cards.length) return
+			if (this.$opts['director.cards.enabled'] === false) return
+			if (this.$opts['director.cards.endgame'] === false) return
 			this._egQueue = cards.slice()
 			const next = () => {
 				const card = this._egQueue && this._egQueue.shift()

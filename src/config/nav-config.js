@@ -14,6 +14,7 @@ export const NAV_GROUPS = [
 		label: 'Live',
 		items: [
 			{ id: 'live-control', label: 'Live Control', icon: 'live', componentKey: 'Dashboard' },
+			{ id: 'director',     label: 'AI Director',  icon: 'director', componentKey: 'DirectorPage' },
 			{ id: 'telestrator',  label: 'Telestrator',  icon: 'telestrator', componentKey: 'TelestratorPage' },
 			{ id: 'layout-editor', label: 'Layout Editor', icon: 'layout', componentKey: 'LayoutEditor' },
 		],
@@ -86,6 +87,7 @@ export const migrateLegacyCategory = (raw) => {
  */
 export const ICON_PATHS = {
 	live:        ['M6 12h12', 'M12 6v12', 'M8.5 8.5h7v7h-7z'],
+	director:    ['M4 8h12v10H4z', 'M16 11l5-3v8l-5-3', 'M4 5l3 3', 'M9 4l3 4'],
 	telestrator: ['M4 4h16v12H4z', 'M4 20h16', 'M9 9l4 4', 'M13 9l-4 4'],
 	layout:      ['M4 5h16v14H4z', 'M4 10h16', 'M10 10v9'],
 	series:      ['M7 5h10', 'M7 12h10', 'M7 19h10', 'M4 5h.01', 'M4 12h.01', 'M4 19h.01'],
