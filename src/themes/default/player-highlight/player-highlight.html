@@ -1,6 +1,10 @@
-<div :class="['player-highlight', sideClass, { '--shown': visible && !!player }]">
+<div :class="['player-highlight', sideClass, '--fx-' + fxKind, { '--shown': visible && !!player }]">
 	<div class="ph-stage" ref="stage">
-		<!-- mystic smoke behind + in front of the hero -->
+		<!-- rear FX layer: god rays / heartbeat glow behind the hero -->
+		<canvas ref="fxback" class="ph-fx-back"></canvas>
+		<!-- entrance flash overlay (per-achievement) -->
+		<div class="ph-flash"></div>
+		<!-- front FX layer: smoke / sparks / embers / lightning -->
 		<canvas ref="smoke" class="ph-smoke"></canvas>
 		<!-- Cycles turntable loop (slow rotation); falls back to the still, then WebGL -->
 		<video v-if="!threeMode && videoOk" class="ph-render" :src="videoSrc" :poster="renderSrc"

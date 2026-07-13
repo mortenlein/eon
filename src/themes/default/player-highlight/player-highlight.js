@@ -72,6 +72,15 @@ export default {
 			const side = this.player?.side
 			return side === 3 ? '--ct' : side === 2 ? '--t' : ''
 		},
+		// achievement family drives the FX identity + entrance choreography
+		fxKind() {
+			const t = this.tag || ''
+			if (/^ACE/i.test(t)) return 'ace'
+			if (/^CLUTCH/i.test(t)) return 'clutch'
+			if (/KILL$/i.test(t)) return 'multi'
+			if (/DMG$/i.test(t)) return 'damage'
+			return 'plain'
+		},
 		renderSrc() {
 			// per-show cache-buster: render files keep the same URL when re-baked,
 			// and a long-lived HUD page would otherwise show stale art forever
@@ -105,6 +114,9 @@ export default {
 			this.roundKills = body.roundKills || 0
 			this.showSeq++
 			this.visible = true
+			// re-arm the FX engine so back-to-back spotlights get their own identity
+			this.stopSmoke()
+			this.$nextTick(() => this.startSmoke())
 			if (body.durationMs > 0) this._hideTimer = setTimeout(() => { this.visible = false }, body.durationMs)
 		}
 		this._bootTs = Date.now()
@@ -131,39 +143,168 @@ export default {
 	},
 
 	methods: {
-		// ── mystic smoke: soft drifting plumes on a canvas over the hero ──
+		// ── per-achievement FX engine: two canvases (rear = rays/glow behind the
+		//    hero, front = smoke/sparks/embers/lightning) with a distinct identity
+		//    per kind. ACE is the crown jewel: gold god-rays, shockwave rings,
+		//    spark bursts, rising embers. Clutch = crimson heartbeat. Multi-kill =
+		//    electric arcs. Damage = heat embers. Plain = side-tinted mystic smoke.
 		startSmoke() {
-			const c = this.$refs.smoke
-			if (!c || this._smokeRaf) return
-			const ctx = c.getContext('2d')
+			const front = this.$refs.smoke
+			const back = this.$refs.fxback
+			if (!front || this._smokeRaf) return
+			const fc = front.getContext('2d')
+			const bc = back ? back.getContext('2d') : null
 			const vh = window.innerHeight || 1080
-			c.width = Math.round(vh * 0.34)
-			c.height = Math.round(vh * 0.32)
-			if (!this._puffs) {
-				this._puffs = Array.from({ length: 16 }, () => ({
-					x: Math.random(), y: 0.6 + Math.random() * 0.5,
-					r: 0.18 + Math.random() * 0.26,
-					vx: (Math.random() - 0.5) * 0.0006, vy: -(0.0005 + Math.random() * 0.001),
-					a: 0.10 + Math.random() * 0.12, ph: Math.random() * Math.PI * 2,
-				}))
+			const W = Math.round(vh * 0.34), H = Math.round(vh * 0.32)
+			front.width = W; front.height = H
+			if (back) { back.width = W; back.height = H }
+
+			const THEMES = {
+				ace: { tint: '255,200,80', tint2: '255,240,190', smoke: 8, rays: 7, rings: true, sparks: 46, embers: 26 },
+				clutch: { tint: '255,72,64', tint2: '255,150,130', smoke: 20, pulse: 1.15, embers: 10 },
+				multi: { tint: '120,190,255', tint2: '220,240,255', smoke: 8, bolts: true, sparks: 22 },
+				damage: { tint: '255,140,50', tint2: '255,210,150', smoke: 14, embers: 20 },
+				plain: { tint: null, tint2: '205,220,245', smoke: 16 },
 			}
+			const kind = this.fxKind
+			const th = THEMES[kind] || THEMES.plain
+			const tint = th.tint || (this.sideKey === 't' ? '224,165,59' : '110,165,230')
+			const t0 = performance.now() / 1000
+			const rnd = Math.random
+
+			const puffs = Array.from({ length: th.smoke }, () => ({
+				x: rnd(), y: 0.6 + rnd() * 0.5, r: 0.18 + rnd() * 0.26,
+				vx: (rnd() - 0.5) * 0.0006, vy: -(0.0005 + rnd() * 0.001),
+				a: 0.10 + rnd() * 0.12, ph: rnd() * Math.PI * 2,
+			}))
+			const embers = Array.from({ length: th.embers || 0 }, () => ({
+				x: rnd(), y: 0.7 + rnd() * 0.4, r: 1.2 + rnd() * 2.2,
+				vy: 0.0015 + rnd() * 0.0035, ph: rnd() * Math.PI * 2, sway: 0.0006 + rnd() * 0.001,
+			}))
+			// spark burst on entry (radial, gravity) - ACE gets a re-burst every 4s
+			const mkSparks = () => Array.from({ length: th.sparks || 0 }, () => {
+				const ang = rnd() * Math.PI * 2, sp = 0.004 + rnd() * 0.012
+				return { x: 0.5, y: 0.42, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * 0.7 - 0.003,
+					life: 0.7 + rnd() * 0.9, born: t0, r: 0.8 + rnd() * 1.6 }
+			})
+			let sparks = mkSparks()
+			let lastBurst = t0
+			let bolt = null, boltUntil = 0, nextBolt = t0 + 0.3
+
 			const tick = () => {
 				this._smokeRaf = requestAnimationFrame(tick)
-				const w = c.width, h = c.height
-				const tint = this.sideKey === 't' ? '224,165,59' : '110,165,230'
-				ctx.clearRect(0, 0, w, h)
 				const t = performance.now() / 1000
-				for (const p of this._puffs) {
+				const el = t - t0
+				fc.clearRect(0, 0, W, H)
+				if (bc) bc.clearRect(0, 0, W, H)
+
+				// ── rear canvas ──
+				if (bc && th.rays) {
+					// rotating golden god-rays from behind the head/chest
+					const cx = W / 2, cy = H * 0.34
+					bc.save()
+					bc.translate(cx, cy)
+					for (let i = 0; i < th.rays; i++) {
+						const a0 = (i / th.rays) * Math.PI * 2 + t * 0.12
+						const grad = bc.createLinearGradient(0, 0, Math.cos(a0) * W, Math.sin(a0) * W)
+						grad.addColorStop(0, `rgba(${tint},${0.16 * Math.min(1, el / 0.8)})`)
+						grad.addColorStop(1, 'rgba(0,0,0,0)')
+						bc.fillStyle = grad
+						bc.beginPath()
+						bc.moveTo(0, 0)
+						bc.arc(0, 0, W, a0 - 0.09, a0 + 0.09)
+						bc.closePath()
+						bc.fill()
+					}
+					bc.restore()
+				}
+				if (bc && th.pulse) {
+					// clutch heartbeat: double-thump glow behind the hero
+					const ph = (t % th.pulse) / th.pulse
+					const beat = Math.pow(Math.max(0, Math.sin(ph * Math.PI * 2)), 10)
+						+ 0.55 * Math.pow(Math.max(0, Math.sin((ph - 0.14) * Math.PI * 2)), 10)
+					const g = bc.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, W * 0.55)
+					g.addColorStop(0, `rgba(${tint},${0.10 + 0.20 * beat})`)
+					g.addColorStop(1, 'rgba(0,0,0,0)')
+					bc.fillStyle = g
+					bc.fillRect(0, 0, W, H)
+				}
+				if (th.rings && el < 1.4) {
+					// entry shockwave rings (front canvas so they cross the hero)
+					for (const d of [0, 0.18, 0.36]) {
+						const p = (el - d) / 0.9
+						if (p <= 0 || p >= 1) continue
+						fc.strokeStyle = `rgba(${tint},${0.5 * (1 - p)})`
+						fc.lineWidth = 2.5 * (1 - p) + 0.5
+						fc.beginPath()
+						fc.arc(W / 2, H * 0.45, p * W * 0.62, 0, Math.PI * 2)
+						fc.stroke()
+					}
+				}
+
+				// ── front canvas: smoke ──
+				for (const p of puffs) {
 					p.x += p.vx + Math.sin(t * 0.4 + p.ph) * 0.0004
 					p.y += p.vy
-					if (p.y < -p.r) { p.y = 1 + p.r * 0.5; p.x = Math.random() }
-					const g = ctx.createRadialGradient(p.x * w, p.y * h, 0, p.x * w, p.y * h, Math.max(8, p.r * w))
+					if (p.y < -p.r) { p.y = 1 + p.r * 0.5; p.x = rnd() }
+					const g = fc.createRadialGradient(p.x * W, p.y * H, 0, p.x * W, p.y * H, Math.max(8, p.r * W))
 					const a = p.a * (0.75 + 0.25 * Math.sin(t * 0.7 + p.ph * 3))
 					g.addColorStop(0, `rgba(${tint},${a})`)
-					g.addColorStop(0.55, `rgba(205,220,245,${a * 0.3})`)
+					g.addColorStop(0.55, `rgba(${th.tint2},${a * 0.3})`)
 					g.addColorStop(1, 'rgba(0,0,0,0)')
-					ctx.fillStyle = g
-					ctx.fillRect(0, 0, w, h)
+					fc.fillStyle = g
+					fc.fillRect(0, 0, W, H)
+				}
+				// embers: bright rising motes
+				for (const e of embers) {
+					e.y -= e.vy * (0.7 + 0.3 * Math.sin(t + e.ph))
+					e.x += Math.sin(t * 1.3 + e.ph) * e.sway
+					if (e.y < -0.05) { e.y = 1.05; e.x = rnd() }
+					const a = 0.35 + 0.35 * Math.sin(t * 3 + e.ph)
+					fc.fillStyle = `rgba(${th.tint2},${Math.max(0, a)})`
+					fc.beginPath()
+					fc.arc(e.x * W, e.y * H, e.r, 0, Math.PI * 2)
+					fc.fill()
+				}
+				// sparks: entry burst (+ ACE re-burst)
+				if (th.sparks) {
+					if (kind === 'ace' && t - lastBurst > 4) { sparks = sparks.concat(mkSparks()); lastBurst = t }
+					sparks = sparks.filter((s) => t - s.born < s.life)
+					for (const s of sparks) {
+						const age = t - s.born
+						s.vy += 0.00018 // gravity
+						s.x += s.vx; s.y += s.vy
+						const a = Math.max(0, 1 - age / s.life)
+						fc.fillStyle = `rgba(${th.tint2},${0.9 * a})`
+						fc.beginPath()
+						fc.arc(s.x * W, s.y * H, s.r * a + 0.4, 0, Math.PI * 2)
+						fc.fill()
+					}
+				}
+				// lightning: brief jagged arcs for multi-kill
+				if (th.bolts) {
+					if (t > nextBolt) {
+						const x0 = 0.18 + rnd() * 0.64
+						const pts = [[x0, -0.02]]
+						let x = x0
+						for (let y = 0.08; y < 0.55 + rnd() * 0.2; y += 0.07 + rnd() * 0.06) {
+							x += (rnd() - 0.5) * 0.14
+							pts.push([x, y])
+						}
+						bolt = pts
+						boltUntil = t + 0.1 + rnd() * 0.08
+						nextBolt = t + 0.45 + rnd() * 0.9
+					}
+					if (bolt && t < boltUntil) {
+						fc.strokeStyle = `rgba(${th.tint2},0.85)`
+						fc.lineWidth = 1.6
+						fc.shadowColor = `rgb(${tint})`
+						fc.shadowBlur = 10
+						fc.beginPath()
+						bolt.forEach(([bx, by], i) => (i ? fc.lineTo(bx * W, by * H) : fc.moveTo(bx * W, by * H)))
+						fc.stroke()
+						fc.shadowBlur = 0
+					}
 				}
 			}
 			tick()
