@@ -329,6 +329,60 @@
                                                        "section":  "Director",
                                                        "label":  "Mid-round establishing shots when nothing is happening (dead-air reclaim)"
                                                    },
+                    "director.waitingIdle.enabled":  {
+                                                         "type":  "boolean",
+                                                         "value":  true,
+                                                         "section":  "Director",
+                                                         "label":  "Waiting scene idle character (breathing loop at the screen edge with occasional watch-check fidgets)"
+                                                     },
+                    "director.waitingIdle.agent":  {
+                                                       "type":  "select",
+                                                       "section":  "Director",
+                                                       "label":  "Waiting scene idle character agent",
+                                                       "value":  "ct-sas",
+                                                       "options":  [
+                                                                       "ct-sas",
+                                                                       "ct-fbi",
+                                                                       "ct-diver",
+                                                                       "ct-gendarmerie",
+                                                                       "ct-heavy",
+                                                                       "ct-st6",
+                                                                       "ct-swat",
+                                                                       "t-phoenix",
+                                                                       "t-balkan",
+                                                                       "t-jumpsuit",
+                                                                       "t-jungleraider",
+                                                                       "t-leet",
+                                                                       "t-phoenixheavy",
+                                                                       "t-professional"
+                                                                   ]
+                                                   },
+                    "director.waitingIdle.side":  {
+                                                      "type":  "select",
+                                                      "section":  "Director",
+                                                      "label":  "Waiting scene idle character screen edge",
+                                                      "value":  "right",
+                                                      "options":  [
+                                                                      "right",
+                                                                      "left"
+                                                                  ]
+                                                  },
+                    "director.waitingIdle.loopsShort":  {
+                                                            "type":  "number",
+                                                            "fallback":  5,
+                                                            "min":  1,
+                                                            "max":  30,
+                                                            "section":  "Director",
+                                                            "label":  "Breathing loops before a fidget (short block; alternates with the long block)"
+                                                        },
+                    "director.waitingIdle.loopsLong":  {
+                                                           "type":  "number",
+                                                           "fallback":  10,
+                                                           "min":  1,
+                                                           "max":  60,
+                                                           "section":  "Director",
+                                                           "label":  "Breathing loops before a fidget (long block; alternates with the short block)"
+                                                       },
                     "preferences.roundResultBanner.enabled":  {
                                                                   "type":  "boolean",
                                                                   "value":  true,

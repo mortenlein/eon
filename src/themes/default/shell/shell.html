@@ -120,6 +120,7 @@
 					</section>
 					</div>
 			</main>
+			<WaitingIdle v-if="komplettligaenView === 'waiting'" />
 
 			<main v-if="komplettligaenMatch && komplettligaenView === 'result'" class="kl-scene-frame">
 				<div class="kl-scene-gutter">
