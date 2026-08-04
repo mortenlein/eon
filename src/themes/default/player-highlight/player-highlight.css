@@ -434,3 +434,12 @@
 	0% { transform: translateY(0); opacity: 1; }
 	100% { transform: translateY(5vh) scale(0.96); filter: brightness(1.6) blur(5px); opacity: 0; }
 }
+
+/* native CS2 performance: FULL-BODY theatrical clip (feet grounded on the
+   stage shadow), not the waist-up turntable crop. No breathe push-in - the
+   clip carries its own motion and a scale sweep would kick the feet out. */
+.ph-render.--performance {
+	object-fit: contain;
+	object-position: center bottom;
+	animation: none;
+}

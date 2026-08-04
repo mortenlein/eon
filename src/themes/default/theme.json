@@ -286,6 +286,12 @@
                                                    "section":  "Director",
                                                    "label":  "End-of-match showcase (best moments chained, MVP finale)"
                                                },
+                    "director.cards.performances":  {
+                                                        "type":  "boolean",
+                                                        "value":  true,
+                                                        "section":  "Director",
+                                                        "label":  "Native CS2 performances on spotlight cards (per-kind celebration instead of the turntable stance)"
+                                                    },
                     "director.cards.minKills":  {
                                                     "type":  "number",
                                                     "fallback":  3,

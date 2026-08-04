@@ -6,10 +6,14 @@
 		<div class="ph-flash"></div>
 		<!-- front FX layer: smoke / sparks / embers / lightning -->
 		<canvas ref="smoke" class="ph-smoke"></canvas>
+		<!-- native CS2 performance keyed to the achievement kind; plays once and
+		     holds its final stance. Falls back to the turntable, still, then WebGL -->
+		<video v-if="usePerf" class="ph-render --performance" :src="perfSrc"
+			autoplay muted playsinline @error="perfOk = false"></video>
 		<!-- Cycles turntable loop (slow rotation); falls back to the still, then WebGL -->
-		<video v-if="!threeMode && videoOk" class="ph-render" :src="videoSrc" :poster="renderSrc"
+		<video v-if="!threeMode && videoOk && !usePerf" class="ph-render" :src="videoSrc" :poster="renderSrc"
 			autoplay muted loop playsinline @error="videoOk = false"></video>
-		<img v-if="!threeMode && !videoOk" class="ph-render" :src="renderSrc" @error="onRenderError" alt="">
+		<img v-if="!threeMode && !videoOk && !usePerf" class="ph-render" :src="renderSrc" @error="onRenderError" alt="">
 		<canvas v-show="threeMode" ref="canvas" class="ph-canvas"></canvas>
 	</div>
 

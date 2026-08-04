@@ -68,7 +68,7 @@ export default {
 		// still-image fallback). The animated WebGL model stays behind ?phThree.
 		// showSeq bumps per spotlight so re-baked renders can never serve stale
 		// from the browser cache (a long-lived HUD page never reloads).
-		return { visible: false, leaving: false, steamid: null, tag: '', roundKills: 0, threeMode: false, videoOk: true, showSeq: 0 }
+		return { visible: false, leaving: false, steamid: null, tag: '', roundKills: 0, threeMode: false, videoOk: true, perfOk: true, showSeq: 0 }
 	},
 
 	computed: {
@@ -110,6 +110,17 @@ export default {
 		},
 		videoSrc() {
 			return `/hud/player-highlight/renders/${this.agentKey}.webm?v=${this._bootTs || 0}-${this.showSeq}`
+		},
+		// native CS2 performance keyed to the achievement kind (Valve's own
+		// animation on the agent - real hands/fingers, no bolt-on weapon). Plays
+		// once and settles on its final stance; the turntable render is the
+		// fallback when a pair hasn't been rendered or the option is off.
+		perfSrc() {
+			return `/hud/player-highlight/performances/${this.agentKey}-${this.fxKind}.webm?v=${this._bootTs || 0}-${this.showSeq}`
+		},
+		usePerf() {
+			return !this.threeMode && this.perfOk
+				&& this.$opts['director.cards.performances'] !== false
 		},
 	},
 
@@ -189,6 +200,7 @@ export default {
 			this.steamid = body.steamid != null ? String(body.steamid) : null
 			this.tag = body.tag || 'HIGHLIGHT'
 			this.roundKills = body.roundKills || 0
+			this.perfOk = true // each show retries: kind/agent pair may exist now
 			this.showSeq++
 			this.visible = true
 			// re-arm the FX engine so back-to-back spotlights get their own identity
