@@ -1,8 +1,8 @@
 import https from 'node:https'
 
-const COMPETITION_SLUG = "komplettligaen-counter-strike-varen-2026";
-const COMPETITION_ID = "13835";
-const DIVISION_ID = "18714";
+const COMPETITION_SLUG = "komplettligaen-counter-strike-hosten-2026";
+const COMPETITION_ID = "13908";
+const DIVISION_ID = "18878";
 const BASE_URL = `https://www.ggarena.no/competitions/${COMPETITION_SLUG}/${COMPETITION_ID}`;
 
 function decodeHtml(value) {
