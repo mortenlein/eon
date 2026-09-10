@@ -68,7 +68,7 @@ export default {
 		// still-image fallback). The animated WebGL model stays behind ?phThree.
 		// showSeq bumps per spotlight so re-baked renders can never serve stale
 		// from the browser cache (a long-lived HUD page never reloads).
-		return { visible: false, leaving: false, steamid: null, tag: '', roundKills: 0, threeMode: false, videoOk: true, perfOk: true, showSeq: 0 }
+		return { visible: false, leaving: false, steamid: null, tag: '', roundKills: 0, cardSide: null, threeMode: false, videoOk: true, perfOk: true, showSeq: 0 }
 	},
 
 	computed: {
@@ -76,10 +76,16 @@ export default {
 			if (! this.steamid) return null
 			return (this.$players || []).find((p) => String(p.steam64Id) === this.steamid) || null
 		},
+		// prefer the side the director sent (it always knows it); fall back to the
+		// $players lookup only when absent. A failed lookup used to default to CT
+		// and mislabel T-side spotlights.
 		sideKey() {
+			if (this.cardSide === 't' || this.cardSide === 'ct') return this.cardSide
 			return this.player?.side === 2 ? 't' : 'ct'
 		},
 		sideClass() {
+			if (this.cardSide === 't') return '--t'
+			if (this.cardSide === 'ct') return '--ct'
 			const side = this.player?.side
 			return side === 3 ? '--ct' : side === 2 ? '--t' : ''
 		},
@@ -200,6 +206,7 @@ export default {
 			this.steamid = body.steamid != null ? String(body.steamid) : null
 			this.tag = body.tag || 'HIGHLIGHT'
 			this.roundKills = body.roundKills || 0
+			this.cardSide = body.side === 't' || body.side === 'ct' ? body.side : null
 			this.perfOk = true // each show retries: kind/agent pair may exist now
 			this.showSeq++
 			this.visible = true
