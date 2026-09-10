@@ -59,6 +59,12 @@ const run = async () => {
 			context.redirect(`${path}/`)
 			return
 		}
+		// animation-asset telemetry: every card-performance / waiting-idle fetch is
+		// one playback (per-show cache-busters guarantee a server hit), so the
+		// server log doubles as a "what actually played on stream" record
+		if (path.includes('/performances/') || path.includes('/waiting-idle/renders/')) {
+			console.log(`[anim] ${new Date().toISOString()} ${path.split('/').pop()} (${context.querystring})`)
+		}
 		await next()
 	})
 
