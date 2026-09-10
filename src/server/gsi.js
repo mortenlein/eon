@@ -96,6 +96,27 @@ const gsiToken = process.env.GSI_TOKEN || DEFAULT_GSI_TOKEN
 if (!process.env.GSI_TOKEN) {
 	console.warn('[Security] GSI_TOKEN not set — using the bundled default token. Fine for loopback use; set GSI_TOKEN (and update gamestate_integration_eon.cfg) before exposing the server on a network.')
 }
+// Raw GSI session recorder: every ACCEPTED frame, timestamped, JSONL. This is
+// the replay source - `node scripts/gsi-simulator.js --session <file>` streams
+// it back through /api/gsi with original pacing, reproducing an entire game
+// against the live stack (HUD + director) deterministically. Expect roughly
+// 0.5-1 GB per match night in tmp/; disable with EON_GSI_RECORD=0.
+const gsiRecordEnabled = process.env.EON_GSI_RECORD !== '0'
+let gsiRecordStream = null
+const recordRawGsiFrame = (body) => {
+	if (!gsiRecordEnabled) return
+	if (!gsiRecordStream) {
+		const dir = path.join(process.cwd(), 'tmp')
+		if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+		const stamp = new Date().toISOString().slice(0, 16).replace(/[T:]/g, '-')
+		const file = path.join(dir, `gsi-${stamp}.jsonl`)
+		gsiRecordStream = fs.createWriteStream(file, { flags: 'a' })
+		console.log(`[gsi] recording raw session -> ${file}`)
+	}
+	const { auth, ...frame } = body // token has no business in a replay file
+	gsiRecordStream.write(JSON.stringify({ t: Date.now(), frame }) + '\n')
+}
+
 let lastGsiMeta = {
 	acceptedAtUnixTimestamp: 0,
 	authFailedAtUnixTimestamp: 0,
@@ -179,6 +200,7 @@ export const registerGsiRoutes = (router, websocket) => {
 		const wasMapActive = !!gsiState.map
 
 		additionalState.gsiActive = true
+		recordRawGsiFrame(body)
 		updateGsiState(body)
 		
 		const { mapChanged } = updateLastKnownMapName(body)

@@ -19,6 +19,8 @@ function getArgValue(name, fallback) {
 
 const fixtureArg = getArgValue('--fixture', 'tests/fixtures/gsi/live.json');
 const intervalArg = getArgValue('--interval', null);
+const sessionArg = getArgValue('--session', null); // tmp/gsi-*.jsonl replay
+const speedArg = parseFloat(getArgValue('--speed', '1'));
 const tokenArg = getArgValue('--token', '7ATvXUzTfBYyMLrA');
 const portArg = getArgValue('--port', '31982');
 const hostArg = getArgValue('--host', 'localhost');
@@ -61,10 +63,53 @@ async function loadAndPostFixture(fixturePath) {
 	}
 }
 
+async function postFrame(frame) {
+	frame.auth = { token: tokenArg };
+	const response = await fetch(endpoint, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json', 'User-Agent': 'CS2 GSI Simulator/v1.0' },
+		body: JSON.stringify(frame)
+	});
+	return response.ok;
+}
+
+// Replay a recorded session (tmp/gsi-*.jsonl from the server's raw recorder)
+// with the ORIGINAL inter-frame pacing, so the entire stack - HUD, director,
+// cards, scenes - re-lives the game exactly as it happened. --speed N to
+// fast-forward; delays are capped at 5s so halftime doesn't take 15 minutes.
+async function replaySession(sessionPath) {
+	const absolutePath = path.isAbsolute(sessionPath)
+		? sessionPath
+		: path.resolve(projectRoot, sessionPath);
+	const lines = (await fs.readFile(absolutePath, 'utf8')).split('\n').filter(Boolean);
+	console.log(`[Simulator] Replaying ${lines.length} frames from ${sessionPath} at ${speedArg}x`);
+
+	let posted = 0, failed = 0, prevT = null;
+	const startedAt = Date.now();
+	for (const line of lines) {
+		let record;
+		try { record = JSON.parse(line); } catch { continue; }
+		if (prevT !== null) {
+			const delay = Math.min(5000, Math.max(0, record.t - prevT)) / speedArg;
+			if (delay > 0) await new Promise((r) => setTimeout(r, delay));
+		}
+		prevT = record.t;
+		(await postFrame(record.frame)) ? posted++ : failed++;
+		if (posted % 500 === 0 && posted > 0) {
+			console.log(`[Simulator] ${posted}/${lines.length} frames (${failed} failed, ${Math.round((Date.now() - startedAt) / 1000)}s elapsed)`);
+		}
+	}
+	console.log(`[Simulator] Replay complete: ${posted} posted, ${failed} failed.`);
+}
+
 async function run() {
 	console.log('=========================================');
 	console.log('  Eon CS2 GSI Simulator');
 	console.log('=========================================');
+	if (sessionArg) {
+		await replaySession(sessionArg);
+		return;
+	}
 	console.log(`- Fixture: ${fixtureArg}`);
 	console.log(`- Token:   ${tokenArg}`);
 	console.log(`- Endpoint: ${endpoint}`);
