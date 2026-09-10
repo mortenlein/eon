@@ -14,7 +14,7 @@ function decodeHtml(value) {
     .replace(/&gt;/g, ">");
 }
 
-function get(url) {
+function get(url, redirects = 0) {
   return new Promise((resolve, reject) => {
     https
       .get(
@@ -26,6 +26,19 @@ function get(url) {
           },
         },
         (response) => {
+          // GG Arena 301/302s any stale competition slug/id to the canonical
+          // season path for the requested resource. Following the redirect
+          // makes match lookups season-independent - the constants above are
+          // only fallbacks, never a correctness requirement.
+          if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+            response.resume();
+            if (redirects >= 5) {
+              reject(new Error("GG Arena redirect loop"));
+              return;
+            }
+            resolve(get(new URL(response.headers.location, url).toString(), redirects + 1));
+            return;
+          }
           if (response.statusCode < 200 || response.statusCode >= 300) {
             reject(new Error(`GG Arena returned HTTP ${response.statusCode}`));
             response.resume();
