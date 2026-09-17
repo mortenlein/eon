@@ -18,6 +18,7 @@ import WinProbGraph from '/hud/win-prob-graph/win-prob-graph.vue'
 import Maps from '/hud/maps/maps.vue'
 import MapsSleek from '/hud/maps-sleek/maps-sleek.vue'
 import KlSeries from '/hud/kl-series/kl-series.vue'
+import BombCallout from '/hud/bomb-callout/bomb-callout.vue'
 import WaitingIdle from '/hud/waiting-idle/waiting-idle.vue'
 import { getPlayerDisplayName, getTeamLogoPath } from '/hud/helpers/player-resolver.js'
 import { buildHudTeamIdentityContext, resolveTeamIdentities } from '/hud/helpers/team-identity-resolver.js'
@@ -46,6 +47,7 @@ export default {
 		Maps,
 		MapsSleek,
 		KlSeries,
+		BombCallout,
 		WaitingIdle,
 	},
 

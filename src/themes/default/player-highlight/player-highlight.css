@@ -20,7 +20,11 @@
 	font-family: var(--font-primary, 'Quantico', sans-serif);
 }
 
-.player-highlight { --ph-glow: #14233a; }
+/* the SIDE owns the card colours (frame, tag, kills, floor glow). The
+   achievement kind (--fx-*) only owns its FX identity (--ph-fx, particles,
+   choreography) - it used to overwrite the accent, so a T triple kill came out
+   CT blue (2026-09-17 feedback: "wrong colour for the team the player is on"). */
+.player-highlight { --ph-glow: #14233a; --ph-fx: var(--ph-accent); --ph-fx-glow: var(--ph-glow); }
 .player-highlight.--t { --ph-accent: var(--color-t, #e0a53b); --ph-glow: #38270e; }
 .player-highlight.--ct { --ph-accent: var(--color-ct, #5b9bd5); --ph-glow: #122f4d; }
 .player-highlight.--shown { opacity: 1; }
@@ -117,10 +121,10 @@
 
 /* ── per-achievement identities ─────────────────────────────────────────── */
 /* ACE: molten gold - overrides the side colour; this is the crown jewel */
-.player-highlight.--fx-ace { --ph-accent: #ffc94d; --ph-glow: #4a3208; }
-.player-highlight.--fx-clutch { --ph-accent: #ff5246; --ph-glow: #4a100c; }
-.player-highlight.--fx-multi { --ph-accent: #7cc3ff; --ph-glow: #14304d; }
-.player-highlight.--fx-damage { --ph-accent: #ff8c32; --ph-glow: #47230a; }
+.player-highlight.--fx-ace { --ph-fx: #ffc94d; --ph-fx-glow: #4a3208; }
+.player-highlight.--fx-clutch { --ph-fx: #ff5246; --ph-fx-glow: #4a100c; }
+.player-highlight.--fx-multi { --ph-fx: #7cc3ff; --ph-fx-glow: #14304d; }
+.player-highlight.--fx-damage { --ph-fx: #ff8c32; --ph-fx-glow: #47230a; }
 
 /* ACE entrance: white-gold flashbang + slam from scale 1.35 with blur → sharp */
 .player-highlight.--fx-ace.--shown .ph-flash {
@@ -210,7 +214,7 @@
 }
 
 /* MVP: royal violet - the end-of-match crown */
-.player-highlight.--fx-mvp { --ph-accent: #c9a2ff; --ph-glow: #2a1650; }
+.player-highlight.--fx-mvp { --ph-fx: #c9a2ff; --ph-fx-glow: #2a1650; }
 
 .player-highlight.--fx-mvp.--shown .ph-flash {
 	background: radial-gradient(60% 60% at 50% 38%, rgba(240, 228, 255, 0.95), rgba(186, 140, 255, 0.5) 55%, transparent 80%);
@@ -244,7 +248,7 @@
 }
 
 /* KNIFE: cold steel - slash-wipe entrance */
-.player-highlight.--fx-knife { --ph-accent: #dfe7f2; --ph-glow: #2c333d; }
+.player-highlight.--fx-knife { --ph-fx: #dfe7f2; --ph-fx-glow: #2c333d; }
 
 .player-highlight.--fx-knife.--shown .ph-stage {
 	animation: ph-knife-cut 0.5s cubic-bezier(0.3, 1.3, 0.4, 1) both;

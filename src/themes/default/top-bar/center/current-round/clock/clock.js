@@ -10,6 +10,13 @@ export default {
 		return {
 			nowUnixTimestamp: Date.now(),
 			timerInterval: null,
+			// monotonic guard: the feed's countdown lags the wall clock by the
+			// transport delay, so the locally extrapolated value crosses a whole
+			// second BEFORE the next frame snaps it back above it - the
+			// 7-6-7-6 flicker seen live (2026-09-17). Within one phase the shown
+			// value may only go down; it resets on a phase change or a real jump.
+			guardPhase: null,
+			guardValue: null,
 		}
 	},
 
@@ -30,7 +37,7 @@ export default {
 			return Math.max(0, Math.ceil(countdown))
 		},
 
-		roundEndsInSec() {
+		rawEndsInSec() {
 			const syncedAt = additionalState.unixTimestamp
 			const phaseEndsInSec = Number(this.$round?.phaseEndsInSec)
 			if (! Number.isFinite(phaseEndsInSec)) return 0
@@ -39,6 +46,20 @@ export default {
 
 			const elapsedSeconds = (this.nowUnixTimestamp - syncedAt) / 1000
 			return Math.max(0, Math.ceil(phaseEndsInSec - elapsedSeconds))
+		},
+
+		roundEndsInSec() {
+			const raw = this.rawEndsInSec
+			const phase = this.$round?.phase || null
+			// a new phase, or a genuine jump up (pause lifted, timer extended):
+			// follow the feed. Otherwise never tick back up.
+			if (phase !== this.guardPhase || this.guardValue == null || raw > this.guardValue + 1.5) {
+				this.guardPhase = phase
+				this.guardValue = raw
+			} else if (raw < this.guardValue) {
+				this.guardValue = raw
+			}
+			return this.guardValue
 		},
 
 		clockMinutes() {
