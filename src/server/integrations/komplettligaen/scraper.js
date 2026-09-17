@@ -106,6 +106,15 @@ function signupId(signup) {
   return signup?.signup_id || signup?.signup?.id || (signup?.team_id || signup?.team ? signup.id : null);
 }
 
+// 'CT' | 'T' | null from a side object ({remote_id, name}) or a bare string
+function startSide(value) {
+  const raw = String(value?.remote_id || value?.name || value || "").trim().toLowerCase();
+  if (!raw) return null;
+  if (raw === "ct" || raw.startsWith("counter")) return "CT";
+  if (raw === "t" || raw.startsWith("terror")) return "T";
+  return null;
+}
+
 function mapWinner(map) {
   if (!map.finished || map.homeScore === null || map.awayScore === null) {
     return null;
@@ -151,6 +160,12 @@ function simplifyMatch(page, matchMaps = []) {
         finished: Boolean(map.finished_at),
         winner: null,
         pickedBy: text(teamName(map.picked_by) || map.picked_by || map.pick_team || map.picks_side),
+        // starting sides per map, as shown on the match page. The maps API
+        // carries them as homeside/awayside {remote_id:'ct'|'t', name}; the HUD
+        // uses them (with the round number) when the game feed's team names
+        // don't identify the teams.
+        homeStartSide: startSide(map.homeside ?? map.home_side ?? map.homeSide),
+        awayStartSide: startSide(map.awayside ?? map.away_side ?? map.awaySide),
       }))
     : [];
   parsedMaps.forEach((map) => {

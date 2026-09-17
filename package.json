@@ -17,7 +17,8 @@
     "theme:validate": "node scripts/theme-validate.js",
     "broadcast:start": "node scripts/broadcast-start.js",
     "test:smoke": "playwright test",
-    "gsi:simulate": "node scripts/gsi-simulator.js"
+    "gsi:simulate": "node scripts/gsi-simulator.js",
+    "test:unit": "node --test tests/unit/*.test.mjs"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.2.8",

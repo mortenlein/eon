@@ -156,15 +156,6 @@ export const resolveTeamIdentities = (context) => {
 	}
 }
 
-const mapKlSlots = (match, options) => {
-	const isSwapped = !!options?.['preferences.topBar.swapScrapedTeams']
-	const home = match?.home || {}
-	const away = match?.away || {}
-	return isSwapped
-		? { left: away, right: home }
-		: { left: home, right: away }
-}
-
 const hudSlotForTeam = (teams, side) => {
 	const index = teams?.findIndex((team) => team?.side === (side === 'CT' ? 3 : 2)) ?? -1
 	return {
@@ -208,10 +199,100 @@ const makeHudSlot = ({ side, slot, team, options, klEntry }) => {
 	}
 }
 
-export const buildHudTeamIdentityContext = ({ teams = [], options = {}, match = null } = {}) => {
-	const klSlots = mapKlSlots(match, options)
+// ---- which scraped team is on which side? ---------------------------------
+// The old rule was positional (home = T, away = CT, whatever the game said),
+// so every match where the home team started CT - and every second half -
+// showed the names the wrong way round (2026-09-17, live). Three sources, in
+// order of trust:
+//   1. the game feed's own team names (league servers set them) matched
+//      against the scraped home/away names
+//   2. the match page's starting side for the current map, plus the round
+//      number (MR12: sides swap after round 12; overtime swaps every 3 rounds)
+//   3. the old positional guess
+// The operator's "swap" switch is applied last, on top of whatever was found.
+const normalizeTeamName = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+
+export const teamNamesMatch = (a, b) => {
+	const x = normalizeTeamName(a)
+	const y = normalizeTeamName(b)
+	if (!x || !y) return false
+	if (x === y) return true
+	const shorter = x.length < y.length ? x : y
+	return shorter.length >= 4 && (x.includes(y) || y.includes(x))
+}
+
+export const normalizeMapName = (value) => String(value || '').toLowerCase().replace(/^de_/, '').replace(/[^a-z0-9]/g, '').replace(/ii$/, '2')
+
+const otherSide = (side) => (side === 'CT' ? 'T' : 'CT')
+
+/** The side a team is on in round `roundNumber` (1-based) given where it
+ * started. MR12 regulation (24 rounds), then 3-round overtime halves. */
+export const sideInRound = (startSide, roundNumber, regulationRounds = 24) => {
+	if (!startSide) return null
+	const r = Math.max(1, Number(roundNumber) || 1)
+	const half = regulationRounds / 2
+	let swapped
+	if (r <= half) swapped = false
+	else if (r <= regulationRounds) swapped = true
+	else swapped = Math.floor((r - regulationRounds - 1) / 3) % 2 === 1
+	return swapped ? otherSide(startSide) : startSide
+}
+
+/**
+ * @param {object} p
+ * @param {object} p.match       scraped match ({home, away, maps[]})
+ * @param {object} p.options     options map (the swap switch)
+ * @param {{name?:string, score?:number}} p.ct   the game feed's CT team
+ * @param {{name?:string, score?:number}} p.t    the game feed's T team
+ * @param {string} [p.mapName]   the game feed's map (de_ancient)
+ * @returns {{ct: object|null, t: object|null, source: string}}
+ */
+export const assignKlSides = ({ match, options = {}, ct = {}, t = {}, mapName = null } = {}) => {
+	const home = match?.home || null
+	const away = match?.away || null
+	if (!home?.name && !away?.name) return { ct: null, t: null, source: 'none' }
+	let sideOfHome = null
+	let source = null
+
+	// 1. by the game feed's team names
+	const ctName = isGenericGsiTeamName(ct?.name) ? '' : ct?.name
+	const tName = isGenericGsiTeamName(t?.name) ? '' : t?.name
+	const homeIsCt = teamNamesMatch(home?.name, ctName)
+	const homeIsT = teamNamesMatch(home?.name, tName)
+	const awayIsCt = teamNamesMatch(away?.name, ctName)
+	const awayIsT = teamNamesMatch(away?.name, tName)
+	if ((homeIsCt && !homeIsT) || (awayIsT && !awayIsCt)) { sideOfHome = 'CT'; source = 'gsi-name' }
+	else if ((homeIsT && !homeIsCt) || (awayIsCt && !awayIsT)) { sideOfHome = 'T'; source = 'gsi-name' }
+
+	// 2. by the match page's starting side for this map + the round number
+	if (!source && mapName && Array.isArray(match?.maps)) {
+		const wanted = normalizeMapName(mapName)
+		const entry = match.maps.find((m) => normalizeMapName(m?.name) === wanted)
+		if (entry?.homeStartSide) {
+			const roundNumber = (Number(ct?.score) || 0) + (Number(t?.score) || 0) + 1
+			sideOfHome = sideInRound(entry.homeStartSide, roundNumber)
+			source = 'starting-side'
+		}
+	}
+
+	// 3. the old positional guess (home = T, away = CT)
+	if (!source) { sideOfHome = 'T'; source = 'home-away' }
+
+	// operator override, on top
+	if (options?.['preferences.topBar.swapScrapedTeams']) { sideOfHome = otherSide(sideOfHome); source += '+swapped' }
+
+	return sideOfHome === 'CT' ? { ct: home, t: away, source } : { ct: away, t: home, source }
+}
+
+export const buildHudTeamIdentityContext = ({ teams = [], options = {}, match = null, map = null } = {}) => {
 	const ct = hudSlotForTeam(teams, 'CT')
 	const t = hudSlotForTeam(teams, 'T')
+	const klSides = assignKlSides({
+		match, options,
+		ct: { name: ct.team?.name, score: ct.team?.score },
+		t: { name: t.team?.name, score: t.team?.score },
+		mapName: map?.name || null,
+	})
 
 	return {
 		options,
@@ -219,6 +300,7 @@ export const buildHudTeamIdentityContext = ({ teams = [], options = {}, match = 
 		komplettligaen: {
 			config: {},
 			match,
+			sideSource: klSides.source,
 		},
 		session: null,
 		slots: {
@@ -227,14 +309,14 @@ export const buildHudTeamIdentityContext = ({ teams = [], options = {}, match = 
 				slot: ct.slot,
 				team: ct.team,
 				options,
-				klEntry: ct.slot === 'left' ? klSlots.left : klSlots.right,
+				klEntry: klSides.ct,
 			}),
 			t: makeHudSlot({
 				side: 'T',
 				slot: t.slot,
 				team: t.team,
 				options,
-				klEntry: t.slot === 'left' ? klSlots.left : klSlots.right,
+				klEntry: klSides.t,
 			}),
 		},
 	}

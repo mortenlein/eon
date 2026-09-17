@@ -6,7 +6,7 @@ import { gsiState } from './state.js'
 import { getActiveSession } from './sessions/session-store.js'
 import { getKomplettligaenBundle, getKomplettligaenConfig } from './komplettligaen.js'
 import { builtinThemesDirectory, customThemesDirectory } from './helpers/paths.js'
-import { isGenericGsiTeamName } from './team-identity-resolver.js'
+import { assignKlSides, isGenericGsiTeamName } from './team-identity-resolver.js'
 
 const optionValue = (settings, key) => settings.options?.[key]?.value ?? settings.options?.[key]?.fallback ?? null
 
@@ -35,15 +35,6 @@ const resolveFilesystemLogo = async (name, themeTree) => {
 	}
 
 	return { path: `/hud/${hudPath}`, exists: false }
-}
-
-const mapKlSlots = (match, options) => {
-	const isSwapped = !!options['preferences.topBar.swapScrapedTeams']
-	const home = match?.home || {}
-	const away = match?.away || {}
-	return isSwapped
-		? { left: away, right: home }
-		: { left: home, right: away }
 }
 
 const mapSessionSlots = (session) => ({
@@ -88,7 +79,15 @@ export const buildTeamIdentityContext = async () => {
 	const komplettligaenConfig = await getKomplettligaenConfig()
 	const komplettligaenBundle = await getKomplettligaenBundle(komplettligaenConfig.matchId)
 	const match = komplettligaenBundle?.match || null
-	const klSlots = mapKlSlots(match, options)
+	// scraped identity per SIDE (not per sidebar slot): matched against the
+	// game feed's team names, else the match page's starting sides + round,
+	// else the old positional guess - see assignKlSides
+	const klSides = assignKlSides({
+		match, options,
+		ct: { name: gsiState.map?.team_ct?.name, score: gsiState.map?.team_ct?.score },
+		t: { name: gsiState.map?.team_t?.name, score: gsiState.map?.team_t?.score },
+		mapName: gsiState.map?.name || null,
+	})
 	const session = getActiveSession()
 	const sessionSlots = mapSessionSlots(session)
 
@@ -114,6 +113,7 @@ export const buildTeamIdentityContext = async () => {
 			source: komplettligaenBundle?.source || null,
 			stale: !!komplettligaenBundle?.stale,
 			match,
+			sideSource: klSides.source,
 		},
 		session,
 		slots: {
@@ -121,7 +121,7 @@ export const buildTeamIdentityContext = async () => {
 				side: 'CT',
 				sidebarSlot: ctSidebarSlot,
 				overrideName: ctSidebarSlot === 'left' ? options['teams.leftTeamName'] : options['teams.rightTeamName'],
-				klEntry: ctSidebarSlot === 'left' ? klSlots.left : klSlots.right,
+				klEntry: klSides.ct,
 				sessionEntry: ctSidebarSlot === 'left' ? sessionSlots.left : sessionSlots.right,
 				gsiEntry: gsiState.map?.team_ct,
 				themeTree,
@@ -130,7 +130,7 @@ export const buildTeamIdentityContext = async () => {
 				side: 'T',
 				sidebarSlot: tSidebarSlot,
 				overrideName: tSidebarSlot === 'left' ? options['teams.leftTeamName'] : options['teams.rightTeamName'],
-				klEntry: tSidebarSlot === 'left' ? klSlots.left : klSlots.right,
+				klEntry: klSides.t,
 				sessionEntry: tSidebarSlot === 'left' ? sessionSlots.left : sessionSlots.right,
 				gsiEntry: gsiState.map?.team_t,
 				themeTree,

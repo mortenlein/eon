@@ -30,7 +30,7 @@ export default {
 		// source the top bar uses, so the scoreboard matches the broadcast.
 		resolvedTeams() {
 			const ctx = buildHudTeamIdentityContext({
-				teams: this.$teams, options: this.$opts, match: this.klMatch,
+				teams: this.$teams, map: this.$map, options: this.$opts, match: this.klMatch,
 			})
 			return resolveTeamIdentities(ctx).teams
 		},

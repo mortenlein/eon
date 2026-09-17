@@ -115,6 +115,7 @@ export default {
 
 			const context = buildHudTeamIdentityContext({
 				teams: this.$teams,
+				map: this.$map,
 				options: this.$opts,
 				match: this.match,
 			})

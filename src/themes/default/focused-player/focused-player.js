@@ -35,6 +35,7 @@ export default {
 			if (!this.player?.team) return null
 			const context = buildHudTeamIdentityContext({
 				teams: this.$teams,
+				map: this.$map,
 				options: this.$opts,
 				match: this.$root?.komplettligaenMatch,
 			})
