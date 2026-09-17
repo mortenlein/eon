@@ -323,6 +323,12 @@
                                                             "section":  "Director",
                                                             "label":  "Show the scoreboard takeover every Nth round"
                                                         },
+                    "director.scenes.auto":  {
+                                                 "type":  "boolean",
+                                                 "value":  true,
+                                                 "section":  "Director",
+                                                 "label":  "Auto scenes: KL Waiting at warmup and halftime, Live HUD when play starts, KL Result at the end"
+                                             },
                     "director.cameras.flyby":  {
                                                    "type":  "boolean",
                                                    "value":  true,

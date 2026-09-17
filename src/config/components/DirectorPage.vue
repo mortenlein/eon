@@ -105,6 +105,17 @@
 			<div class="settings-grid">
 				<label class="setting-card --switch">
 					<span>
+						<strong>Auto scenes</strong>
+						<small>Follows the match: KL Waiting during warmup and halftime, Live HUD when play starts, KL Result when the map is over. Picking a scene by hand still works until the next phase change.</small>
+					</span>
+					<span class="switch">
+						<input type="checkbox" :checked="isOn('director.scenes.auto', true)" @change="setOption('director.scenes.auto', $event.target.checked)">
+						<span class="slider"></span>
+					</span>
+				</label>
+
+				<label class="setting-card --switch">
+					<span>
 						<strong>Freezetime flyby</strong>
 						<small>A slow cinematic move over the spawns while teams buy (x-ray off).</small>
 					</span>
