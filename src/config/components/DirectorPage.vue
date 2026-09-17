@@ -116,6 +116,37 @@
 
 				<label class="setting-card --switch">
 					<span>
+						<strong>Auto reconnect</strong>
+						<small>GOTV goes down between maps and CS2 drops to the main menu. When on, the director opens the console, types the connect string below, and retries until it is back in.</small>
+					</span>
+					<span class="switch">
+						<input type="checkbox" :checked="isOn('director.reconnect.enabled', false)" @change="setOption('director.reconnect.enabled', $event.target.checked)">
+						<span class="slider"></span>
+					</span>
+				</label>
+
+				<label class="setting-card">
+					<span>
+						<strong>GOTV connect string</strong>
+						<small>Exactly what you would type into the console, e.g. <code>connect 10.0.0.5:27020; password abc</code></small>
+					</span>
+					<input type="text" class="text-input" :value="strOption('director.reconnect.connect', '')" @change="setOption('director.reconnect.connect', $event.target.value.trim())" placeholder="connect host:port; password ...">
+				</label>
+
+				<label class="setting-card">
+					<span>
+						<strong>Console key / retry</strong>
+						<small>The key bound to the CS2 console on this PC, and how often to retry while still in the menu.</small>
+					</span>
+					<div class="input-with-unit">
+						<input type="text" class="text-input --short" :value="strOption('director.reconnect.consoleKey', 'F10')" @change="setOption('director.reconnect.consoleKey', $event.target.value.trim() || 'F10')">
+						<input type="number" min="10" max="300" step="5" :value="numOption('director.reconnect.retrySeconds', 30)" @change="setOption('director.reconnect.retrySeconds', Number($event.target.value))">
+						<span>sec</span>
+					</div>
+				</label>
+
+				<label class="setting-card --switch">
+					<span>
 						<strong>Freezetime flyby</strong>
 						<small>A slow cinematic move over the spawns while teams buy (x-ray off).</small>
 					</span>
@@ -178,6 +209,10 @@ export default {
 			const v = Number(state.options[key])
 			return Number.isFinite(v) && v > 0 ? v : fallback
 		},
+		strOption(key, fallback) {
+			const v = state.options[key]
+			return v === undefined || v === null ? fallback : String(v)
+		},
 		setOption(key, value) {
 			state.options[key] = value
 			actions.broadcast(key, value) // live to HUD + director over WS
@@ -188,6 +223,17 @@ export default {
 </script>
 
 <style scoped>
+.text-input {
+	width: 100%;
+	max-width: 420px;
+	padding: 0.45rem 0.6rem;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	background: rgba(0, 0, 0, 0.25);
+	color: inherit;
+	font: inherit;
+}
+.text-input.--short { max-width: 90px; }
 .director-page {
 	display: flex;
 	flex-direction: column;

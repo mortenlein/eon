@@ -323,6 +323,29 @@
                                                             "section":  "Director",
                                                             "label":  "Show the scoreboard takeover every Nth round"
                                                         },
+                    "director.reconnect.enabled":  {
+                                                     "type":  "boolean",
+                                                     "value":  false,
+                                                     "section":  "Director",
+                                                     "label":  "Auto reconnect: when CS2 sits in the main menu (GOTV down between maps), type the connect string into the console"
+                                                 },
+                    "director.reconnect.connect":  {
+                                                     "type":  "string",
+                                                     "section":  "Director",
+                                                     "label":  "GOTV connect string typed into the console (e.g. `connect 10.0.0.5:27020; password abc`)"
+                                                 },
+                    "director.reconnect.consoleKey":  {
+                                                        "type":  "string",
+                                                        "value":  "F10",
+                                                        "section":  "Director",
+                                                        "label":  "Key bound to the CS2 console (F10, F11, ` ...)"
+                                                    },
+                    "director.reconnect.retrySeconds":  {
+                                                          "type":  "number",
+                                                          "value":  30,
+                                                          "section":  "Director",
+                                                          "label":  "Seconds between reconnect attempts while still in the menu"
+                                                      },
                     "director.scenes.auto":  {
                                                  "type":  "boolean",
                                                  "value":  true,
