@@ -48,7 +48,7 @@
 					</div>
 
 					<div class="kl-maps-exact">
-						<Maps />
+						<KlSeries :match="komplettligaenMatch" />
 					</div>
 					</section>
 					</section>
@@ -87,7 +87,7 @@
 						</article>
 					</div>
 					<div class="kl-maps-exact">
-						<Maps />
+						<KlSeries :match="komplettligaenMatch" />
 					</div>
 					</section>
 
@@ -318,11 +318,13 @@
 			</div>
 		</div>
 
-		<div class="maps" v-if="$map.name && !$opts['preferences.maps.sleek']">
+		<!-- the in-game series strips stay out of the KL waiting / result panels,
+		     which carry their own full-size series row (kl-series) -->
+		<div class="maps" v-if="$map.name && !$opts['preferences.maps.sleek'] && !klPanelVisible">
 			<Maps />
 		</div>
 
-		<div class="maps-sleek-container" v-if="$map.name && komplettligaenMatch && $opts['preferences.maps.sleek']">
+		<div class="maps-sleek-container" v-if="$map.name && komplettligaenMatch && $opts['preferences.maps.sleek'] && !klPanelVisible">
 			<MapsSleek :match="komplettligaenMatch" />
 		</div>
 

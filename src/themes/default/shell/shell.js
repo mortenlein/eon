@@ -17,6 +17,7 @@ import TopBar from '/hud/top-bar/top-bar.vue'
 import WinProbGraph from '/hud/win-prob-graph/win-prob-graph.vue'
 import Maps from '/hud/maps/maps.vue'
 import MapsSleek from '/hud/maps-sleek/maps-sleek.vue'
+import KlSeries from '/hud/kl-series/kl-series.vue'
 import WaitingIdle from '/hud/waiting-idle/waiting-idle.vue'
 import { getPlayerDisplayName, getTeamLogoPath } from '/hud/helpers/player-resolver.js'
 import { buildHudTeamIdentityContext, resolveTeamIdentities } from '/hud/helpers/team-identity-resolver.js'
@@ -44,10 +45,16 @@ export default {
 		WinProbGraph,
 		Maps,
 		MapsSleek,
+		KlSeries,
 		WaitingIdle,
 	},
 
 	computed: {
+		// the KL waiting / result panel is on screen (it has its own series row)
+		klPanelVisible() {
+			return !!this.komplettligaenMatch && ['waiting', 'result'].includes(this.komplettligaenView)
+		},
+
 		komplettligaenView() {
 			const scene = this.$opts?.['match.activeScene']
 			if (scene === 'intro') return 'match'
@@ -94,11 +101,14 @@ export default {
 			if (!match) return { label: '', homeScore: '', awayScore: '', hasScore: false }
 
 			if (match.currentMap) {
+				const name = match.currentMap.name || `Map ${match.currentMap.number || ''}`.trim()
+				const hasScore = match.currentMap.homeScore != null || match.currentMap.awayScore != null
+				// before the map starts there is no score - say what is next instead of "- - -"
 				return {
-					label: match.currentMap.name || `Map ${match.currentMap.number || ''}`.trim(),
-					homeScore: match.currentMap.homeScore ?? '-',
-					awayScore: match.currentMap.awayScore ?? '-',
-					hasScore: true,
+					label: hasScore ? name : `Next up · ${name}`,
+					homeScore: hasScore ? match.currentMap.homeScore ?? 0 : '',
+					awayScore: hasScore ? match.currentMap.awayScore ?? 0 : '',
+					hasScore,
 				}
 			}
 
@@ -119,7 +129,10 @@ export default {
 			if (!match) return ''
 			if (match.matchWinner) return `${match[match.matchWinner].name} wins`
 			if (match.currentMap) {
-				return `${match.currentMap.name || `Map ${match.currentMap.number || ''}`.trim()} ${match.currentMap.homeScore ?? '-'}-${match.currentMap.awayScore ?? '-'}`
+				const name = match.currentMap.name || `Map ${match.currentMap.number || ''}`.trim()
+				const hasScore = match.currentMap.homeScore != null || match.currentMap.awayScore != null
+				if (!hasScore) return `Next up · ${name}` // no "DUST II ---" before the map starts
+				return `${name} · ${match.currentMap.homeScore ?? 0} – ${match.currentMap.awayScore ?? 0}`
 			}
 			const startsAt = match.startsAt ? new Date(match.startsAt) : null
 			if (startsAt && !Number.isNaN(startsAt.getTime()) && new Date() < startsAt) return this.formatKomplettligaenDate(match.startsAt)
