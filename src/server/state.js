@@ -22,6 +22,7 @@ export const additionalState = {
 	lastKnownMapName: null,
 	lastKnownPlayerObserverSlot: {},
 	moneyAtStartOfRound: {},
+	equipAtStartOfRound: {},
 	roundDamages: {},
 	// Clutch & MVP Engine
 	currentRoundProb: 0.5,

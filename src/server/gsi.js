@@ -6,6 +6,7 @@ import { logRound } from './helpers/logger.js'
 import { isUiDevMode } from './dev-mode.js'
 import { builtinRootDirectory, userspaceSettingsPath } from './helpers/paths.js'
 import { readJsonIfExists } from './helpers/json-file.js'
+import { winProbCt, hasModel as hasWinProbModel } from './win-prob.js'
 import { getCacheMetadata } from './cache/scraper-cache.js'
 import { LEGACY_TO_CANONICAL } from './helpers/canonical-map.js'
 import { processGsiFrame, recordGsiStale } from './sessions/timeline-recorder.js'
@@ -1604,6 +1605,7 @@ export const getState = () => ({
 const resetVolatileMatchState = () => {
 	additionalState.roundDamages = {}
 	additionalState.moneyAtStartOfRound = {}
+	additionalState.equipAtStartOfRound = {}
 	additionalState.currentRoundProb = 0.5
 	additionalState.probHistory = []
 	additionalState.maxProbSwing = 0
@@ -1702,6 +1704,16 @@ const processAllPlayers = (body, mapChanged, wasRoundFreezetime) => {
 			additionalState.moneyAtStartOfRound[steam64Id] = player.state.money ?? 0
 		}
 
+		// B2. Equipment value at the start of the round (win-probability feature:
+		// the model was trained on round-start equipment, not the current value)
+		if (
+			isFreezetime
+			&& player.state
+			&& additionalState.equipAtStartOfRound[steam64Id] === undefined
+		) {
+			additionalState.equipAtStartOfRound[steam64Id] = { team: player.team, value: player.state.equip_value ?? 0 }
+		}
+
 		// C. Round Damages
 		if (roundNumber) {
 			if (! additionalState.roundDamages[steam64Id]) {
@@ -1736,6 +1748,18 @@ const processAllPlayers = (body, mapChanged, wasRoundFreezetime) => {
 			const countdown = body.bomb.countdown || 40
 			const bombFactor = Math.pow(countdown / 40, 2)
 			prob = prob * bombFactor
+		}
+
+		// The learned model (src/server/win-prob.js) replaces the formula above
+		// when its data file is present; the formula stays as the fallback.
+		if (hasWinProbModel()) {
+			const equipAtStart = { ct: 0, t: 0 }
+			let captured = 0
+			for (const e of Object.values(additionalState.equipAtStartOfRound || {})) {
+				if (e.team === 'CT') { equipAtStart.ct += e.value; captured++ } else if (e.team === 'T') { equipAtStart.t += e.value; captured++ }
+			}
+			const modelProb = winProbCt(body, { roundNumber, equipAtStart: captured >= 10 ? equipAtStart : undefined })
+			if (typeof modelProb === 'number' && Number.isFinite(modelProb)) prob = modelProb
 		}
 
 		additionalState.currentRoundProb = prob
