@@ -1,4 +1,5 @@
 import { reactive, watch } from '/dependencies/vue.js'
+import { eonToken } from '/config/control-token.js'
 import { NAV_GROUP_BY_ITEM_ID, migrateLegacyCategory } from '/config/nav-config.js'
 
 const rawStoredCategory = localStorage.getItem('eon-config-category')
@@ -84,7 +85,8 @@ export const actions = {
 
 	initWebsocket() {
 		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-		state.socket = new WebSocket(`${protocol}//${window.location.host}`)
+		const tokenQuery = eonToken ? `?token=${encodeURIComponent(eonToken)}` : ''
+		state.socket = new WebSocket(`${protocol}//${window.location.host}/${tokenQuery}`)
 
 		state.socket.onmessage = (msg) => {
 			try {
