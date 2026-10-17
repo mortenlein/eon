@@ -10,6 +10,8 @@
 export function getMatchFallback(matchId = 'fallback-match') {
 	return {
 		id: matchId || 'fallback-match',
+		// placeholder teams ("Home Team" / "Away Team") - never a real identity
+		isFallback: true,
 		component: 'Matchup',
 		competition: 'Tournament Broadcast',
 		divisionId: 'fallback-division',

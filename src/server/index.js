@@ -15,6 +15,7 @@ import { registerGsiRoutes } from './gsi.js'
 import { registerDiagnosticsRoutes } from './diagnostics.js'
 import { registerHudRoutes, concatStaticFileFromThemeTreeRecursively } from './hud.js'
 import { registerKomplettligaenRoutes } from './komplettligaen.js'
+import { startSummitNamePoller } from './summit-names.js'
 import { registerLicensesRoutes } from './licenses.js'
 import { registerRadarRoutes } from './radar.js'
 import { registerVersionRoutes } from './version.js'
@@ -50,6 +51,7 @@ const run = async () => {
 
 	const websocket = new Websocket(server)
 	await websocket.init()
+	startSummitNamePoller()
 
 	// 1. Mandatory Trailing Slash Redirects
 	app.use(async (context, next) => {

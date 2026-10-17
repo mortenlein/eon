@@ -8,6 +8,8 @@
  *         APEXPLAY_BRIDGE_URL=https://your-apexplay-host
  *         APEXPLAY_BRIDGE_TOKEN=eon_xxx           (minted in ApexPlay: Control → EON live scores)
  *   file: ./apexplay-bridge.json  (or APEXPLAY_BRIDGE_CONFIG=/path)  { enabled, url, token }
+ *   SUMMIT_BRIDGE_* / ./summit-bridge.json are accepted as aliases (Summit's runbook names);
+ *   the SUMMIT_ names win when both are set.
  *
  * Mapping is by steamid: we send each side's steamids so ApexPlay can identify the match and
  * which of its teams is currently CT vs T (scores survive side swaps). Disabled/unconfigured =
@@ -19,19 +21,26 @@ import path from 'path'
 let cfgCache = null
 let cfgLoadedAt = 0
 
-function loadConfig() {
+const env = (name) => process.env[`SUMMIT_BRIDGE_${name}`] || process.env[`APEXPLAY_BRIDGE_${name}`] || ''
+
+export function loadConfig() {
 	if (cfgCache && Date.now() - cfgLoadedAt < 5000) return cfgCache
 	cfgLoadedAt = Date.now()
 
 	let cfg = {
-		enabled: process.env.APEXPLAY_BRIDGE_ENABLED === '1' || process.env.APEXPLAY_BRIDGE_ENABLED === 'true',
-		url: process.env.APEXPLAY_BRIDGE_URL || '',
-		token: process.env.APEXPLAY_BRIDGE_TOKEN || '',
+		enabled: env('ENABLED') === '1' || env('ENABLED') === 'true',
+		url: env('URL'),
+		token: env('TOKEN'),
 	}
 
 	try {
-		const p = process.env.APEXPLAY_BRIDGE_CONFIG || path.join(process.cwd(), 'apexplay-bridge.json')
-		if (fs.existsSync(p)) {
+		const candidates = [
+			env('CONFIG'),
+			path.join(process.cwd(), 'summit-bridge.json'),
+			path.join(process.cwd(), 'apexplay-bridge.json'),
+		].filter(Boolean)
+		const p = candidates.find((c) => fs.existsSync(c))
+		if (p) {
 			const file = JSON.parse(fs.readFileSync(p, 'utf-8'))
 			cfg = {
 				enabled: file.enabled ?? cfg.enabled,

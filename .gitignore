@@ -44,3 +44,7 @@ scratch/
 handoff.md
 report.md
 task.md
+
+# bridge config holds the Summit token
+apexplay-bridge.json
+summit-bridge.json

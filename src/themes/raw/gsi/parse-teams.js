@@ -1,5 +1,5 @@
 import { gsiState, options, players } from '/hud/core/state.js'
-import { getOverriddenTeamName, getTeamNameOverrides } from '/hud/gsi/helpers/team-name-overrides.js'
+import { getOverriddenTeamName, getSummitTeamNameOverrides, getTeamNameOverrides } from '/hud/gsi/helpers/team-name-overrides.js'
 
 const getGrenadeKey = (weaponName) => {
 	switch (weaponName) {
@@ -18,11 +18,12 @@ const getFallbackNameFromSide = (side) => {
 	return ''
 }
 
-const makeTeam = (side, gsiTeamObject, teamNameOverrides) => {
+const makeTeam = (side, gsiTeamObject, teamNameOverrides, summitTeamNameOverrides) => {
 	const teamMembers = players.filter((player) => player.side === side)
 	gsiTeamObject = gsiTeamObject || {}
 
 	const overriddenTeamName = getOverriddenTeamName(teamNameOverrides, teamMembers)
+		|| getOverriddenTeamName(summitTeamNameOverrides, teamMembers)
 
 	const team = {
 		side,
@@ -60,6 +61,7 @@ const makeTeam = (side, gsiTeamObject, teamNameOverrides) => {
 // NB! This must be called AFTER parsePlayers!
 export const parseTeams = () => {
 	const teamNameOverrides = getTeamNameOverrides()
+	const summitTeamNameOverrides = getSummitTeamNameOverrides()
 
 	const getSortKey = (team) => {
 		const firstSlot = team.players?.[0]?.observerSlot
@@ -68,8 +70,8 @@ export const parseTeams = () => {
 	}
 
 	const sorted = [
-		makeTeam(2, gsiState.map?.team_t, teamNameOverrides),
-		makeTeam(3, gsiState.map?.team_ct, teamNameOverrides),
+		makeTeam(2, gsiState.map?.team_t, teamNameOverrides, summitTeamNameOverrides),
+		makeTeam(3, gsiState.map?.team_ct, teamNameOverrides, summitTeamNameOverrides),
 	].sort((a, b) => getSortKey(a) - getSortKey(b))
 
 	// Simple team name overrides (takes priority over everything)

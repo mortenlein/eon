@@ -248,8 +248,10 @@ export const sideInRound = (startSide, roundNumber, regulationRounds = 24) => {
  * @returns {{ct: object|null, t: object|null, source: string}}
  */
 export const assignKlSides = ({ match, options = {}, ct = {}, t = {}, mapName = null } = {}) => {
-	const home = match?.home || null
-	const away = match?.away || null
+	// a fallback/placeholder KL match must not outrank real names (GSI, Summit)
+	if (!match || match.isFallback || match.id === 'fallback-match') return { ct: null, t: null, source: 'none' }
+	const home = match.home || null
+	const away = match.away || null
 	if (!home?.name && !away?.name) return { ct: null, t: null, source: 'none' }
 	let sideOfHome = null
 	let source = null

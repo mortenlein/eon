@@ -1,9 +1,11 @@
-import { options } from '/hud/core/state.js'
+import { additionalState, options } from '/hud/core/state.js'
 
-export const getTeamNameOverrides = () => {
+// Summit's lines (additionalState.summitNames) - looked up only when no manual line matches
+export const getSummitTeamNameOverrides = () => getTeamNameOverrides(additionalState.summitNames?.teamNameOverrides)
+
+export const getTeamNameOverrides = (opt = options['teams.teamNameOverrides']) => {
 	const teamNameOverrides = new Map()
 
-	const opt = options['teams.teamNameOverrides']
 	if (! opt?.trim()?.length) return teamNameOverrides
 
 	const lines = opt.trim().split('\n')

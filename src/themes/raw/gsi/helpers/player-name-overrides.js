@@ -1,10 +1,17 @@
-import { options } from '/hud/core/state.js'
+import { additionalState, options } from '/hud/core/state.js'
 import { getPlayerDisplayName } from '/hud/helpers/player-resolver.js'
+
+// The operator's manual lines first, Summit's (additionalState.summitNames) after -
+// the first matching line wins, so manual entries always beat Summit.
+export const getPlayerNameOverridesText = () => [
+	options['teams.playerNameOverrides'],
+	additionalState.summitNames?.playerNameOverrides,
+].filter((text) => text?.trim()).join('\n')
 
 export const getPlayerNameOverrides = () => {
 	const playerNameOverrides = new Map()
 
-	const opt = options['teams.playerNameOverrides']
+	const opt = getPlayerNameOverridesText()
 	if (! opt?.trim()?.length) return playerNameOverrides
 
 	const lines = opt.trim().split('\n')
