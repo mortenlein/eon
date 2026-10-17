@@ -9,7 +9,8 @@ export const MODE_PRESETS = {
 	wingman: {
 		'cvars.mp_maxrounds': 16,
 		'cvars.mp_roundtime': 1.5,
-		'cvars.mp_overtime_maxrounds': 2,
+		// MR4 overtime: 8-8 -> OT, first to 11 (10-10 -> next OT, first to 13 ...)
+		'cvars.mp_overtime_maxrounds': 4,
 		'cvars.mp_freezetime': 15,
 	}
 }
