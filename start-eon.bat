@@ -5,6 +5,8 @@ title eon
 REM %~dp0 = the folder this .bat lives in, so the repo can sit anywhere
 cd /d "%~dp0"
 chcp 65001 >nul
+REM tmp\ is gitignored, so a fresh clone has no log folder - Out-File won't make one
+if not exist tmp mkdir tmp
 REM pwsh (PS7) is preferred but is NOT installed everywhere - fall back to the
 REM Windows-bundled powershell (5.1) so this runs on any machine.
 set "PSEXE=pwsh"
