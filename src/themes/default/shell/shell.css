@@ -677,6 +677,35 @@ body {
 }
 
 .kl-score small,
+.tournament-series-maps {
+	display: flex;
+	justify-content: center;
+	gap: 14px;
+	padding: 18px 22px;
+}
+
+.tournament-series-map {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	min-width: 140px;
+	padding: 10px 16px;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	font-size: 15px;
+	font-weight: 900;
+	text-transform: uppercase;
+}
+
+.tournament-series-map strong {
+	font-size: 22px;
+}
+
+.tournament-series-map.--live {
+	border-color: #4fe3c1;
+	color: #4fe3c1;
+}
+
 .kl-waiting-score small {
 	color: #f6c85f;
 	font-size: 15px;

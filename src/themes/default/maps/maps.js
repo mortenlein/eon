@@ -1,7 +1,7 @@
 export default {
 	computed: {
 		match() {
-			return this.$root.komplettligaenMatch
+			return this.$root.seriesMatch
 		},
 		maps() {
 			const m = this.match

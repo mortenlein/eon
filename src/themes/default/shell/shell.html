@@ -1,5 +1,5 @@
-<div :class="['hud-viewport', '--scene-' + ($opts['match.activeScene'] || 'default'), '--style-' + ($opts['css.ui-style'] || 'slanted'), $additionalState.connectionState ? 'ws-' + $additionalState.connectionState : 'ws-connected']">
-	<div v-if="$map.name || ['intro', 'halftime', 'fulltime', 'over', 'analytics'].includes($opts['match.activeScene'])" class="hud-stage">
+<div :class="['hud-viewport', '--scene-' + (activeScene || 'default'), '--style-' + ($opts['css.ui-style'] || 'slanted'), $additionalState.connectionState ? 'ws-' + $additionalState.connectionState : 'ws-connected']">
+	<div v-if="$map.name || ['intro', 'halftime', 'fulltime', 'over', 'analytics'].includes(activeScene)" class="hud-stage">
 		<Telestrator />
 		<MvpCard v-if="false" />
 		<PromotionPanel v-if="$map.name" />
@@ -59,7 +59,46 @@
 
 		<!-- Scene: Halftime / Over Scoreboard -->
 		<div class="scene-board --halftime">
-			<main v-if="komplettligaenMatch && komplettligaenView === 'waiting'" class="kl-scene-frame">
+			<!-- no real KL match (tournament night): halftime and full time show this match's
+			     score - team names come from the identity resolver (Summit/GSI) -->
+			<main v-if="tournamentResult" class="kl-scene-frame">
+				<div class="kl-scene-gutter">
+					<section class="kl-waiting-scene">
+					<section class="kl-waiting-match">
+					<header class="kl-match-meta">
+						<span>{{ tournamentResult.stage || 'Turnering' }}</span>
+						<strong>{{ tournamentResult.map }}</strong>
+					</header>
+					<div class="kl-waiting-scoreboard">
+						<article :class="['kl-waiting-team', { 'kl-winner': tournamentResult.final && tournamentResult.teams[0].winner }]">
+							<img v-if="tournamentResult.teams[0].logo" :src="tournamentResult.teams[0].logo" alt="">
+							<h1>{{ tournamentResult.teams[0].name }}</h1>
+						</article>
+						<div class="kl-waiting-score">
+							<small>{{ !tournamentResult.final ? 'Half time' : tournamentResult.series && !tournamentResult.series.decided ? `Map ${tournamentResult.series.mapNumber || ''} ferdig` : 'Full time' }}</small>
+							<div class="kl-waiting-series">
+								<span>{{ tournamentResult.teams[0].score }}</span>
+								<b>-</b>
+								<span>{{ tournamentResult.teams[1].score }}</span>
+							</div>
+							<strong v-if="tournamentResult.series">BO{{ tournamentResult.series.bestOf }} · Serie {{ tournamentResult.series.wins[0] }} - {{ tournamentResult.series.wins[1] }}</strong>
+						</div>
+						<article :class="['kl-waiting-team', { 'kl-winner': tournamentResult.final && tournamentResult.teams[1].winner }]">
+							<img v-if="tournamentResult.teams[1].logo" :src="tournamentResult.teams[1].logo" alt="">
+							<h1>{{ tournamentResult.teams[1].name }}</h1>
+						</article>
+					</div>
+					<div v-if="tournamentResult.series?.maps.length" class="tournament-series-maps">
+						<div v-for="map in tournamentResult.series.maps" :key="map.name" :class="['tournament-series-map', { '--live': map.live }]">
+							<span>{{ map.name }}</span>
+							<strong>{{ map.left ?? '-' }} - {{ map.right ?? '-' }}</strong>
+						</div>
+					</div>
+					</section>
+					</section>
+				</div>
+			</main>
+			<main v-if="!tournamentResult && komplettligaenMatch && komplettligaenView === 'waiting'" class="kl-scene-frame">
 				<div class="kl-scene-gutter">
 					<section class="kl-waiting-scene">
 					<section class="kl-waiting-match">
@@ -120,9 +159,9 @@
 					</section>
 					</div>
 			</main>
-			<WaitingIdle v-if="komplettligaenView === 'waiting'" />
+			<WaitingIdle v-if="!tournamentResult && komplettligaenView === 'waiting'" />
 
-			<main v-if="komplettligaenMatch && komplettligaenView === 'result'" class="kl-scene-frame">
+			<main v-if="!tournamentResult && komplettligaenMatch && komplettligaenView === 'result'" class="kl-scene-frame">
 				<div class="kl-scene-gutter">
 					<section class="kl-waiting-scene">
 					<section class="kl-waiting-match">
@@ -325,8 +364,8 @@
 			<Maps />
 		</div>
 
-		<div class="maps-sleek-container" v-if="$map.name && komplettligaenMatch && $opts['preferences.maps.sleek'] && !klPanelVisible">
-			<MapsSleek :match="komplettligaenMatch" />
+		<div class="maps-sleek-container" v-if="$map.name && seriesMatch && $opts['preferences.maps.sleek'] && !klPanelVisible">
+			<MapsSleek :match="seriesMatch" />
 		</div>
 
 		<SeriesGraph v-if="$map.name" />

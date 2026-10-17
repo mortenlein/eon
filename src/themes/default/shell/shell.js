@@ -21,9 +21,29 @@ import KlSeries from '/hud/kl-series/kl-series.vue'
 import BombCallout from '/hud/bomb-callout/bomb-callout.vue'
 import WaitingIdle from '/hud/waiting-idle/waiting-idle.vue'
 import { getPlayerDisplayName, getTeamLogoPath } from '/hud/helpers/player-resolver.js'
-import { buildHudTeamIdentityContext, resolveTeamIdentities } from '/hud/helpers/team-identity-resolver.js'
+import { getPlayerNameOverridesText } from '/hud/gsi/helpers/player-name-overrides.js'
+import { buildHudTeamIdentityContext, normalizeMapName, resolveTeamIdentities } from '/hud/helpers/team-identity-resolver.js'
 import { applyResolvedCssVariables, getMigratedOptionKeys, resolveOption, RADAR_OPTION_DEFINITIONS, TOPBAR_OPTION_DEFINITIONS, SIDEBAR_POSITION_OPTION_DEFINITIONS, SIDEBAR_VISIBILITY_OPTION_DEFINITIONS, PLAYERS_ALIVE_OPTION_DEFINITIONS, FOCUSED_PLAYER_OPTION_DEFINITIONS, CURRENT_MAP_OPTION_DEFINITIONS, EVENT_BADGE_OPTION_DEFINITIONS, SPONSOR_OPTION_DEFINITIONS, MAPS_OPTION_DEFINITIONS, THEME_MATERIALS_OPTION_DEFINITIONS, THEME_COLORS_OPTION_DEFINITIONS, THEME_SHAPES_OPTION_DEFINITIONS, THEME_TYPOGRAPHY_OPTION_DEFINITIONS } from '/hud/core/resolve-option.js'
 import { options } from '/hud/core/state.js'
+
+// ?hudonly (the desktop overlay from `npm run overlay`): only the in-game HUD - intro/waiting/
+// result scenes are for the stream, so the overlay treats every scene as "no scene"
+const hudOnly = new URL(window.location).searchParams.has('hudonly')
+
+// Operator stopgap for a map result Summit is missing: option 'summit.mapScoreOverrides',
+// one "<map> <home> <away>" per line in Summit's home/away order (e.g. "de_inferno 9 2").
+// Replaces Summit's row for that map; remove the line once Summit has the result.
+const withMapScoreOverrides = (scores, text) => {
+	const overrides = String(text || '').split('\n')
+		.map((line) => line.trim().split(/\s+/))
+		.filter(([map, home, away]) => map && /^\d+$/.test(home) && /^\d+$/.test(away))
+		.map(([map, home, away]) => ({ map, home: Number(home), away: Number(away) }))
+	if (!overrides.length) return scores
+	const overridden = new Set(overrides.map((entry) => normalizeMapName(entry.map)))
+	return [...scores.filter((entry) => !overridden.has(normalizeMapName(entry.map))), ...overrides]
+}
+
+const prettyMapName = (name) => String(name || '').replace(/^de_/, '').replace(/^./, (c) => c.toUpperCase())
 
 export default {
 	components: {
@@ -55,6 +75,92 @@ export default {
 		// the KL waiting / result panel is on screen (it has its own series row)
 		klPanelVisible() {
 			return !!this.komplettligaenMatch && ['waiting', 'result'].includes(this.komplettligaenView)
+		},
+
+		// halftime / full time score for a match without a real KL match behind it
+		// (tournament nights): the KL panels would otherwise show the fallback placeholders
+		tournamentResult() {
+			const view = this.komplettligaenView
+			if (view !== 'waiting' && view !== 'result') return null
+			const match = this.komplettligaenMatch
+			if (match && !match.isFallback && match.id !== 'fallback-match') return null
+			if (!this.$teams?.length || this.$teams.length < 2) return null
+
+			const teams = this.$teams.slice(0, 2).map((team) => {
+				const identity = this.resolvedTeamIdentities?.[team.side === 3 ? 'CT' : 'T']?.final
+				return { name: identity?.name || team.name, logo: identity?.logo || null, score: Number(team.score) || 0 }
+			})
+			teams.forEach((team, index) => { team.winner = team.score > teams[1 - index].score })
+
+			return {
+				teams,
+				final: view === 'result',
+				stage: this.$additionalState?.summitNames?.stage || null,
+				map: prettyMapName(this.$map?.name),
+				series: this.tournamentSeries(),
+			}
+		},
+
+		// the match the series map components (Maps, MapsSleek) show: a real KL match when
+		// one is set, otherwise the Summit match in the same shape
+		seriesMatch() {
+			const match = this.komplettligaenMatch
+			if (match && !match.isFallback && match.id !== 'fallback-match') return match
+			return this.summitSeriesMatch
+		},
+
+		// Summit's match as a KL-shaped match. Summit says home/away; "home" here is the HUD's
+		// left team (matched by name, Summit's order if the names don't match - oriented=false).
+		summitSeriesMatch() {
+			const summit = this.$additionalState?.summitNames
+			if (!summit?.matchId) return null
+
+			const same = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase()
+			const [left, right] = this.$teams || []
+			const swapped = same(left?.name, summit.away) && same(right?.name, summit.home)
+			const oriented = swapped || (same(left?.name, summit.home) && same(right?.name, summit.away))
+			const [homeKey, awayKey] = swapped ? ['away', 'home'] : ['home', 'away']
+
+			const currentMap = normalizeMapName(this.$map?.name)
+			// the map just finished still counts while we sit on it between maps
+			const mapOver = ['results', 'gameover'].includes(this.$map?.phase)
+			const scores = withMapScoreOverrides(summit.mapScores || [], this.$opts?.['summit.mapScoreOverrides'])
+			const mapNames = summit.maps?.length ? summit.maps : scores.map((entry) => entry.map)
+
+			const maps = mapNames.map((name, index) => {
+				const key = normalizeMapName(name)
+				const current = key === currentMap
+				// Summit creates a 0-0 row for every map up front - a row only counts once it
+				// has rounds on it, or it is the map being played
+				const found = scores.find((score) => normalizeMapName(score.map) === key)
+				const entry = found && (current || Number(found.home) + Number(found.away) > 0) ? found : null
+				const finished = !!entry && (!current || mapOver)
+				const homeScore = entry ? Number(entry[homeKey]) || 0 : null
+				const awayScore = entry ? Number(entry[awayKey]) || 0 : null
+				return {
+					number: index + 1,
+					name: prettyMapName(name),
+					image: `/hud/img/maps/de_${prettyMapName(name).toLowerCase()}.png`,
+					status: finished ? 'finished' : current ? 'live' : 'upcoming',
+					homeScore,
+					awayScore,
+					finished,
+					current,
+					winner: finished && homeScore !== awayScore ? (homeScore > awayScore ? 'home' : 'away') : null,
+				}
+			})
+
+			return {
+				id: summit.matchId,
+				source: 'summit',
+				oriented,
+				bestOf: summit.bestOf || 1,
+				round: summit.stage,
+				home: { name: summit[homeKey] },
+				away: { name: summit[awayKey] },
+				maps,
+				currentMap: currentMap ? { name: prettyMapName(this.$map?.name) } : null,
+			}
 		},
 
 		komplettligaenView() {
@@ -145,8 +251,12 @@ export default {
 			return this.$players?.length > 0
 		},
 
+		activeScene() {
+			return hudOnly ? null : this.$opts?.['match.activeScene']
+		},
+
 		showObserverDataWarning() {
-			const scene = this.$opts?.['match.activeScene']
+			const scene = this.activeScene
 			if (['intro', 'halftime', 'fulltime', 'over', 'analytics', 'radar'].includes(scene)) return false
 			return !!(
 				this.$map?.name
@@ -182,7 +292,7 @@ export default {
 
 		// Set up active scene intermission watch
 		this.$watch(
-			() => options['match.activeScene'],
+			() => this.activeScene,
 			(scene) => {
 				const isIntermission = ['intro', 'halftime', 'fulltime', 'over', 'analytics', 'radar'].includes(scene)
 				if (isIntermission && !this._vantaEffect) this.initVanta()
@@ -246,9 +356,21 @@ export default {
 
 		getTeamLogoPath,
 
+		// BO3+ row on the halftime / full time panel, read off the Summit series match
+		tournamentSeries() {
+			const match = this.summitSeriesMatch
+			if (!match?.oriented || !(match.bestOf > 1)) return null
+			const wins = [0, 0]
+			for (const map of match.maps) if (map.winner) wins[map.winner === 'home' ? 0 : 1]++
+			const decided = Math.max(...wins) > match.bestOf / 2
+			const mapNumber = match.maps.findIndex((map) => map.current) + 1
+			const maps = match.maps.map((map) => ({ name: map.name, left: map.homeScore, right: map.awayScore, live: map.current }))
+			return { bestOf: match.bestOf, wins, maps, decided, mapNumber }
+		},
+
 		getPlayerName(p) {
 			if (!p) return ''
-			return getPlayerDisplayName(p.steamId, p.name, this.$opts?.['teams.playerNameOverrides'])
+			return getPlayerDisplayName(p.steamId, p.name, getPlayerNameOverridesText())
 		},
 
 		formatKomplettligaenDate(value) {
