@@ -154,8 +154,18 @@ const run = async () => {
 		}
 	})
 
+	// A port we cannot bind is fatal. Unhandled, ws re-emits the bind error on
+	// its WebSocketServer, that throws, and the NON-FATAL uncaughtException
+	// handler below keeps a deaf eon alive (the 2026-09-24 match night).
+	// prependListener so this runs before ws's own listener can throw.
+	server.prependListener('error', (error) => {
+		if (server.listening) return
+		console.error(`[eon] cannot listen on ${host}:${port} (${error.code || error.message}) - exiting`)
+		process.exit(1)
+	})
+	server.once('listening', () => console.info(`[eon] listening on ${host}:${port}`))
 	server.listen(port, host)
-	
+
 	const interfaces = os.networkInterfaces()
 	const addresses = []
 	for (const k in interfaces) {
