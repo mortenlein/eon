@@ -9,6 +9,9 @@ import { clearThemeAssetCache } from './hud.js'
 export class Websocket {
 	constructor(server) {
 		this.websocket = new WebSocketServer({ server })
+		// ws re-emits the HTTP server's errors here and throws without a listener;
+		// bind failures are handled (and retried on the next port) by listenWithFallback
+		this.websocket.on('error', () => {})
 
 		this.websocket.on('connection', (client, request) => {
 			// Read-only state is pushed to every client (so overlays render on any

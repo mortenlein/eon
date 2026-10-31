@@ -67,7 +67,7 @@ npm install
 npm start
 ```
 
-Then copy `gamestate_integration_eon.cfg` into your CS2 `game/csgo/cfg` directory, restart CS2, and open `http://127.0.0.1:31982/config` to drive the broadcast. Add `http://127.0.0.1:31982/hud?transparent` as a browser source in OBS/vMix.
+Then copy every `gamestate_integration_eon*.cfg` (one per port in `ports.json`, see `docs/networking.md`) into your CS2 `game/csgo/cfg` directory, restart CS2, and open `http://127.0.0.1:31982/config` to drive the broadcast. Add `http://127.0.0.1:31982/hud?transparent` as a browser source in OBS/vMix.
 
 Useful scripts:
 

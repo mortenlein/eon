@@ -25,6 +25,7 @@ import send from 'koa-send'
 import { builtinRootDirectory } from './helpers/paths.js'
 import { isUiDevMode } from './dev-mode.js'
 import { isAuthorizedControl, getControlToken } from './auth.js'
+import { listenWithFallback, writeRuntimeFile, removeRuntimeFile } from './listen.js'
 
 Error.stackTraceLimit = 64
 
@@ -36,7 +37,7 @@ const run = async () => {
 	// network is opt-in via HOST=0.0.0.0 (or settings.host) and should be paired
 	// with the control token below.
 	const host = process.env.HOST || settings.host || '127.0.0.1'
-	const port = process.env.PORT || settings.port || 31982
+	const preferredPort = Number(process.env.PORT || settings.port || 31982)
 
 	const app = new Koa()
 	const server = http.createServer(app.callback())
@@ -154,17 +155,18 @@ const run = async () => {
 		}
 	})
 
-	// A port we cannot bind is fatal. Unhandled, ws re-emits the bind error on
-	// its WebSocketServer, that throws, and the NON-FATAL uncaughtException
-	// handler below keeps a deaf eon alive (the 2026-09-24 match night).
-	// prependListener so this runs before ws's own listener can throw.
-	server.prependListener('error', (error) => {
-		if (server.listening) return
-		console.error(`[eon] cannot listen on ${host}:${port} (${error.code || error.message}) - exiting`)
+	// A taken port moves eon to the next candidate in ports.json; only when every
+	// candidate fails is it fatal. Never keep a deaf eon alive (2026-09-24, and
+	// the 2026-10-29 broadcast where 31982 could not be bound at all).
+	const bound = await listenWithFallback(server, host, preferredPort)
+	if (bound.port === null) {
+		console.error(`[eon] cannot listen on ${host}:${bound.tried.join(',')} (${bound.codes.join(',')}) - exiting`)
 		process.exit(1)
-	})
-	server.once('listening', () => console.info(`[eon] listening on ${host}:${port}`))
-	server.listen(port, host)
+	}
+	const port = bound.port
+	writeRuntimeFile(host, port)
+	process.on('exit', removeRuntimeFile)
+	console.info(`[eon] listening on ${host}:${port}`)
 
 	const interfaces = os.networkInterfaces()
 	const addresses = []
